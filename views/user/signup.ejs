@@ -1,0 +1,155 @@
+<%- include('../partials/user/header.ejs') %>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="box-shadow p-4 border rounded" style="box-shadow: 3px 3px #ececec; border: 1px solid #e5dcdc;">
+                <div class="heading_s1 text-center mb-4">
+                    <h3>Create an Account</h3>
+                </div>
+                
+                <form id="registration-form" method="post" action="/signup" onsubmit="return validateForm()">
+                    <div class="form-group">
+                        <input id="name" type="text" class="form-control" name="name" placeholder="Enter your name">
+                        <span class="error" id="name-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group">
+                        <input id="email" type="email" class="form-control" name="email" placeholder="Enter your Email">
+                        <span class="error" id="email-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group">
+                        <input id="mobile" type="text" class="form-control" name="phone" placeholder="Enter your Mobile Number">
+                        <span class="error" id="mobile-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input id="password" type="password" class="form-control" name="password" placeholder="Enter Password">
+                            <span class="input-group-text" onclick="togglePasswordVisibility('password')" style="cursor: pointer;">
+                                <i class="bi bi-eye" id="toggle-icon-password">👁️</i>
+                            </span>
+                        </div>
+                        <span class="error" id="password-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input id="cpassword" type="password" class="form-control" name="cpassword" placeholder="Confirm Password">
+                            <span class="input-group-text" onclick="togglePasswordVisibility('cpassword')" style="cursor: pointer;">
+                                <i class="bi bi-eye" id="toggle-icon-cpassword">👁️</i>
+                            </span>
+                        </div>
+                        <span class="error" id="cpassword-error" style="color: red;"></span>
+                    </div>
+
+                    <%if(locals.message && message.length>0){%>
+                        <div class="alert alert-danger text-center">
+                            <%=message%>
+                        </div>
+                    <%}%>
+
+                    
+                    <div class="form-group text-center">
+                        <button type="submit" class="btn btn-custom" name="register">Submit & Register</button>
+                    </div>
+                </form>
+
+                <div class="text-center text-muted mt-3">
+                    <p>Or</p>
+                    <a href="/auth/google" class="btn btn-google" >
+                        <img src="/assets/imgs/Google__G__logo.svg.png" alt="Google" style="width: 20px; margin-right: 8px;">
+                        Sign Up with Google
+                    </a>
+                </div>
+
+                <div class="text-center text-muted mt-3">
+                    Already have an account? <a href="/login">Sign in now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('../partials/user/footer.ejs') %>
+
+
+<script>
+    function validateForm() {
+        // Clear previous error messages
+        document.querySelectorAll(".error").forEach((error) => (error.innerText = ""));
+
+        let valid = true;
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const mobile = document.getElementById("mobile").value.trim();
+        const password = document.getElementById("password").value;
+        const cpassword = document.getElementById("cpassword").value;
+
+        // Name validation
+        if (name === "") {
+            document.getElementById("name-error").innerText = "Name is required.";
+            document.getElementById("name-error").style.color = "red";
+            valid = false;
+        } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+            document.getElementById("name-error").innerText = "Name can only contain letters.";
+            document.getElementById("name-error").style.color = "red";
+            valid = false;
+        }
+
+        // Email validation
+        if (email === "") {
+            document.getElementById("email-error").innerText = "Email is required.";
+            document.getElementById("email-error").style.color = "red";
+            valid = false;
+        } else if (!/^[a-z]+[0-9]*@gmail\.com$/.test(email)) {
+            document.getElementById("email-error").innerText =
+                "Email must be lowercase, include '@', 'gmail.com', and may optionally contain numbers.";
+            document.getElementById("email-error").style.color = "red";
+            valid = false;
+        }
+
+        // Mobile validation
+        if (mobile === "") {
+            document.getElementById("mobile-error").innerText = "Mobile number is required.";
+            document.getElementById("mobile-error").style.color = "red";
+            valid = false;
+        } else if (!/^\d{10}$/.test(mobile)) {
+            document.getElementById("mobile-error").innerText = "Enter a valid 10-digit mobile number.";
+            document.getElementById("mobile-error").style.color = "red";
+            valid = false;
+        }
+
+        // Password validation
+        if (password === "") {
+            document.getElementById("password-error").innerText = "Password is required.";
+            document.getElementById("password-error").style.color = "red";
+            valid = false;
+        } else if (password.length < 6) {
+            document.getElementById("password-error").innerText = "Password must be at least 6 characters.";
+            document.getElementById("password-error").style.color = "red";
+            valid = false;
+        }
+
+        // Confirm password validation
+        if (cpassword === "") {
+            document.getElementById("cpassword-error").innerText = "Confirm Password is required.";
+            document.getElementById("cpassword-error").style.color = "red";
+            valid = false;
+        } else if (cpassword !== password) {
+            document.getElementById("cpassword-error").innerText = "Passwords do not match.";
+            document.getElementById("cpassword-error").style.color = "red";
+            valid = false;
+        }
+
+        return valid; // Prevent form submission if validation fails
+    }
+
+    function togglePasswordVisibility(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = document.querySelector(`#toggle-icon-${fieldId}`);
+        if (field.type === "password") {
+            field.type = "text";
+            icon.className = "bi bi-eye-slash";
+        } else {
+            field.type = "password";
+            icon.className = "bi bi-eye";
+        }
+    }
+</script>

@@ -4,7 +4,7 @@ const path = require("path")
 const env = require("dotenv").config();
 const userRouter = require('./routes/userRouter')
 const db = require("./config/db")
-db()
+
 
 
 app.use(express.json())
@@ -15,7 +15,7 @@ app.set("views",[path.join(__dirname, 'views/user'), path.join(__dirname, 'views
 app.use(express.static(path.join(__dirname, "public")))
 app.use("/", userRouter)
 
-
+db();
 const PORT = 3002 || process.env.PORT
 app.listen(PORT, ()=>{
     console.log("Server running..");

@@ -1,0 +1,137 @@
+<%- include("../partials/user/header.ejs") %>
+
+
+<style>
+    .custom-container {
+        background-color: #ffff;
+        border: 1px solid #e5dcdc;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 8%;
+        margin-top: 6%;
+        box-shadow: 3px 3px #ececec;
+        padding: 20px;
+        border-radius: 8px; /* Optional: for rounded corners */
+        max-width: 500px; /* Optional: max width for the container */
+    }
+    .form-control {
+        border-radius: 4px; /* Optional: for rounded corners on inputs */
+    }
+    .btn-custom {
+        margin-left: 35%;
+        color: white;
+    }
+    .divider-text-center {
+        text-align: center;
+        margin: 15px 0;
+    }
+</style>
+<main class="main" style="background-color: #f1fbf2;">
+  <div class="page-header breadcrumb-wrap">
+      <div class="container">
+          <div class="breadcrumb">
+              <a href="/" rel="nofollow">Home</a>
+              <span></span> Login
+          </div>
+      </div>
+  </div>
+<div class="custom-container"  style="background-color: #ffffff; border: 1px solid #e5dcdc;  margin-left: 30%;  margin-right: 20%;margin-bottom: 8%;  margin-top: 6%; box-shadow: 3px 3px #ececec;">
+    <div >
+        <h3 class="text-center" style="color: #3C3633; font-family: 'Cinzel Decorative', serif; margin-top: 5%; margin-bottom: 5%;">User Login</h3>
+    </div>
+    <span style="color: red;"><%= locals.msg %></span>
+    <form method="post" action="/login">
+        <div class="form-group">
+            <input type="text" required name="email" placeholder="<% if(locals.email) {%><%= locals.email %><% } %> <% if(!locals.email) {%>Enter Email<% } %>" style="background-color: white;">
+        </div>
+        <div class="form-group">
+            <div class="input-group">
+                <input required type="password" name="password" id="login-password" class="form-control" placeholder="Password" style="background-color: white;">
+                <span class="input-group-text" onclick="togglePasswordVisibility('login-password')" style="cursor: pointer;">
+                    <i class="bi bi-eye" id="toggle-icon-login-password">👁</i>
+                </span>
+            </div>
+        </div> 
+        <!-- erroer message showing -->
+
+        <%if(locals.message && message.length>0){%>
+            <div class="alert alert-danger text-center">
+                <%=message%>
+            </div>
+        <%}%>
+        
+
+
+        <div class="login_footer form-group">
+            <div class="chek-form">
+                <!-- <div class="custome-checkbox">
+                    <input class="form-check-input" type="checkbox" name="checkbox" id="exampleCheckbox1" value="">
+                    <label class="form-check-label" for="exampleCheckbox1"><span>Remember me</span></label>
+                </div> -->
+            </div>
+            <a style="color: #3C3633;" href="/forgotpassword">Forgot password?</a>
+        </div>
+        <div class="form-group">
+            <button type="submit" class=" btn-custom " name="login">Log in</button>
+        </div>
+    </form>
+    <ul class=" list_none text-center ">
+        <li> <p>Dont have Account? <a href="/signup" ><span>Signup here</span></a> </p></li>
+    </ul>
+    <div class="divider-text-center ">
+        <span> or</span>
+    </div>
+    <ul class="btn-login list_none text-center mb-15">
+        <li><a href="/auth/google" class="btn btn-google hover-up">Login With Google</a></li>
+    </ul>
+</div>
+                             
+<%- include("../partials/user/footer.ejs") %>
+<style>
+    .input-group {
+        display: flex;
+        align-items: center;
+    }
+    
+    .input-group-text {
+        background-color: white;
+        border-left: none;
+        border-radius: 0 4px 4px 0; /* Rounded corners for the right side */
+        padding: 8px 12px;
+    }
+    
+    .form-control {
+        border-radius: 4px 0 0 4px; /* Rounded corners for the left side */
+        border-right: none;
+    }
+    
+    .input-group-text i {
+        font-size: 1.2rem;
+        color: #000;
+    }
+    
+</style>
+<script>
+    function togglePasswordVisibility(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById('toggle-icon-' + inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+    
+    
+        // Swal.fire({
+        //     icon: 'error',
+        //     title: 'Blocked!',
+        //     text: 'Your account has been blocked by the admin. Please contact support.',
+        //     confirmButtonText: 'OK'
+        // }).then(() => {
+        //     window.location.href = "/signup"; // Redirect after alert
+        // });
+    
+</script>
