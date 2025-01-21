@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const {Schema} = mongoose
-
+mongoose.set('autoIndex', false);
 
 const userSchema = new Schema({
     name: {
@@ -21,7 +21,7 @@ const userSchema = new Schema({
     },
     googleId: {
         type: String,
-        // unique: true
+        unique: true
     },
     password: {
         type: String,

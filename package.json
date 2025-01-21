@@ -18,6 +18,8 @@
     "mongoose": "^8.9.4",
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.9",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "uuidv4": "^6.2.13"
   }
 }
