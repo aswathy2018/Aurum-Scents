@@ -13,6 +13,8 @@ passport.use(new GoogleStrategy({
 async(accessToken, refreshToken, profile, done)=>{
     try {
         let user = await User.findOne({googleId: profile.id});
+        console.log("jabaja..", user);
+        
         if(user){
             return done(null, user);
         }else{
@@ -32,12 +34,14 @@ async(accessToken, refreshToken, profile, done)=>{
 
 
 passport.serializeUser((user, done)=>{
-    done(null, user.id)
+    done(null, user._id)
 });
 
 passport.deserializeUser((id, done)=>{
     User.findById(id)
     .then(user=>{
+        
+        
         done(null,user)
     })
     .catch(err=>{
