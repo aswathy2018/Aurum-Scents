@@ -1,0 +1,160 @@
+/* General Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #121212; /* Dark background */
+    color: #ffffff;
+    height: 100%;
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #1e1e1e; /* Dark gray */
+    padding: 20px;
+    height: 100vh; /* Full height */
+    position: fixed; /* Fixed sidebar */
+    top: 0;
+    left: 0;
+}
+
+.sidebar .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4caf50;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin: 10px 0;
+}
+
+.sidebar-menu a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 10px 15px;
+    display: block;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar img{
+    width: 50%;
+    height: 50%;
+}
+
+.sidebar-menu a:hover, .sidebar-menu .active a {
+    background-color: #4caf50;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 370px; /* Leaves space for the sidebar */
+    padding: 80px;
+    flex: 1;
+}
+
+/* Align cards, chart, and table to the right */
+.dashboard-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+/* Stats Cards */
+.stats-cards {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.card {
+    background-color: #1e1e1e;
+    padding: 50px;
+    border-radius: 10px;
+    text-align: center;
+    flex: 1;
+    max-width: 800px; /* Adjust width of each card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card h3 {
+    margin: 0 0 10px;
+    color: #bbbbbb;
+    font-size: 17px;
+}
+
+.card p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Chart Section */
+.chart-section {
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    width: 100%; /* Full width */
+    max-width: 800px; /* Set a limit */
+}
+
+/* Data Table */
+.data-table {
+    margin-top: 20px;
+    width: 100%; /* Ensure it spans full available width */
+    max-width: 900px; /* Matches chart */
+}
+
+.data-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.data-table th, .data-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+    color: #ffffff;
+}
+
+.data-table th {
+    background-color: #2c2c2c;
+}
+
+.data-table tr:hover {
+    background-color: #333333;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .stats-cards {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .card {
+        max-width: 100%; /* Cards take full width in smaller screens */
+    }
+
+    .chart-section, .data-table {
+        max-width: 100%; /* Adjust widths for smaller screens */
+    }
+}

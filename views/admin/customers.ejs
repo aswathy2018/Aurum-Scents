@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Listing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: #212529;
+            color: #ffffff;
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 20px;
+        }
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .sidebar ul li:hover {
+            background-color: #495057;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* Active State */
+        .sidebar ul li.active {
+            background-color: #343a40; /* Active color for row */
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        /* Header */
+        .content-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0d6efd;
+            margin-bottom: 20px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            margin-bottom: 20px;
+            max-width: 500px;
+        }
+
+        /* Table */
+        .table-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .table-striped tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        /* Buttons */
+        .btn-danger, .btn-success {
+            font-size: 0.85rem;
+        }
+
+        /* Pagination */
+        .pagination .page-link {
+            color: #0d6efd;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">
+            AURUM SCENTS
+        </div>
+        <ul id="menu">
+            <li><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#order-lists">Order Lists</a></li>
+            <li class="active"><a href="/admin/users">Users</a></li>
+            <li><a href="#sales-report">Sales Report</a></li>
+            <li><a href="#coupons">Coupons</a></li>
+            <li><a href="#category">Category</a></li>
+            <li><a href="#banner-management">Banner Management</a></li>
+            <li><a href="#offers">Offers</a></li>
+            <li><a href="#brands">Brands</a></li>
+            <li><a href="#settings">Settings</a></li>
+            <li><a href="/admin/logout">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h2 class="content-title">Customers</h2>
+
+        <!-- Search Bar -->
+        <form action="/admin/users/" method="get" class="input-group search-bar shadow-sm">
+            <input type="text" class="form-control" placeholder="Search customers..." name="search">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone No</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%for(let i=0 ; i<data.length ; i++){%>
+                    <tr>
+                        <td><%=data[i].name%></td>
+                        <td><%=data[i].email%></td>
+                        <td><%=data[i].phone%></td>
+                        <td>
+                            <%if(data[i].isBlocked===false){%>
+                            <button class="btn btn-danger me-2">
+                                <a href="/admin/blockCustomer?id=<%=data[i]._id%>" class="text-white text-decoration-none">Block</a>
+                            </button>
+                            <%}else{%>
+                            <button class="btn btn-success">
+                                <a href="/admin/unblockCustomer?id=<%=data[i]._id%>" class="text-white text-decoration-none">Unblock</a>
+                            </button>
+                            <%}%>
+                        </td>
+                    </tr>
+                    <%}%>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <%for(let i=1 ; i<=totalPages ; i++){%>
+                    <li class="page-item <%=(i===currentPage)? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+
+                    </li>
+                    <%}%>
+            </ul>
+        </nav>
+    </div>
+
+    <script>
+        // JavaScript for handling active state in the sidebar
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuItems = document.querySelectorAll('#menu li');
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Remove active class from all items
+                    menuItems.forEach(i => i.classList.remove('active'));
+
+                    // Add active class to the clicked item
+                    item.classList.add('active');
+                });
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

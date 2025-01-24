@@ -6,8 +6,8 @@ const passport = require('./config/passport')
 const env = require("dotenv").config();
 const userRouter = require('./routes/userRouter')
 const db = require("./config/db")
-
-
+const adminRouter = require('./routes/adminRouter')
+const nocache = require("nocache");
 
 
 app.use(express.json())
@@ -32,8 +32,8 @@ app.set("views",[path.join(__dirname, 'views/user'), path.join(__dirname, 'views
 app.use(express.static(path.join(__dirname, "public")))
 
 app.use("/", userRouter)
-
-
+app.use('/admin', adminRouter)
+nocache();
 db();
 const PORT = 3002 || process.env.PORT
 app.listen(PORT, ()=>{

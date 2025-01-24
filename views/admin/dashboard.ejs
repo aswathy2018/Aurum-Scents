@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: #212529;
+            color: #ffffff;
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 20px;
+        }
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .sidebar ul li:hover {
+            background-color: #495057;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* Active State */
+        .sidebar ul li.active {
+            background-color: #343a40; /* Hash color for active state */
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        /* Header */
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        /* Dashboard Widgets */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Chart Placeholder */
+        .chart-placeholder {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #adb5bd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">
+            AURUM SCENTS
+        </div>
+        <ul id="menu">
+            <li class="active"><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#order-lists">Order Lists</a></li>
+            <li><a href="/admin/users">Users</a></li>
+            <li><a href="#sales-report">Sales Report</a></li>
+            <li><a href="#coupons">Coupons</a></li>
+            <li><a href="#category">Category</a></li>
+            <li><a href="#banner-management">Banner Management</a></li>
+            <li><a href="#offers">Offers</a></li>
+            <li><a href="#brands">Brands</a></li>
+            <li><a href="#settings">Settings</a></li>
+            <li><a href="/admin/logout">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h2 class="dashboard-title">Admin Dashboard</h2>
+
+        <!-- Dashboard Stats -->
+        <div class="row my-4">
+            <div class="col-md-4">
+                <div class="card p-4 text-center">
+                    <h5 class="card-title">Total Users</h5>
+                    <p class="card-text display-6">1,245</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 text-center">
+                    <h5 class="card-title">Total Sales</h5>
+                    <p class="card-text display-6">$56,780</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 text-center">
+                    <h5 class="card-title">Active Orders</h5>
+                    <p class="card-text display-6">87</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Placeholder -->
+        <div class="chart-placeholder">
+            Sales Chart Placeholder
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for handling active state
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuItems = document.querySelectorAll('#menu li');
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Remove active class from all items
+                    menuItems.forEach(i => i.classList.remove('active'));
+
+                    // Add active class to the clicked item
+                    item.classList.add('active');
+                });
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

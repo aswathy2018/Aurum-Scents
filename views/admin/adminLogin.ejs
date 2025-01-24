@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="/styles/admin-login.css">
+</head>
+<style>
+    /* Reset and general styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #d4dddd;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Login container */
+.login-container {
+    background-color: #10161b;
+    padding:  40px 100px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    display: flex; /* Flexbox for inner alignment */
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center all child elements horizontally */
+    justify-content: center; /* Center all child elements vertically */
+    text-align: center; /* Center text */
+}
+
+/* Heading */
+.login-container h1 {
+    margin-bottom: 30px;
+    color: #80c3e2;
+}
+
+/* Form group styles */
+.form-group {
+    margin-bottom: 25px; /* Increased gap between fields */
+    width: 100%; /* Ensure form-group spans full width */
+    max-width: 380px; /* Restrict width to match inputs */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+label {
+    font-size: 14px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: #80c3e2;
+    width: 100%; /* Ensure labels span full width */
+    max-width: 380px;
+    text-align: left; /* Keep labels aligned to the left */
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+input {
+    width: 100%; /* Keeps the field full width */
+    max-width: 380px; /* Adds a maximum width for wider screens */
+    padding: 15px 30px; /* Increased padding for better typing space */
+    border-radius: 5px;
+    border: none;
+    background-color: #d4dddd;
+    color: #6d6d6d;
+    font-size: 12px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    text-align: center;
+}
+
+input::placeholder {
+    color: #353c41;
+    text-align: center;
+}
+
+/* Button styles */
+.btn {
+    width: 100%;
+    max-width: 380px;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #1a4e66;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #458ba0;
+}
+
+
+
+</style>
+<body>
+    <div class="login-container">
+        <h1>Admin Login</h1>
+        <form action="/admin/login" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+    </div>
+</body>
+</html>
