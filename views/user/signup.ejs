@@ -7,7 +7,7 @@
                     <h3>Create an Account</h3>
                 </div>
                 
-                <form id="registration-form" method="post" action="/signup" onsubmit="return validateForm()">
+                <form id="registration-form" method="post" action="/signup" onsubmit="return validateForm(event)">
                     <div class="form-group">
                         <input id="name" type="text" class="form-control" name="name" placeholder="Enter your name">
                         <span class="error" id="name-error" style="color: red;"></span>
@@ -70,7 +70,8 @@
 
 
 <script>
-    function validateForm() {
+    function validateForm(event) {
+        // event.preventDefault();
         // Clear previous error messages
         document.querySelectorAll(".error").forEach((error) => (error.innerText = ""));
 
@@ -98,9 +99,9 @@
             document.getElementById("email-error").innerText = "Email is required.";
             document.getElementById("email-error").style.color = "red";
             valid = false;
-        } else if (!/^[a-z]+[0-9]*@gmail\.com$/.test(email)) {
+        } else if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(email)) {
             document.getElementById("email-error").innerText =
-                "Email must be lowercase, include '@', 'gmail.com', and may optionally contain numbers.";
+                "Email must be lowercase, include '@', and may optionally contain numbers.";
             document.getElementById("email-error").style.color = "red";
             valid = false;
         }
@@ -152,4 +153,9 @@
             icon.className = "bi bi-eye";
         }
     }
+
+    document.querySelector('form').addEventListener('submit', function() {
+        document.querySelector('button[type="submit"]').disabled = true;
+    });
+
 </script>

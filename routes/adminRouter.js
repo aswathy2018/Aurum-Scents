@@ -1,8 +1,12 @@
-const express = require('express')
+const express = require('express');
 const router = express.Router();
-const adminController = require('../controllers/admin/adminController')
-const customerController = require('../controllers/admin/customerController')
-const {userAuth, adminAuth} = require('../middlewares/auth')
+const adminController = require('../controllers/admin/adminController');
+const customerController = require('../controllers/admin/customerController');
+const categoryController = require('../controllers/admin/categoryController');
+const productController = require('../controllers/admin/productController');
+const brandController = require('../controllers/admin/brandController');
+const {userAuth, adminAuth} = require('../middlewares/auth');
+const {uploads} = require('../helpers/multer');
 
 
 //404 page not found
@@ -21,8 +25,33 @@ router.get('/users', adminAuth, customerController.customerinfo)
 router.get('/blockCustomer', adminAuth, customerController.customerBlocked)
 router.get('/unblockCustomer', adminAuth, customerController.customerunBlocked)
 
-router.get('/*', adminController.errorPage)
 
+//category management
+router.get('/category', adminAuth, categoryController.categoryInfo)
+router.post('/addCategory', adminAuth, categoryController.addCategory)
+router.get('/editCategory', adminAuth, categoryController.getEditCategory)
+router.post('/editCategory/:id', adminAuth, categoryController.editCategory)
+router.get('/listcategory', adminAuth, categoryController.listcategory)
+router.get('/unlistcategory',adminAuth, categoryController.unlistcategory)
+
+
+//Brand management
+router.get('/brands', adminAuth, brandController.getBrandPage)
+router.post('/addBrand', adminAuth,(req,res,next)=>{
+    console.log(req.body);
+    console.log(req.files);
+    next();
+}, uploads.single ('brandImage'), brandController.addBrand);
+router.get('/blockBrand',adminAuth,brandController.blockBrand)
+router.get('/unBlockBrand', adminAuth, brandController.unBlockBrand)
+router.get('/deleteBrand', adminAuth, brandController.deleteBrand)
+
+
+//Product management
+router.get('/addProducts', adminAuth, productController.getProductAddPage)
+
+
+router.get('/*', adminController.errorPage)
 
 
 module.exports = router;

@@ -1,0 +1,101 @@
+<%- include('../partials/admin/adminHeader.ejs') %>
+
+
+<style>
+        /* Content Styling */
+        .container {
+            margin-left: 270px;
+            padding: 20px;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-container .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-shadow: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-container .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            box-shadow: 0 6px 8px rgba(0, 123, 255, 0.5);
+        }
+
+        .btn-primary:active {
+            background-color: #004085;
+            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.4);
+        }
+
+        .mt-60 {
+            margin-top: 60px !important;
+        }
+
+        .mt-30 {
+            margin-top: 30px !important;
+        }
+
+        .text-end {
+            text-align: right !important;
+        }
+
+        .d-grid {
+            display: grid !important;
+        }
+
+        .border {
+            border: 1px solid #ddd !important;
+        }
+    </style>
+</head>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 mt-60">
+                <div class="form-container">
+                    <form method="post" action="/admin/editCategory/<%=category._id%>">
+                        <div class="d-grid text-end mt-30 col-md-5">
+                            <button class="btn btn-primary" type="submit">Update category</button>
+                        </div>
+                        <div class="mb-4 mt-30">
+                            <label for="product_name" class="form-label">Name</label>
+                            <input type="text" name="categoryname" value="<%=category.name%>" class="form-control border" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control border"><%=category.description%></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+

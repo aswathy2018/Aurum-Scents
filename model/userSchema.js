@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const {Schema} = mongoose
-mongoose.set('autoIndex', false);
+// mongoose.set('autoIndex', false);
 
 const userSchema = new Schema({
     name: {
@@ -10,7 +10,7 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        // unique: true
     },
     phone: {
         type: String,

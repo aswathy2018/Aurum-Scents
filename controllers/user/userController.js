@@ -39,15 +39,24 @@ const otp = async(req,res)=>{
             const user = req.session.userData
             const passwordHash = await securePassword(user.password)
 
-            const saveUserData = new User({
+            const existingUser = await User.findOne({ email: user.email });
+            if (existingUser) {
+                res.json({ success: false, message: "User already exists. Please log in." });
+                return;
+            }
+
+
+           const newUser = await User.create({
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
                 password: passwordHash
             })
 
-            await saveUserData.save()
-            req.session.user = saveUserData._id
+            console.log('asdfghjkl',newUser)
+            req.session.userOtp = null;
+            req.session.userData = null;
+            req.session.user = newUser._id
             res.json({success: true, redirectUrl: '/'})
         }
         else{

@@ -1,0 +1,464 @@
+<%- include('../partials/admin/adminHeader.ejs') %>
+
+<style>
+
+        .content-main {
+            margin-left: 280px;
+            padding: 2rem;
+            width: calc(100% - 280px);
+        }
+
+        .content-header {
+            margin-bottom: 2rem;
+        }
+
+        .content-title {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #f9fafb;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #374151;
+            background-color: #ffffff;
+            background-clip: padding-box;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: #3b82f6;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            text-align: center;
+            vertical-align: middle;
+            user-select: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 0.25rem;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .btn-primary {
+            color: #ffffff;
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .thumbnails-container {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .thumbnail {
+            flex: none;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9fafb;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-close {
+                display: block;
+            }
+
+            .content-main {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        /* Variant Section Styling */
+        .variant-section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .variant-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .variant-header {
+            margin-bottom: 20px;
+        }
+
+        .variant-header h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .ml-options {
+            max-width: 200px;
+        }
+
+        .variant-details {
+            display: grid;
+            gap: 20px;
+        }
+
+        .variant-prices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .price-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .price-input .currency {
+            position: absolute;
+            left: 10px;
+            color: #6b7280;
+        }
+
+        .price-input input {
+            padding-left: 25px;
+        }
+
+        #add-variant {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #374151;
+            background: transparent;
+            border: 2px dashed #d1d5db;
+            padding: 12px 20px;
+            width: 100%;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #add-variant:hover {
+            border-color: #9ca3af;
+            background: #f9fafb;
+        }
+
+        #add-variant svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px dashed #d1d5db;
+            color: #374151;
+        }
+
+        .size-select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+        }
+    </style>
+</head>
+
+    <!-- Main Content -->
+    <main class="content-main">
+        <div class="content-header">
+            <h1 class="content-title">Add New Product</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <form method="post" action="/admin/productAdd" enctype="multipart/form-data"
+                    onsubmit="return validateForm()">
+                    <div class="form-group">
+                        <label for="product_name" class="form-label">Product Name</label>
+                        <input type="text" placeholder="Type here" name="productName" class="form-control"
+                            id="product_name">
+                        <div id="productName-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Brand</label>
+                        <select class="form-control" name="">
+                            <option value="">Select Brand</option>
+
+                            <option value=""></option>
+
+                        </select>
+                        <div id="brand-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Description</label>
+                        <textarea placeholder="Type here" name="description" class="form-control" rows="4"></textarea>
+                        <div id="description-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Regular Price</label>
+                        <input placeholder="$" name="regularPrice" type="text" class="form-control">
+                        <div id="regularPrice-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sale Price</label>
+                        <input placeholder="$" name="salePrice" type="text" class="form-control">
+                        <div id="salePrice-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input name="quantity" type="text" class="form-control">
+                        <div id="quantity-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-control" name="">
+                            <option value="">Select Category</option>
+
+                            <option value=""></option>
+
+                        </select>
+                        <div id="category-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Choose Images</label>
+                        <div class="thumbnails-container" id="addedImagesContainer"></div>
+                        <input class="form-control" type="file" name="images" accept="image/png, image/jpeg" multiple>
+                        <div id="images-error" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group variant-section">
+                        <label class="form-label">Variants</label>
+                        <div id="variants-container">
+                            <div class="variant-item">
+                                <div class="variant-header">
+                                    <h4>ML</h4>
+                                    <div class="ml-options">
+                                        <select name="variants[0][size]" class="form-control size-select">
+                                            <option value="50">50ml</option>
+                                            <option value="100">100ml</option>
+                                            <option value="200">200ml</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="variant-details">
+                                    <div class="form-group">
+                                        <label class="form-label">Stock quantity</label>
+                                        <input type="number" name="variants[0][stock]" class="form-control"
+                                            placeholder="Enter quantity">
+                                    </div>
+
+                                    <div class="variant-prices">
+                                        <div class="form-group">
+                                            <label class="form-label">Regular Price</label>
+                                            <div class="price-input">
+                                                <span class="currency">₹</span>
+                                                <input type="number" name="variants[0][regularPrice]"
+                                                    class="form-control" placeholder="1000">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">Sale Price</label>
+                                            <div class="price-input">
+                                                <span class="currency">₹</span>
+                                                <input type="number" name="variants[0][salePrice]" class="form-control"
+                                                    placeholder="2500">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" id="add-variant" class="btn btn-outline">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add variant
+                        </button>
+                    </div>
+            </div>
+            <div>
+                <button class="btn btn-primary" type="submit">Publish</button>
+            </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/cropHere's the continuation of the text stream from the cut-off point:
+    </main>
+
+    <script src=" https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+    <script>
+        function validateForm() {
+            let isValid = true;
+            const fields = ['Product Name', 'brand', 'description', 'regularPrice', 'salePrice', 'quantity', 'category', 'images'];
+
+            fields.forEach(field => {
+                const value = document.getElementsByName(field)[0].value.trim();
+                const errorElement = document.getElementById(`${field}-error`);
+
+                if (!value) {
+                    errorElement.textContent = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+                    isValid = false;
+                } else {
+                    errorElement.textContent = '';
+                }
+            });
+
+            return isValid;
+        }
+
+        document.querySelector('input[name="images"]').addEventListener('change', function (event) {
+            const files = event.target.files;
+            const container = document.getElementById('addedImagesContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const thumbnail = document.createElement('div');
+                    thumbnail.className = 'thumbnail';
+                    thumbnail.style.backgroundImage = `url(${e.target.result})`;
+                    thumbnail.style.backgroundSize = 'cover';
+                    thumbnail.style.backgroundPosition = 'center';
+                    container.appendChild(thumbnail);
+                }
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Mobile sidebar toggle
+        document.querySelector('.sidebar-close').addEventListener('click', function () {
+            document.querySelector('.sidebar').classList.remove('open');
+        });
+
+        document.querySelector('.content-main').addEventListener('click', function () {
+            document.querySelector('.sidebar').classList.remove('open');
+        });
+        // Variant Management
+        document.getElementById('add-variant').addEventListener('click', function () {
+            const container = document.getElementById('variants-container');
+            const variantCount = container.children.length;
+
+            const newVariant = document.createElement('div');
+            newVariant.className = 'variant-item';
+            newVariant.innerHTML = `
+    <div class="variant-header">
+        <h4>ML</h4>
+        <div class="ml-options">
+            <select name="variants[${variantCount}][size]" class="form-control size-select">
+                <option value="50">50ml</option>
+                <option value="100">100ml</option>
+                <option value="200">200ml</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="variant-details">
+        <div class="form-group">
+            <label class="form-label">Stock quantity</label>
+            <input type="number" name="variants[${variantCount}][stock]" class="form-control" placeholder="Enter quantity">
+        </div>
+        
+        <div class="variant-prices">
+            <div class="form-group">
+                <label class="form-label">Regular Price</label>
+                <div class="price-input">
+                    <span class="currency">₹</span>
+                    <input type="number" name="variants[${variantCount}][regularPrice]" class="form-control" placeholder="1000">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Sale Price</label>
+                <div class="price-input">
+                    <span class="currency">₹</span>
+                    <input type="number" name="variants[${variantCount}][salePrice]" class="form-control" placeholder="2500">
+                </div>
+            </div>
+        </div>
+    </div>
+`;
+
+            container.appendChild(newVariant);
+        });
+    </script>
+</body>
+
+</html>
