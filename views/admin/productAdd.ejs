@@ -1,298 +1,432 @@
 <%- include('../partials/admin/adminHeader.ejs') %>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" />
 <style>
+    .content-main {
+        margin-left: 280px;
+        padding: 2rem;
+        width: calc(100% - 280px);
+    }
+
+    .content-header {
+        margin-bottom: 2rem;
+    }
+
+    .content-title {
+        font-size: 1.875rem;
+        font-weight: bold;
+        color: #111827;
+    }
+
+    .card {
+        background: #ffffff;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: #ffffff;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #e0e0e0;
+        border: 0.5px solid #cbd4dd;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 1rem;
+        color: #374151;
+        cursor:auto;
+        position: relative;
+    }
+
+    .form-control::after {
+        content: "▼";
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #6b7280;
+    }
+
+    .form-control:focus {
+        border-color: #151c27;
+        box-shadow: 0 0 5px rgba(26, 33, 43, 0.5);
+        outline: none;
+    }
+
+    .form-control:hover {
+        border-color: #9ca3af;
+    }
+
+    .ml-options .form-control {
+        max-width: 200px;
+    }
+
+    .btn {
+        display: inline-block;
+        font-weight: 400;
+        text-align: center;
+        vertical-align: middle;
+        user-select: none;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border-radius: 0.25rem;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .btn-primary {
+        color: #ffffff;
+        background-color: #191d22;
+        border-color: #11161d;
+    }
+
+    .btn-primary:hover {
+        background-color: #202633;
+        border-color: #222731;
+    }
+
+    .thumbnails-container {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding: 1rem 0;
+    }
+
+    .thumbnail {
+        flex: none;
+        width: 100px;
+        height: 100px;
+        border: 1px solid #d1d5db;
+        border-radius: 0.25rem;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f9fafb;
+    }
+
+    .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .dropdown-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .dropdown-container .dropdown-arrow {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #1a1f2b;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-close {
+            display: block;
+        }
 
         .content-main {
-            margin-left: 280px;
-            padding: 2rem;
-            width: calc(100% - 280px);
-        }
-
-        .content-header {
-            margin-bottom: 2rem;
-        }
-
-        .content-title {
-            font-size: 1.875rem;
-            font-weight: bold;
-            color: #111827;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-        }
-
-        .card-header {
-            background-color: #f9fafb;
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .form-control {
+            margin-left: 0;
             width: 100%;
-            padding: 0.5rem 0.75rem;
-            font-size: 1rem;
-            line-height: 1.5;
-            color: #374151;
-            background-color: #ffffff;
-            background-clip: padding-box;
-            border: 1px solid #d1d5db;
-            border-radius: 0.25rem;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
+    }
 
-        .form-control:focus {
-            border-color: #3b82f6;
-            outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
-        }
+    .variant-section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
 
-        .btn {
-            display: inline-block;
-            font-weight: 400;
-            text-align: center;
-            vertical-align: middle;
-            user-select: none;
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            line-height: 1.5;
-            border-radius: 0.25rem;
-            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
+    .variant-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
 
-        .btn-primary {
-            color: #ffffff;
-            background-color: #3b82f6;
-            border-color: #3b82f6;
-        }
+    .variant-header {
+        margin-bottom: 20px;
+    }
 
-        .btn-primary:hover {
-            background-color: #2563eb;
-            border-color: #2563eb;
-        }
+    .variant-header h4 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
 
-        .thumbnails-container {
-            display: flex;
-            gap: 1rem;
-            overflow-x: auto;
-            padding: 1rem 0;
-        }
+    .ml-options {
+        max-width: 200px;
+    }
 
-        .thumbnail {
-            flex: none;
-            width: 100px;
-            height: 100px;
-            border: 1px solid #d1d5db;
-            border-radius: 0.25rem;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f9fafb;
-        }
+    .variant-details {
+        display: grid;
+        gap: 20px;
+    }
 
-        .error-message {
-            color: #ef4444;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-        }
+    .variant-prices {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-            }
+    .price-input {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
 
-            .sidebar.open {
-                transform: translateX(0);
-            }
+    .price-input .currency {
+        position: absolute;
+        left: 10px;
+        color: #5a5f69;
+    }
 
-            .sidebar-close {
-                display: block;
-            }
+    .price-input input {
+        padding-left: 25px;
+    }
 
-            .content-main {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
+    #add-variant {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #374151;
+        background: transparent;
+        border: 2px dashed #d1d5db;
+        padding: 12px 20px;
+        width: 100%;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
 
-        /* Variant Section Styling */
-        .variant-section {
-            background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+    #add-variant:hover {
+        border-color: #9ca3af;
+        background: #f9fafb;
+    }
 
-        .variant-item {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
+    #add-variant svg {
+        width: 20px;
+        height: 20px;
+    }
 
-        .variant-header {
-            margin-bottom: 20px;
-        }
+    .btn-outline {
+        background: transparent;
+        border: 2px dashed #d1d5db;
+        color: #374151;
+    }
 
-        .variant-header h4 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
+    .size-select {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+    }
 
-        .ml-options {
-            max-width: 200px;
-        }
+    #croppie-container {
+    width: 300px;
+    height: 300px;
+    position: relative;
+}
 
-        .variant-details {
-            display: grid;
-            gap: 20px;
-        }
 
-        .variant-prices {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+    #result img {
+        max-width: 100%;
+        max-height: 300px;
+    }
+</style>
 
-        .price-input {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .price-input .currency {
-            position: absolute;
-            left: 10px;
-            color: #6b7280;
-        }
-
-        .price-input input {
-            padding-left: 25px;
-        }
-
-        #add-variant {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #374151;
-            background: transparent;
-            border: 2px dashed #d1d5db;
-            padding: 12px 20px;
-            width: 100%;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        #add-variant:hover {
-            border-color: #9ca3af;
-            background: #f9fafb;
-        }
-
-        #add-variant svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px dashed #d1d5db;
-            color: #374151;
-        }
-
-        .size-select {
-            width: 100%;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #d1d5db;
-        }
-    </style>
-</head>
-
-    <!-- Main Content -->
-    <main class="content-main">
-        <div class="content-header">
-            <h1 class="content-title">Add New Product</h1>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <form method="post" action="/admin/productAdd" enctype="multipart/form-data"
-                    onsubmit="return validateForm()">
-                    <div class="form-group">
-                        <label for="product_name" class="form-label">Product Name</label>
-                        <input type="text" placeholder="Type here" name="productName" class="form-control"
-                            id="product_name">
-                        <div id="productName-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Brand</label>
-                        <select class="form-control" name="">
-                            <option value="">Select Brand</option>
-
-                            <option value=""></option>
-
+<!-- Main Content -->
+<main class="content-main">
+    <div class="content-header">
+        <h1 class="content-title">Add New Product</h1>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <form method="post" action="/admin/productAdd" enctype="multipart/form-data" onsubmit="return validateForm()">
+                <div class="form-group">
+                    <label for="product_name" class="form-label">Product Name</label>
+                    <input type="text" placeholder="Type here" name="productName" class="form-control" id="product_name">
+                    <div id="productName-error" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Brand</label>
+                    <div class="dropdown-container">
+                        <select class="form-control" name="brand">
+                            <option value="" selected disabled>Select a Brand</option>
+                            <% for (let i=0; i < brand.length; i++) { %>
+                                <option value="<%= brand[i].brandName %>">
+                                    <%= brand[i].brandName %>
+                                </option>
+                            <% } %>
                         </select>
-                        <div id="brand-error" class="error-message"></div>
+                        <span class="dropdown-arrow">▼</span>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Full Description</label>
-                        <textarea placeholder="Type here" name="description" class="form-control" rows="4"></textarea>
-                        <div id="description-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Regular Price</label>
-                        <input placeholder="$" name="regularPrice" type="text" class="form-control">
-                        <div id="regularPrice-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Sale Price</label>
-                        <input placeholder="$" name="salePrice" type="text" class="form-control">
-                        <div id="salePrice-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input name="quantity" type="text" class="form-control">
-                        <div id="quantity-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select class="form-control" name="">
-                            <option value="">Select Category</option>
+                    <div id="brand-error" class="error-message"></div>
+                </div>
 
-                            <option value=""></option>
-
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <div class="dropdown-container">
+                        <select class="form-control" name="category">
+                            <option value="" selected disabled>Select a Category</option>
+                            <% for (let i=0; i < cat.length; i++) { %>
+                                <option value="<%= cat[i].name %>">
+                                    <%= cat[i].name %>
+                                </option>
+                            <% } %>
                         </select>
-                        <div id="category-error" class="error-message"></div>
+                        <span class="dropdown-arrow">▼</span>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Choose Images</label>
-                        <div class="thumbnails-container" id="addedImagesContainer"></div>
-                        <input class="form-control" type="file" name="images" accept="image/png, image/jpeg" multiple>
-                        <div id="images-error" class="error-message"></div>
+                    <div id="category-error" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Full Description</label>
+                    <textarea placeholder="Type here" name="description" class="form-control" rows="4"></textarea>
+                    <div id="description-error" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Quantity</label>
+                    <input name="quantity" type="text" class="form-control">
+                    <div id="quantity-error" class="error-message"></div>
+                </div>
+
+                <div class="card mb-1">
+                    <div class="card-header">
+                        <h4>Upload Images</h4>
                     </div>
+
+                    <div class="border">
+                        <div id="addedImagesContainer" class="thumbnails-container"></div>
+                    </div>
+
+                    <!-- <div class="container mt-4">
+                        <h2 class="mb-4">Image Cropping Components</h2> -->
+                
+                        <!-- Component 1 -->
+                        <div class="card p-3 mb-4">
+                            <h5>Image 1</h5>
+                            <div class="mb-3">
+                                <input class="form-control" type="file" name="images" id="input1" accept="image/png, image/jpeg, image/jpg">
+                            </div>
+                            <div class="d-flex gap-3">
+                                <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
+                                    <img src="/placeholder.svg" alt="Preview Image" id="imgView1" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
+                                </div>
+                                <div id="croppie-container-1" class="border" style="width: 300px; height: 300px;"></div>
+                                <div id="result-1" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
+                                    <img src="/placeholder.svg" id="croppedImg1" alt="Cropped Image" class="img-fluid" style="object-fit: contain;">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" id="crop-button-1" class="btn btn-primary me-2">Crop Image</button>
+                                <button type="button" id="save-button-1" class="btn btn-success">Save</button>
+                            </div>
+                        </div>
+                
+                        <!-- Component 2 -->
+                        <div class="card p-3 mb-4">
+                            <h5>Image 2</h5>
+                            <div class="mb-3">
+                                <input class="form-control" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg">
+                            </div>
+                            <div class="d-flex gap-3">
+                                <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
+                                    <img src="/placeholder.svg" alt="Preview Image" id="imgView2" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
+                                </div>
+                                <div id="croppie-container-2" class="border" style="width: 300px; height: 300px;"></div>
+                                <div id="result-2" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
+                                    <img src="/placeholder.svg" id="croppedImg2" alt="Cropped Image" class="img-fluid" style="object-fit: contain;">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" id="crop-button-2" class="btn btn-primary me-2">Crop Image</button>
+                                <button type="button" id="save-button-2" class="btn btn-success">Save</button>
+                            </div>
+                        </div>
+                
+                        <!-- Component 3 -->
+                        <div class="card p-3 mb-4">
+                            <h5>Image 3</h5>
+                            <div class="mb-3">
+                                <input class="form-control" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg">
+                            </div>
+                            <div class="d-flex gap-3">
+                                <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
+                                    <img src="/placeholder.svg" alt="Preview Image" id="imgView3" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
+                                </div>
+                                <div id="croppie-container-3" class="border" style="width: 300px; height: 300px;"></div>
+                                <div id="result-3" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
+                                    <img src="/placeholder.svg" id="croppedImg3" alt="Cropped Image" class="img-fluid" style="object-fit: contain;">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" id="crop-button-3" class="btn btn-primary me-2">Crop Image</button>
+                                <button type="button" id="save-button-3" class="btn btn-success">Save</button>
+                            </div>
+                        </div>
+                
+                        <!-- Component 4 -->
+                        <div class="card p-3 mb-4">
+                            <h5>Image 4</h5>
+                            <div class="mb-3">
+                                <input class="form-control" type="file" name="images" id="input4" accept="image/png, image/jpeg, image/jpg">
+                            </div>
+                            <div class="d-flex gap-3">
+                                <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
+                                    <img src="/placeholder.svg" alt="Preview Image" id="imgView4" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
+                                </div>
+                                <div id="croppie-container-4" class="border" style="width: 300px; height: 300px;"></div>
+                                <div id="result-4" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
+                                    <img src="/placeholder.svg" id="croppedImg4" alt="Cropped Image" class="img-fluid" style="object-fit: contain;">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" id="crop-button-4" class="btn btn-primary me-2">Crop Image</button>
+                                <button type="button" id="save-button-4" class="btn btn-success">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    
 
                     <div class="form-group variant-section">
                         <label class="form-label">Variants</label>
@@ -312,8 +446,7 @@
                                 <div class="variant-details">
                                     <div class="form-group">
                                         <label class="form-label">Stock quantity</label>
-                                        <input type="number" name="variants[0][stock]" class="form-control"
-                                            placeholder="Enter quantity">
+                                        <input type="number" name="variants[0][stock]" class="form-control" placeholder="Enter quantity">
                                     </div>
 
                                     <div class="variant-prices">
@@ -321,8 +454,7 @@
                                             <label class="form-label">Regular Price</label>
                                             <div class="price-input">
                                                 <span class="currency">₹</span>
-                                                <input type="number" name="variants[0][regularPrice]"
-                                                    class="form-control" placeholder="1000">
+                                                <input type="number" name="variants[0][regularPrice]" class="form-control" placeholder="₹1000">
                                             </div>
                                         </div>
 
@@ -330,8 +462,7 @@
                                             <label class="form-label">Sale Price</label>
                                             <div class="price-input">
                                                 <span class="currency">₹</span>
-                                                <input type="number" name="variants[0][salePrice]" class="form-control"
-                                                    placeholder="2500">
+                                                <input type="number" name="variants[0][salePrice]" class="form-control" placeholder="₹2500">
                                             </div>
                                         </div>
                                     </div>
@@ -340,125 +471,201 @@
                         </div>
 
                         <button type="button" id="add-variant" class="btn btn-outline">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
                             Add variant
                         </button>
                     </div>
-            </div>
-            <div>
-                <button class="btn btn-primary" type="submit">Publish</button>
-            </div>
+                </div>
+                <div>
+                    <button class="btn btn-primary" type="submit">Publish</button>
+                </div>
             </form>
         </div>
-    </main>
+    </div>
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/cropHere's the continuation of the text stream from the cut-off point:
-    </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 
-    <script src=" https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
-    <script>
-        function validateForm() {
-            let isValid = true;
-            const fields = ['Product Name', 'brand', 'description', 'regularPrice', 'salePrice', 'quantity', 'category', 'images'];
+<script>
 
-            fields.forEach(field => {
-                const value = document.getElementsByName(field)[0].value.trim();
-                const errorElement = document.getElementById(`${field}-error`);
+    const components = [1, 2, 3, 4]; // Define all component IDs
 
-                if (!value) {
-                    errorElement.textContent = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
-                    isValid = false;
-                } else {
-                    errorElement.textContent = '';
+        components.forEach(id => {
+            let croppie;
+
+            const input = document.getElementById(`input${id}`);
+            const previewImage = document.getElementById(`imgView${id}`);
+            const croppieContainer = document.getElementById(`croppie-container-${id}`);
+            const resultContainer = document.getElementById(`result-${id}`);
+            const cropButton = document.getElementById(`crop-button-${id}`);
+            const saveButton = document.getElementById(`save-button-${id}`);
+            const croppedImg = document.getElementById(`croppedImg${id}`);
+
+            input.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImage.src = e.target.result;
+                        initCroppie(e.target.result);
+                    };
+                    reader.readAsDataURL(this.files[0]);
                 }
             });
 
-            return isValid;
+            function initCroppie(imageData) {
+                if (croppie) {
+                    croppie.destroy();
+                }
+                croppie = new Croppie(croppieContainer, {
+                    viewport: { width: 200, height: 200, type: 'square' },
+                    boundary: { width: 300, height: 300 },
+                    showZoomer: true,
+                });
+                croppie.bind({ url: imageData });
+            }
+
+            cropButton.addEventListener('click', function () {
+                if (croppie) {
+                    croppie.result({
+                        type: 'canvas',
+                        size: 'viewport',
+                    }).then(function (croppedImage) {
+                        croppedImg.src = croppedImage;
+                        resultContainer.classList.remove('d-none');
+                    });
+                }
+            });
+
+            saveButton.addEventListener('click', function () {
+                if (croppedImg.src) {
+                    console.log(`Component ${id}: Cropped image ready.`);
+                }
+            });
+        });
+
+
+
+
+    function validateForm() {
+        clearErrorMessages();
+        const name = document.getElementsByName('productName')[0].value;
+        const description = document.getElementsByName('description')[0].value;
+        const brand = document.getElementsByName('brand')[0].value;
+        const price = document.getElementsByName('regularPrice')[0].value;
+        const saleprice = document.getElementsByName('salePrice')[0].value;
+        const category = document.getElementsByName('category')[0].value;
+        const quantity = document.getElementsByName('quantity')[0].value;
+        let isValid = true;
+
+        if (name.trim() === "") {
+            displayErrorMessage('productName-error', 'Please enter a product name.');
+            isValid = false;
+        } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+            displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
+            isValid = false;
         }
 
-        document.querySelector('input[name="images"]').addEventListener('change', function (event) {
-            const files = event.target.files;
-            const container = document.getElementById('addedImagesContainer');
-            container.innerHTML = '';
+        if (description.trim() === "") {
+            displayErrorMessage('description-error', 'Please enter a product description.');
+            isValid = false;
+        }
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const reader = new FileReader();
+        if (brand === "") {
+            displayErrorMessage('brand-error', 'Please select a brand.');
+            isValid = false;
+        }
 
-                reader.onload = function (e) {
-                    const thumbnail = document.createElement('div');
-                    thumbnail.className = 'thumbnail';
-                    thumbnail.style.backgroundImage = `url(${e.target.result})`;
-                    thumbnail.style.backgroundSize = 'cover';
-                    thumbnail.style.backgroundPosition = 'center';
-                    container.appendChild(thumbnail);
-                }
+        if (category === "") {
+            displayErrorMessage('category-error', 'Please select a category.');
+            isValid = false;
+        }
 
-                reader.readAsDataURL(file);
-            }
+        if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+            displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+            isValid = false;
+        }
+
+        if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
+            displayErrorMessage('salePrice-error', 'Please enter a valid non-negative sale price.');
+            isValid = false;
+        }
+
+        if (parseFloat(price) <= parseFloat(saleprice)) {
+            displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+            isValid = false;
+        }
+
+        if (!/^\d+$/.test(quantity) || parseInt(quantity) < 0) {
+            displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function displayErrorMessage(elementId, message) {
+        var errorElement = document.getElementById(elementId);
+        errorElement.innerText = message;
+        errorElement.style.display = "block";
+    }
+
+    function clearErrorMessages() {
+        const errorElements = document.getElementsByClassName('error-message');
+        Array.from(errorElements).forEach(element => {
+            element.innerText = '';
+            element.style.display = 'none';
         });
+    }
 
-        // Mobile sidebar toggle
-        document.querySelector('.sidebar-close').addEventListener('click', function () {
-            document.querySelector('.sidebar').classList.remove('open');
-        });
+    document.getElementById('add-variant').addEventListener('click', function () {
+        const container = document.getElementById('variants-container');
+        const variantCount = container.children.length;
 
-        document.querySelector('.content-main').addEventListener('click', function () {
-            document.querySelector('.sidebar').classList.remove('open');
-        });
-        // Variant Management
-        document.getElementById('add-variant').addEventListener('click', function () {
-            const container = document.getElementById('variants-container');
-            const variantCount = container.children.length;
-
-            const newVariant = document.createElement('div');
-            newVariant.className = 'variant-item';
-            newVariant.innerHTML = `
-    <div class="variant-header">
-        <h4>ML</h4>
-        <div class="ml-options">
-            <select name="variants[${variantCount}][size]" class="form-control size-select">
-                <option value="50">50ml</option>
-                <option value="100">100ml</option>
-                <option value="200">200ml</option>
-            </select>
-        </div>
-    </div>
-    
-    <div class="variant-details">
-        <div class="form-group">
-            <label class="form-label">Stock quantity</label>
-            <input type="number" name="variants[${variantCount}][stock]" class="form-control" placeholder="Enter quantity">
-        </div>
-        
-        <div class="variant-prices">
-            <div class="form-group">
-                <label class="form-label">Regular Price</label>
-                <div class="price-input">
-                    <span class="currency">₹</span>
-                    <input type="number" name="variants[${variantCount}][regularPrice]" class="form-control" placeholder="1000">
+        const newVariant = document.createElement('div');
+        newVariant.className = 'variant-item';
+        newVariant.innerHTML = `
+            <div class="variant-header">
+                <h4>ML</h4>
+                <div class="ml-options">
+                    <select name="variants[${variantCount}][size]" class="form-control size-select">
+                        <option value="50">50ml</option>
+                        <option value="100">100ml</option>
+                        <option value="200">200ml</option>
+                    </select>
                 </div>
             </div>
             
-            <div class="form-group">
-                <label class="form-label">Sale Price</label>
-                <div class="price-input">
-                    <span class="currency">₹</span>
-                    <input type="number" name="variants[${variantCount}][salePrice]" class="form-control" placeholder="2500">
+            <div class="variant-details">
+                <div class="form-group">
+                    <label class="form-label">Stock quantity</label>
+                    <input type="number" name="variants[${variantCount}][stock]" class="form-control" placeholder="Enter quantity">
+                </div>
+                
+                <div class="variant-prices">
+                    <div class="form-group">
+                        <label class="form-label">Regular Price</label>
+                        <div class="price-input">
+                            <span class="currency">₹</span>
+                            <input type="number" name="variants[${variantCount}][regularPrice]" class="form-control" placeholder="₹1000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Sale Price</label>
+                        <div class="price-input">
+                            <span class="currency">₹</span>
+                            <input type="number" name="variants[${variantCount}][salePrice]" class="form-control" placeholder="₹2500">
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-`;
+        `;
 
-            container.appendChild(newVariant);
-        });
-    </script>
-</body>
+        container.appendChild(newVariant);
+    });
+</script>
 
-</html>
+<%- include('../partials/admin/adminFooter.ejs') %>

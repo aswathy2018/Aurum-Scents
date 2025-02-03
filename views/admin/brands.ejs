@@ -2,10 +2,10 @@
     <style>
         /* Main Content Styles */
         .main-content {
-            margin-left: 250px;
+            margin-left: 550px;
             padding: 20px;
             background-color: #f4f6f9;
-            min-height: 100vh;
+            min-height: 140vh;
         }
 
         .main-content h1{
@@ -208,6 +208,42 @@ button:hover + a {
     }
 }
 
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 125%; /*Adjust this based on your page height */
+    left: 62%;
+    transform: translateX(-50%);
+}
+
+.pagination-container a,
+.pagination-container .current-page {
+    display: inline-block;
+    padding: 3px 7px;
+    margin: 0 4px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 10px;
+    border: 1px solid #ddd;
+    color: #292a2c;
+    background-color: #f8f9fa;
+    transition: 0.3s;
+}
+
+.pagination-container a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.current-page {
+    background-color: #343a40;
+    color: white;
+    border: 1px solid #343a40;
+}
+
     </style>
 </head>
 <body>
@@ -276,6 +312,34 @@ button:hover + a {
             </table>
         </div>
     </div>
+<!-- Pagination -->
+<div class="pagination-container" style="text-align: center; margin: 20px auto 0;">
+    <% if (totalPages > 1) { %>
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>" style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">&laquo; Prev</a>
+        <% } %>
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+                <span class="current-page" style="padding: 8px 12px; margin: 0 5px; background-color: #6c757d; color: white; border-radius: 5px;">
+                    <%= i %>
+                </span>
+            <% } else { %>
+                <a href="?page=<%= i %>" style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+                    <%= i %>
+                </a>
+            <% } %>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>" style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Next &raquo;</a>
+        <% } %>
+    <% } %>
+</div>
+
+
+
+
 
     <script>
 

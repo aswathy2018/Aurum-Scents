@@ -26,6 +26,7 @@ router.get('/blockCustomer', adminAuth, customerController.customerBlocked)
 router.get('/unblockCustomer', adminAuth, customerController.customerunBlocked)
 
 
+
 //category management
 router.get('/category', adminAuth, categoryController.categoryInfo)
 router.post('/addCategory', adminAuth, categoryController.addCategory)
@@ -48,7 +49,8 @@ router.get('/deleteBrand', adminAuth, brandController.deleteBrand)
 
 
 //Product management
-router.get('/addProducts', adminAuth, productController.getProductAddPage)
+router.get('/productAdd', adminAuth, productController.getProductAddPage)
+router.post('/productAdd', adminAuth, uploads.array("images", 4), productController.productAdd)
 
 
 router.get('/*', adminController.errorPage)

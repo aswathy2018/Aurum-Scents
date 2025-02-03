@@ -10,6 +10,8 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "cropper": "^4.1.0",
+    "croppie": "^2.6.5",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.2",

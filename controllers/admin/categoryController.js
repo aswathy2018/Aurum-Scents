@@ -6,7 +6,7 @@ const Category = require('../../model/categorySchema')
 const categoryInfo = async(req,res)=>{
     try {
         const page = parseInt(req.query.page) || 1
-        const limit = 4
+        const limit = 6
         const skip = (page-1)*limit;
 
         const categoryData = await Category.find({})
@@ -31,27 +31,43 @@ const categoryInfo = async(req,res)=>{
 
 
 
-const addCategory = async (req, res)=>{
-    const {name, description} = req.body;
-    
+const addCategory = async (req, res) => {
     try {
-
-        const existingCategory = await Category.findOne({name});
-        if(existingCategory){
-            return res.status(400).json({error: "Category already exists"})
+        const { name, description } = req.body;
+        
+        // Create a case-insensitive regular expression for the name
+        const nameRegex = new RegExp(`^${name}$`, 'i');
+        
+        // Check if category exists (case-insensitive)
+        const existingCategory = await Category.findOne({
+            name: { $regex: nameRegex }
+        });
+        
+        if (existingCategory) {
+            return res.status(400).json({
+                error: `Category "${name}" already exists`
+            });
         }
+        
+        // If no existing category, save the new one
         const newCategory = new Category({
             name,
             description
-        })
+        });
+        
         await newCategory.save();
-        return res.redirect("/admin/category")
-
+        return res.status(200).json({
+            success: true,
+            message: "Category added successfully"
+        });
+        
     } catch (error) {
-        return res.status(500).json({error: "Internal server error"})
-
+        console.error('Error in addCategory:', error);
+        return res.status(500).json({
+            error: "Internal server error"
+        });
     }
-}
+};
 
 
 const getEditCategory = async(req, res)=>{

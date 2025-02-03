@@ -1,327 +1,408 @@
 <%- include('../partials/admin/adminHeader.ejs') %>
 
 
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
 <style>
-    /* Category Management Styles */
-    .main-content {
-      margin-left: 250px;
-      padding: 20px;
-    }
-    .main-content h1 {
+  /* General Styling */
+  .main-content {
+    margin-left: 250px;
+    padding: 20px;
     font-family: 'Arial', sans-serif;
+  }
+
+  .main-content h1 {
     font-size: 2.5rem;
     color: #2c3e50;
     text-align: center;
-    margin: 20px 0;
-    margin-top: 30px;
+    margin: 20px 0 30px;
     letter-spacing: 2px;
-    }
+  }
 
-    .category-container {
-      display: flex;
-      gap: 20px;
-      margin: 30px;
-    }
+  /* Category Container */
+  .category-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    margin: 20px auto;
+    max-width: 1200px;
+  }
 
-    .category-form {
-      flex: 0 0 300px;
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+  /* Category Form */
+  .category-form {
+    width: 320px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 60px;
+  }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
+  .form-group {
+    margin-bottom: 18px;
+    text-align: left;
+  }
 
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      color: #666;
-    }
+  .form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
 
-    .form-group input,
-    .form-group textarea {
-      width: 85%;
-      padding: 8px;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      background: #f5f5f5;
-    }
+  input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background: #f5f5f5;
+  }
 
-    .form-group textarea {
-      height: 100px;
-      resize: vertical;
-    }
+  textarea {
+    height: 80px;
+    resize: none;
+  }
 
-    .create-btn {
-      width: 80%;
-      padding: 10px;
-      background: #008080;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+  .create-btn {
+    width: 100%;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
 
-    .table-container {
-      flex: 1;
-      overflow-x: auto;
-    }
+  .create-btn:hover {
+    background: #051f3a;
+  }
 
-    .category-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+  /* Table Styling */
+  .table-container {
+    flex: 1;
+    overflow-x: auto;
+  }
 
-    .category-table th,
-    .category-table td {
-      padding: 12px 15px;
-      text-align: center;
-      border-bottom: 1px solid #e0e0e0;
-    }
+  .category-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
 
-    .category-table th {
-      background: #f5f5f5;
-      font-weight: 600;
-      color: #333;
-    }
+  .category-table th, .category-table td {
+    padding: 10px 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+  }
 
-    .offer-buttons {
-      display: flex;
-      gap: 5px;
-    }
+  .category-table th {
+    background: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+  }
 
-    .btn-add-offer,
-    .btn-remove,
-    .btn-edit {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-    }
+  /* Buttons */
+  .status-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+  }
 
-    .btn-add-offer {
-      background: #00bcd4;
-      color: white;
-    }
+  .btn {
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+  }
 
-    .btn-remove {
-      background: #ff4444;
-      color: white;
-    }
+/* Offer Column Styling */
+.offer-buttons {
+  display: flex;
+  justify-content: center; /* Center-align buttons */
+  align-items: center; /* Vertically align buttons */
+  gap: 10px; /* Space between buttons */
+  height: 100%;
+}
 
-    .btn{
-      text-decoration: none;
-    }
+.offer-buttons button {
+  flex: 1; /* Ensures equal button size */
+  width: 80px; /* Fixed width for uniformity */
+  padding: 6px 0; /* Adjust padding for better fit */
+  font-size: 12px; /* Adjust font size */
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+}
 
-    .btn-edit {
-      background: #00bcd4;
-      color: white;
-    }
+.btn-add-offer {
+  background-color: #00bcd4;
+  color: white;
+}
 
-    .status-buttons {
-      display: flex;
-      gap: 5px;
-      justify-content: center;
-    }
+.btn-remove {
+  background-color: #ff4444;
+  color: white;
+}
 
-    .btn-status {
-      padding: 4px 8px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: background-color 0.3s, color 0.3s;
-    }
+/* Table Row Styling */
+.category-table tr {
+  vertical-align: middle; /* Ensures row content is vertically centered */
+}
 
-    .btn-listed {
-      background-color: #4CAF50;
-      color: white;
+.category-table td {
+  height: 60px;
+}
+
+
+  .btn-edit { background: #007bff; color: white; }
+  .btn-listed { background: #4CAF50; color: white; }
+  .btn-unlisted { background: #f44336; color: white; }
+
+  .btn-status {
+    padding: 4px 8px;
+    transition: background 0.3s;
+    text-decoration: none;
+  }
+
+  .status-buttons a {
+  color: white !important; /* Ensures text color remains white */
+  text-decoration: none !important; /* Removes underline */
+  display: block; /* Makes the link fill the button */
+  width: 100%; /* Ensures proper alignment */
+  height: 100%;
+}
+
+.status-buttons:hover{
+  background-color: #681813;
+  border-radius: 5px;
+}
+
+  .btn-status:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 90px; /* Adjust this based on your page height */
+    left: 65%;
+    transform: translateX(-50%);
+}
+
+.pagination-container a,
+.pagination-container .current-page {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 0 4px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 10px;
+    border: 1px solid #ddd;
+    color: #292a2c;
+    background-color: #f8f9fa;
+    transition: 0.3s;
+}
+
+.pagination-container a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.current-page {
+    background-color: #343a40;
+    color: white;
+    border: 1px solid #343a40;
+}
+
+</style>
+
+<!-- Main Content -->
+<div class="main-content">
+  <h1>Category Management</h1>
+
+  <div class="category-container">
+    <!-- Add Category Form -->
+    <div class="category-form">
+      <form id="categoryForm" action="/admin/addCategory" method="POST">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Type here" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" placeholder="Type here" required></textarea>
+        </div>
       
-    }
+        <button type="submit" class="create-btn">Create category</button>
+      </form>
+    </div>
 
-    .btn-unlisted {
-      background-color: #f44336;
-      color: white;
-    }
-
-    .btn-status:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  </style>
-</head>
-
-  <!-- Main Content -->
-  <div class="main-content">
-    <h1 class = "Heading">Category Management</h1>
-
-    <div class="category-container">
-      <!-- Add Category Form -->
-      <div class="category-form">
-        <form action="/admin/addCategory" method="POST">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" placeholder="Type here" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" placeholder="Type here" required></textarea>
-          </div>
-
-          <button type="submit" class="create-btn">Create category</button>
-        </form>
-      </div>
-
-      <!-- Categories Table -->
-      <div class="table-container">
-        <table class="category-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Offer Price</th>
-              <th>Offer</th>
-              <th>Status</th>
-              <th>Edit</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% cat.forEach((category)=> { %>
-            <tr>
-              <td><%= category.name %></td>
-              <td><%= category.description %></td>
-              <td><%= category.offerPrice || 'NA' %></td>
-              <td class="offer-buttons">
-                <button class="btn-add-offer" onclick="addOffer('<%= category._id %>')">Add Offer</button>
-                <button class="btn-remove" onclick="removeOffer('<%= category._id %>')">Remove</button>
-              </td>
-              <td>
-                
-                <div class="status-buttons">
-                  <%if(category.islisted){%>
-
-                 
-
-                  <button class="btn-status btn-islisted">
-                    <a class="btn" href="/admin/unlistcategory?id=<%= category._id %>">Unlist</a>
+    <!-- Categories Table -->
+    <div class="table-container">
+      <table class="category-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Offer Price</th>
+            <th>Offer</th>
+            <th>Status</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cat.forEach((category)=> { %>
+          <tr>
+            <td><%= category.name %></td>
+            <td><%= category.description %></td>
+            <td><%= category.offerPrice || 'NA' %></td>
+            <td class="offer-buttons">
+              <button class="btn btn-add-offer" onclick="addOffer('<%= category._id %>')">Add</button>
+              <button class="btn btn-remove" onclick="removeOffer('<%= category._id %>')">Remove</button>
+            </td>
+            <td>
+              <div class="status-buttons">
+                <% if(category.islisted) { %>
+                  <button class="btn btn-listed">
+                    <a href="/admin/unlistcategory?id=<%= category._id %>">Unlist</a>
                   </button>
-
-                  <%}else{%>
-                  <button class="btn-status btn-unlisted">
-                  <a class="btn" href="/admin/listcategory?id=<%= category._id %>">List</a>
+                <% } else { %>
+                  <button class="btn btn-unlisted">
+                    <a href="/admin/listcategory?id=<%= category._id %>">List</a>
                   </button>
-                  <%}%>
-                </div>
-              </label>
-              </td>
-              <td>
-                <a href="/admin/editCategory?id=<%=category._id%>" class="btn btn-edit"> Edit </a>
-              </td>
-            </tr>
-            <% }); %>
-          </tbody>
-        </table>
-      </div>
+                <% } %>
+              </div>
+            </td>
+            <td>
+              <a href="/admin/editCategory?id=<%=category._id%>" class="btn btn-edit"> Edit </a>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
     </div>
   </div>
-  <div class="pagination-container">
-    <% if (currentPage > 1) { %>
-    <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
-    <% } %> <% for (let i = 1; i <= totalPages; i++) { %> 
-      <% if (i === currentPage) { %>
-    <span class="current-page"><%= i %></span>
-    <% } else { %>
-    <a href="?page=<%= i %>"><%= i %></a>
-    <% } %> <% } %> <% if (currentPage < totalPages) { %>
-    <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
-    <% } %>
-  </div>  
- 
-  <script>
-    // console.log("jkdk",cat)
-    function handleFormSubmit(event){
-      event.preventDefault(e);
-      if(!validateForm()){
-      return
+</div>
+
+<!-- Pagination -->
+<div class="pagination-container">
+  <% if (totalPages > 1) { %>
+      <% if (currentPage > 1) { %>
+          <a href="?page=<%= currentPage - 1 %>">&laquo; Prev</a>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %> 
+          <% if (i === currentPage) { %>
+              <span class="current-page"><%= i %></span>
+          <% } else { %>
+              <a href="?page=<%= i %>"><%= i %></a>
+          <% } %> 
+      <% } %> 
+
+      <% if (currentPage < totalPages) { %>
+          <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
+      <% } %>
+  <% } %>
+</div>
+
+
+<script>
+  document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const data = {
+          name: formData.get('name').trim(),
+          description: formData.get('description')
+      };
+  
+      try {
+          const response = await fetch('/admin/addCategory', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+          });
+  
+          const result = await response.json();
+  
+          if (!response.ok) {
+              Swal.fire({
+                  title: "Category Already Exists",
+                  text: result.error,
+                  icon: 'warning',
+                  showClass: {
+                      popup: `
+                          animate__animated
+                          animate__fadeInUp
+                          animate__faster
+                      `
+                  },
+                  hideClass: {
+                      popup: `
+                          animate__animated
+                          animate__fadeOutDown
+                          animate__faster
+                      `
+                  }
+              });
+          } else {
+              Swal.fire({
+                  title: "Success",
+                  text: "Category added successfully",
+                  icon: 'success',
+                  showClass: {
+                      popup: `
+                          animate__animated
+                          animate__fadeInUp
+                          animate__faster
+                      `
+                  },
+                  hideClass: {
+                      popup: `
+                          animate__animated
+                          animate__fadeOutDown
+                          animate__faster
+                      `
+                  }
+              }).then(() => {
+                  window.location.href = '/admin/category';
+              });
+          }
+      } catch (error) {
+          Swal.fire({
+              title: "Error",
+              text: "Something went wrong",
+              icon: 'error',
+              showClass: {
+                  popup: `
+                      animate__animated
+                      animate__fadeInUp
+                      animate__faster
+                  `
+              },
+              hideClass: {
+                  popup: `
+                      animate__animated
+                      animate__fadeOutDown
+                      animate__faster
+                  `
+              }
+          });
       }
-      const name = document.getElementsByName("name")[0].value;
-      const description = document.getElementById("descriptionId").value;
-  
-      fetch('/admin/addCategory', {
-        method: 'POST',
-        headers: {
-          'content-type':'application/json'
-        },
-        body:JSON.stringify({name, description})
-      })
-      .then(response=>{
-        if(!response.ok){
-          return response.json().then(err =>{
-            throw new Error(err.error)
-          })
-        }
-        return response.json()
-      })
-      .then(data =>{
-        location.reload();
-      })
-      .catch(error =>{
-        if(error.message === "Category already exists"){
-          Swal.fire("The category is already exist..");
-        }
-        else{
-          Swal.fire("An error occured while adding the category");
-        }
-      })
-    }
-  
-  
-    function validateForm(){
-      clearErrorMessages();
-      const name = document.getElementsByName("name")[0].value.trim();
-      const description = document.getElementById("descriptionId").value.trim();
-      isValid = true;
-  
-  
-      if(name===""){
-        displayErrorMessage("name-error", "Please enter a name ");
-        isValid = false
-      }else if(!/^[a-zA-Z\s]+$/.test(name)){
-        displayErrorMessage("name-error", "Category name should contain only alphabetic charecters");
-        isValid = false
-      }
-  
-      if(description===""){
-        displayErrorMessage("description-error", "Please enter a description");
-        isValid = false;
-      }
-      return isValid
-    }
-  
-  
-    function displayErrorMessage(elementId, message){
-      var errorElement = document.getElementById(elementId);
-      errorElement.innerText = message;
-      errorElement.style.display = "block";
-    }
-  
-    function clearErrorMessages(){
-      const errorElements = document.getElementsByClassName("error-message");
-      Array.from(errorElements).forEach((element)=>{
-        element.innerText = "";
-        element.style.display = "none"
-      })
-    }
-  
-    
+  });
   </script>

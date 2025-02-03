@@ -169,7 +169,10 @@ const signup = async(req,res)=>{
 
 const loadLogin = async (req,res)=>{
     try{
-        if(!req.session.user){
+        const userId = req.session.user
+
+        const user = await User.findById(userId)
+        if(!userId || user.isBlocked === true){
             return res.render('login')
         }
         else{

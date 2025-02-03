@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const userController = require('../controllers/user/userController')
 const passport = require('passport');
+const { userAuth } = require('../middlewares/auth');
 
 
 router.get('/pageNotFound', userController.pageNotFound)
@@ -10,7 +11,7 @@ router.get('/shop', userController.loadShop)
 
 
 //signup routes
-router.get('/',userController.loadHomepage)
+router.get('/',userAuth,userController.loadHomepage)
 router.get('/signup', userController.loadSignup)
 router.post('/signup', userController.signup)
 router.get('/otp', userController.getOtp)
