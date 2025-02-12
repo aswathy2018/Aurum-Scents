@@ -16,7 +16,7 @@ router.get('/404error', adminController.errorPage)
 //login management
 router.get('/login', adminController.loadLogin)
 router.post('/login', adminController.login)
-router.get('/dashboard', adminAuth, adminController.loadDashboard)
+router.get('/dashboard', adminController.loadDashboard)
 router.get('/logout', adminController.logout)
 
 
@@ -37,15 +37,16 @@ router.get('/unlistcategory',adminAuth, categoryController.unlistcategory)
 
 
 //Brand management
-router.get('/brands', adminAuth, brandController.getBrandPage)
+router.get('/brands', brandController.getBrandPage)
 router.post('/addBrand', adminAuth,(req,res,next)=>{
-    console.log(req.body);
-    console.log(req.files);
+    // console.log(req.body);
+    // console.log(req.files);
     next();
 }, uploads.single ('brandImage'), brandController.addBrand);
 router.get('/blockBrand',adminAuth,brandController.blockBrand)
 router.get('/unBlockBrand', adminAuth, brandController.unBlockBrand)
 router.get('/deleteBrand', adminAuth, brandController.deleteBrand)
+
 
 
 //Product management

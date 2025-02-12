@@ -23,10 +23,10 @@ const userAuth = (req, res, next)=>{
 
 
 const adminAuth = (req,res,next)=>{
-    const {admin} = req.session
+    const admin = req.session.admin
     
     
-    User.findOne({email:admin,isAdmin: true})
+    User.findOne({_id:admin,isAdmin: true})
     .then(data=>{
         
         if(data){

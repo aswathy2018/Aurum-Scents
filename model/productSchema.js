@@ -35,8 +35,8 @@ const {Schema} = mongoose
         type: Number,
         default: 0
     },
-    color: {
-        type: String,
+    size: {
+        type: Number,
         required: true
     },
     productImage: {

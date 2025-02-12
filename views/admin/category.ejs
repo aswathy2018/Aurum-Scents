@@ -5,7 +5,7 @@
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
 <style>
-  /* General Styling */
+
   .main-content {
     margin-left: 250px;
     padding: 20px;
@@ -20,7 +20,7 @@
     letter-spacing: 2px;
   }
 
-  /* Category Container */
+
   .category-container {
     display: flex;
     align-items: flex-start;
@@ -123,20 +123,18 @@
     border: none;
   }
 
-/* Offer Column Styling */
 .offer-buttons {
   display: flex;
-  justify-content: center; /* Center-align buttons */
-  align-items: center; /* Vertically align buttons */
-  gap: 10px; /* Space between buttons */
+  justify-content: center;
+  align-items: center;
   height: 100%;
 }
 
 .offer-buttons button {
-  flex: 1; /* Ensures equal button size */
-  width: 80px; /* Fixed width for uniformity */
-  padding: 6px 0; /* Adjust padding for better fit */
-  font-size: 12px; /* Adjust font size */
+  flex: 1;
+  width: 80px;
+  padding: 6px 0;
+  font-size: 12px;
   border: none;
   border-radius: 4px;
   text-align: center;
@@ -152,9 +150,9 @@
   color: white;
 }
 
-/* Table Row Styling */
+
 .category-table tr {
-  vertical-align: middle; /* Ensures row content is vertically centered */
+  vertical-align: middle;
 }
 
 .category-table td {
@@ -173,10 +171,10 @@
   }
 
   .status-buttons a {
-  color: white !important; /* Ensures text color remains white */
-  text-decoration: none !important; /* Removes underline */
-  display: block; /* Makes the link fill the button */
-  width: 100%; /* Ensures proper alignment */
+  color: white !important;
+  text-decoration: none !important;
+  display: block;
+  width: 100%;
   height: 100%;
 }
 
@@ -195,7 +193,7 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    bottom: 90px; /* Adjust this based on your page height */
+    bottom: 90px;
     left: 65%;
     transform: translateX(-50%);
 }
@@ -238,12 +236,12 @@
       <form id="categoryForm" action="/admin/addCategory" method="POST">
         <div class="form-group">
           <label for="name">Name</label>
-          <input type="text" id="name" name="name" placeholder="Type here" required>
+          <input type="text" id="name" name="name" placeholder="Type here">
         </div>
         
         <div class="form-group">
           <label for="description">Description</label>
-          <textarea id="description" name="description" placeholder="Type here" required></textarea>
+          <textarea id="description" name="description" placeholder="Type here"></textarea>
         </div>
       
         <button type="submit" class="create-btn">Create category</button>
@@ -321,88 +319,126 @@
 
 <script>
   document.getElementById('categoryForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const formData = new FormData(e.target);
-      const data = {
-          name: formData.get('name').trim(),
-          description: formData.get('description')
-      };
-  
-      try {
-          const response = await fetch('/admin/addCategory', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(data)
-          });
-  
-          const result = await response.json();
-  
-          if (!response.ok) {
-              Swal.fire({
-                  title: "Category Already Exists",
-                  text: result.error,
-                  icon: 'warning',
-                  showClass: {
-                      popup: `
-                          animate__animated
-                          animate__fadeInUp
-                          animate__faster
-                      `
-                  },
-                  hideClass: {
-                      popup: `
-                          animate__animated
-                          animate__fadeOutDown
-                          animate__faster
-                      `
-                  }
-              });
-          } else {
-              Swal.fire({
-                  title: "Success",
-                  text: "Category added successfully",
-                  icon: 'success',
-                  showClass: {
-                      popup: `
-                          animate__animated
-                          animate__fadeInUp
-                          animate__faster
-                      `
-                  },
-                  hideClass: {
-                      popup: `
-                          animate__animated
-                          animate__fadeOutDown
-                          animate__faster
-                      `
-                  }
-              }).then(() => {
-                  window.location.href = '/admin/category';
-              });
-          }
-      } catch (error) {
-          Swal.fire({
-              title: "Error",
-              text: "Something went wrong",
-              icon: 'error',
-              showClass: {
-                  popup: `
-                      animate__animated
-                      animate__fadeInUp
-                      animate__faster
-                  `
-              },
-              hideClass: {
-                  popup: `
-                      animate__animated
-                      animate__fadeOutDown
-                      animate__faster
-                  `
-              }
-          });
-      }
-  });
+    e.preventDefault();
+    
+    const nameInput = document.getElementById('name');
+    const descriptionInput = document.getElementById('description');
+    
+    // Reset any previous error styles
+    nameInput.style.borderColor = '';
+    descriptionInput.style.borderColor = '';
+    
+    // Validation function
+    const validateForm = () => {
+        let isValid = true;
+        const errors = [];
+
+        // Name validation
+        const nameValue = nameInput.value;
+        // Allow letters, numbers, and spaces, but not starting with space
+        const nameRegex = /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/;
+        
+        if (!nameValue.trim()) {
+            isValid = false;
+            errors.push("Name field is required and cannot contain only spaces");
+            nameInput.style.borderColor = 'red';
+        } else if (!nameRegex.test(nameValue)) {
+            isValid = false;
+            errors.push("Name should start with a letter or number");
+            nameInput.style.borderColor = 'red';
+        }
+
+        // Description validation
+        const descriptionValue = descriptionInput.value.trim();
+        
+        if (!descriptionValue) {
+            isValid = false;
+            errors.push("Description field is required");
+            descriptionInput.style.borderColor = 'red';
+        } else if (descriptionValue.length < 10) {
+            isValid = false;
+            errors.push("Description must contain at least 10 characters");
+            descriptionInput.style.borderColor = 'red';
+        }
+
+        return { isValid, errors };
+    };
+
+    // Perform validation
+    const { isValid, errors } = validateForm();
+
+    if (!isValid) {
+        Swal.fire({
+            title: "Ooops!",
+            html: errors.join('<br>'),
+            icon: 'error',
+            showClass: {
+                popup: 'animate__animated animate__fadeInUp animate__faster'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutDown animate__faster'
+            }
+        });
+        return;
+    }
+
+    // If validation passes, proceed with form submission
+    const formData = new FormData(e.target);
+    const data = {
+        name: formData.get('name').trim(),
+        description: formData.get('description')
+    };
+
+    try {
+        const response = await fetch('/admin/addCategory', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            Swal.fire({
+                title: "Category Already Exists",
+                text: result.error,
+                icon: 'warning',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInUp animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutDown animate__faster'
+                }
+            });
+        } else {
+            Swal.fire({
+                title: "Success",
+                text: "Category added successfully",
+                icon: 'success',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInUp animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutDown animate__faster'
+                }
+            }).then(() => {
+                window.location.href = '/admin/category';
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            title: "Error",
+            text: "Something went wrong",
+            icon: 'error',
+            showClass: {
+                popup: 'animate__animated animate__fadeInUp animate__faster'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutDown animate__faster'
+            }
+        });
+    }
+});
   </script>

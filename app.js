@@ -22,6 +22,7 @@ app.use(session({
         maxAge: 72*60*60*1000
     }
 }))
+app.use(nocache())
 
 
 app.use(passport.initialize())

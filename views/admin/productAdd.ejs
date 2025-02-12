@@ -1,6 +1,7 @@
 <%- include('../partials/admin/adminHeader.ejs') %>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" />
 <style>
+
     .content-main {
         margin-left: 280px;
         padding: 2rem;
@@ -273,6 +274,12 @@
         max-width: 100%;
         max-height: 300px;
     }
+
+    .error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
 </style>
 
 <!-- Main Content -->
@@ -324,11 +331,6 @@
                     <textarea placeholder="Type here" name="description" class="form-control" rows="4"></textarea>
                     <div id="description-error" class="error-message"></div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Quantity</label>
-                    <input name="quantity" type="text" class="form-control">
-                    <div id="quantity-error" class="error-message"></div>
-                </div>
 
                 <div class="card mb-1">
                     <div class="card-header">
@@ -338,9 +340,6 @@
                     <div class="border">
                         <div id="addedImagesContainer" class="thumbnails-container"></div>
                     </div>
-
-                    <!-- <div class="container mt-4">
-                        <h2 class="mb-4">Image Cropping Components</h2> -->
                 
                         <!-- Component 1 -->
                         <div class="card p-3 mb-4">
@@ -549,76 +548,279 @@
 
 
 
-    function validateForm() {
-        clearErrorMessages();
-        const name = document.getElementsByName('productName')[0].value;
-        const description = document.getElementsByName('description')[0].value;
-        const brand = document.getElementsByName('brand')[0].value;
-        const price = document.getElementsByName('regularPrice')[0].value;
-        const saleprice = document.getElementsByName('salePrice')[0].value;
-        const category = document.getElementsByName('category')[0].value;
-        const quantity = document.getElementsByName('quantity')[0].value;
+        document.addEventListener("DOMContentLoaded", function() {
+    const form = document.querySelector("form");
+    const errorClass = "text-red-500 text-sm mt-1";
+
+    // Function to create/update error message
+    function showError(field, message) {
+        let errorDiv = field.nextElementSibling;
+        if (!errorDiv || !errorDiv.classList.contains("error-message")) {
+            errorDiv = document.createElement("div");
+            errorDiv.className = `error-message ${errorClass}`;
+            field.parentNode.insertBefore(errorDiv, field.nextSibling);
+        }
+        errorDiv.textContent = message;
+        return false;
+    }
+
+    // Function to clear error message
+    function clearError(field) {
+        const errorDiv = field.nextElementSibling;
+        if (errorDiv && errorDiv.classList.contains("error-message")) {
+            errorDiv.textContent = "";
+        }
+    }
+
+    // Enhanced function to validate product name
+    function validateProductName(field) {
+        const value = field.value;
+        const trimmedValue = value.trim();
+
+        // Check for empty value
+        if (!trimmedValue) {
+            return showError(field, "Product name is required");
+        }
+
+        // Check for leading spaces
+        if (value.startsWith(' ')) {
+            return showError(field, "Product name cannot start with space");
+        }
+
+        // Check for spaces only
+        if (/^\s*$/.test(value)) {
+            return showError(field, "Product name cannot contain only spaces");
+        }
+
+        // Check for multiple consecutive spaces
+        if (/\s\s+/.test(value)) {
+            return showError(field, "Product name cannot contain consecutive spaces");
+        }
+
+        // Check for trailing spaces
+        if (value.endsWith(' ')) {
+            return showError(field, "Product name cannot end with space");
+        }
+
+        // Check for minimum length (after trimming)
+        if (trimmedValue.length < 3) {
+            return showError(field, "Product name must be at least 3 characters long");
+        }
+
+        // Check for maximum length
+        if (trimmedValue.length > 100) {
+            return showError(field, "Product name cannot exceed 100 characters");
+        }
+
+        // Check for special characters
+        if (!/^[a-zA-Z0-9\s-&()]+$/.test(value)) {
+            return showError(field, "Product name can only contain letters, numbers, spaces, hyphens, ampersands and parentheses");
+        }
+
+        clearError(field);
+        return true;
+    }
+
+    // Enhanced function to validate description
+    function validateDescription(field) {
+        const value = field.value;
+        const trimmedValue = value.trim();
+
+        // Check for empty value
+        if (!trimmedValue) {
+            return showError(field, "Description is required");
+        }
+
+        // Check for leading spaces
+        if (value.startsWith(' ')) {
+            return showError(field, "Description cannot start with space");
+        }
+
+        // Check for spaces only
+        if (/^\s*$/.test(value)) {
+            return showError(field, "Description cannot contain only spaces");
+        }
+
+        // Check for multiple consecutive spaces
+        if (/\s\s\s+/.test(value)) {
+            return showError(field, "Description cannot contain more than two consecutive spaces");
+        }
+
+        // Check for minimum length (after trimming)
+        if (trimmedValue.length < 8) {
+            return showError(field, "Description must be at least 8 characters long");
+        }
+
+        // Check for maximum length
+        if (trimmedValue.length > 1000) {
+            return showError(field, "Description cannot exceed 1000 characters");
+        }
+
+        // Check for trailing spaces
+        if (value.endsWith(' ')) {
+            return showError(field, "Description cannot end with space");
+        }
+
+        clearError(field);
+        return true;
+    }
+
+    // Function to validate dropdown selections
+    function validateDropdown(field, fieldName) {
+        if (!field.value) return showError(field, `${fieldName} is required`);
+        clearError(field);
+        return true;
+    }
+
+    // Enhanced function to validate number inputs
+    function validateNumber(field, fieldName) {
+        const value = field.value.trim();
+        
+        // Check for empty value
+        if (!value) {
+            return showError(field, `${fieldName} is required`);
+        }
+
+        // Check if it's a valid number
+        if (!/^\d+$/.test(value)) {
+            return showError(field, `${fieldName} must contain only digits`);
+        }
+
+        // Check for leading zeros
+        if (value.length > 1 && value[0] === '0') {
+            return showError(field, `${fieldName} cannot start with 0`);
+        }
+
+        // Check if it's positive
+        if (parseInt(value) <= 0) {
+            return showError(field, `${fieldName} must be a positive number`);
+        }
+
+        // Add maximum limit based on field type
+        if (fieldName.toLowerCase().includes('price')) {
+            if (parseInt(value) > 1000000) {
+                return showError(field, `${fieldName} cannot exceed 1,000,000`);
+            }
+        } else if (fieldName.toLowerCase().includes('stock')) {
+            if (parseInt(value) > 10000) {
+                return showError(field, `${fieldName} cannot exceed 10,000`);
+            }
+        }
+
+        clearError(field);
+        return true;
+    }
+
+    // Enhanced function to validate image files
+    function validateImage(field) {
+        if (field.files.length > 0) {
+            const file = field.files[0];
+            const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+            
+            // Check file type
+            if (!allowedTypes.includes(file.type)) {
+                return showError(field, "Only JPG, JPEG, and PNG files are allowed");
+            }
+
+            // Check file size (max 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxSize) {
+                return showError(field, "Image size should not exceed 5MB");
+            }
+
+            clearError(field);
+            return true;
+        }
+        return true;
+    }
+
+    // Add input event listeners for real-time validation
+    const productName = document.getElementById("product_name");
+    const description = document.querySelector("textarea[name='description']");
+    const brand = document.querySelector("select[name='brand']");
+    const category = document.querySelector("select[name='category']");
+    const fileInputs = document.querySelectorAll("input[type='file']");
+
+    // Real-time validation with debounce
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    // Add input listeners with debounce
+    productName.addEventListener("input", debounce(() => validateProductName(productName), 300));
+    description.addEventListener("input", debounce(() => validateDescription(description), 300));
+    brand.addEventListener("change", () => validateDropdown(brand, "Brand"));
+    category.addEventListener("change", () => validateDropdown(category, "Category"));
+    fileInputs.forEach(input => {
+        input.addEventListener("change", () => validateImage(input));
+    });
+
+    // Prevent paste of formatted text in description
+    description.addEventListener("paste", function(e) {
+        e.preventDefault();
+        const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+        document.execCommand("insertText", false, text);
+    });
+
+    // Enhanced variant validation
+    function validateVariants() {
         let isValid = true;
+        document.querySelectorAll(".variant-item").forEach((variant, index) => {
+            const stock = variant.querySelector(`input[name='variants[${index}][stock]']`);
+            const regularPrice = variant.querySelector(`input[name='variants[${index}][regularPrice]']`);
+            const salePrice = variant.querySelector(`input[name='variants[${index}][salePrice]']`);
 
-        if (name.trim() === "") {
-            displayErrorMessage('productName-error', 'Please enter a product name.');
-            isValid = false;
-        } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-            displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
-            isValid = false;
-        }
-
-        if (description.trim() === "") {
-            displayErrorMessage('description-error', 'Please enter a product description.');
-            isValid = false;
-        }
-
-        if (brand === "") {
-            displayErrorMessage('brand-error', 'Please select a brand.');
-            isValid = false;
-        }
-
-        if (category === "") {
-            displayErrorMessage('category-error', 'Please select a category.');
-            isValid = false;
-        }
-
-        if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-            displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-            isValid = false;
-        }
-
-        if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-            displayErrorMessage('salePrice-error', 'Please enter a valid non-negative sale price.');
-            isValid = false;
-        }
-
-        if (parseFloat(price) <= parseFloat(saleprice)) {
-            displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-            isValid = false;
-        }
-
-        if (!/^\d+$/.test(quantity) || parseInt(quantity) < 0) {
-            displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-            isValid = false;
-        }
-
+            isValid = validateNumber(stock, "Stock quantity") && isValid;
+            isValid = validateNumber(regularPrice, "Regular price") && isValid;
+            
+            if (salePrice && salePrice.value.trim()) {
+                if (parseFloat(salePrice.value) >= parseFloat(regularPrice.value)) {
+                    isValid = showError(salePrice, "Sale price must be less than regular price") && isValid;
+                } else {
+                    isValid = validateNumber(salePrice, "Sale price") && isValid;
+                }
+            }
+        });
         return isValid;
     }
 
-    function displayErrorMessage(elementId, message) {
-        var errorElement = document.getElementById(elementId);
-        errorElement.innerText = message;
-        errorElement.style.display = "block";
-    }
+    // Form submission handler
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        let isValid = true;
 
-    function clearErrorMessages() {
-        const errorElements = document.getElementsByClassName('error-message');
-        Array.from(errorElements).forEach(element => {
-            element.innerText = '';
-            element.style.display = 'none';
+        // Validate all fields
+        isValid = validateProductName(productName) && isValid;
+        isValid = validateDescription(description) && isValid;
+        isValid = validateDropdown(brand, "Brand") && isValid;
+        isValid = validateDropdown(category, "Category") && isValid;
+        
+        // Validate at least one image is selected
+        let hasImage = false;
+        fileInputs.forEach(input => {
+            if (input.files.length > 0) {
+                hasImage = true;
+                isValid = validateImage(input) && isValid;
+            }
         });
-    }
+        
+        if (!hasImage) {
+            isValid = showError(fileInputs[0], "At least one image is required") && isValid;
+        }
+
+        // Validate variants
+        isValid = validateVariants() && isValid;
+
+        if (isValid) {
+            form.submit();
+        }
+    });
+});
+
 
     document.getElementById('add-variant').addEventListener('click', function () {
         const container = document.getElementById('variants-container');

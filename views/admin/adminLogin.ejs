@@ -1,121 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
-    <link rel="stylesheet" href="/styles/admin-login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/assets/css/adLog.css">
 </head>
-<style>
-    /* Reset and general styles */
-body, html {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #d4dddd;
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
 
-/* Login container */
-.login-container {
-    background-color: #10161b;
-    padding:  40px 100px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 400px;
-    display: flex; /* Flexbox for inner alignment */
-    flex-direction: column; /* Stack elements vertically */
-    align-items: center; /* Center all child elements horizontally */
-    justify-content: center; /* Center all child elements vertically */
-    text-align: center; /* Center text */
-}
-
-/* Heading */
-.login-container h1 {
-    margin-bottom: 30px;
-    color: #80c3e2;
-}
-
-/* Form group styles */
-.form-group {
-    margin-bottom: 25px; /* Increased gap between fields */
-    width: 100%; /* Ensure form-group spans full width */
-    max-width: 380px; /* Restrict width to match inputs */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-label {
-    font-size: 14px;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    color: #80c3e2;
-    width: 100%; /* Ensure labels span full width */
-    max-width: 380px;
-    text-align: left; /* Keep labels aligned to the left */
-    margin-bottom: 5px;
-    text-align: center;
-}
-
-input {
-    width: 100%; /* Keeps the field full width */
-    max-width: 380px; /* Adds a maximum width for wider screens */
-    padding: 15px 30px; /* Increased padding for better typing space */
-    border-radius: 5px;
-    border: none;
-    background-color: #d4dddd;
-    color: #6d6d6d;
-    font-size: 12px;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    text-align: center;
-}
-
-input::placeholder {
-    color: #353c41;
-    text-align: center;
-}
-
-/* Button styles */
-.btn {
-    width: 100%;
-    max-width: 380px;
-    padding: 12px;
-    margin-top: 15px;
-    background-color: #1a4e66;
-    color: #ffffff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.btn:hover {
-    background-color: #458ba0;
-}
-
-
-
-</style>
 <body>
     <div class="login-container">
-        <h1>Admin Login</h1>
-        <form action="/admin/login" method="POST">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-            </div>
-            <button type="submit" class="btn">Login</button>
-        </form>
+        <div class="login-form">
+            <h1>Admin Login</h1>
+            
+            <% if (locals.error) { %>
+                <div class="alert alert-danger">
+                    <%= error %>
+                </div>
+            <% } %>
+            
+            <form id="loginForm" action="/admin/login" method="POST" novalidate>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="email" id="username" name="username" 
+                           placeholder="Enter your email" 
+                           value="<%= locals.username || '' %>" 
+                           required>
+                    <span class="error-message" id="username-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-input">
+                        <input type="password" id="password" name="password" 
+                               placeholder="Enter your password" required>
+                        <i id="togglePassword" class="fa fa-eye"></i>
+                    </div>
+                    <span class="error-message" id="password-error"></span>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
     </div>
+
+    <script>
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("loginForm")
+  const usernameInput = document.getElementById("username")
+  const passwordInput = document.getElementById("password")
+  const usernameError = document.getElementById("username-error")
+  const passwordError = document.getElementById("password-error")
+
+  // Function to validate email format
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  // Function to count numbers in a string
+  function countNumbers(str) {
+    return (str.match(/\d/g) || []).length
+  }
+
+  // Function to validate the form
+  function validateForm(e) {
+    e.preventDefault()
+    let isValid = true
+
+    // Reset error states
+    usernameInput.classList.remove("error")
+    passwordInput.classList.remove("error")
+    usernameError.textContent = ""
+    passwordError.textContent = ""
+
+    // Validate username (email)
+    if (!usernameInput.value.trim()) {
+      usernameError.textContent = "Username is required"
+      usernameInput.classList.add("error")
+      isValid = false
+    } else if (!isValidEmail(usernameInput.value.trim())) {
+      usernameError.textContent = "Please enter a valid Username"
+      usernameInput.classList.add("error")
+      isValid = false
+    }
+
+    // Validate password
+    if (!passwordInput.value) {
+      passwordError.textContent = "Password is required"
+      passwordInput.classList.add("error")
+      isValid = false
+    } else if (countNumbers(passwordInput.value) < 5) {
+      passwordError.textContent = "Password must contain at least 5 numbers"
+      passwordInput.classList.add("error")
+      isValid = false
+    }
+
+    // If form is valid, submit it
+    if (isValid) {
+      form.submit()
+    }
+  }
+
+  // Real-time validation for email
+  usernameInput.addEventListener("input", function () {
+    usernameInput.classList.remove("error")
+    usernameError.textContent = ""
+
+    if (this.value.trim() && !isValidEmail(this.value.trim())) {
+      usernameError.textContent = "Please enter a valid Username"
+      usernameInput.classList.add("error")
+    }
+  })
+
+  // Real-time validation for password
+  passwordInput.addEventListener("input", function () {
+    passwordInput.classList.remove("error")
+    passwordError.textContent = ""
+
+    if (this.value && countNumbers(this.value) < 5) {
+      passwordError.textContent = "Password must contain at least 5 numbers"
+      passwordInput.classList.add("error")
+    }
+  })
+
+  // Toggle password visibility
+  const togglePassword = document.getElementById("togglePassword")
+  togglePassword.addEventListener("click", function () {
+    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
+    passwordInput.setAttribute("type", type)
+    this.classList.toggle("fa-eye")
+    this.classList.toggle("fa-eye-slash")
+  })
+
+  // Form submission event
+  form.addEventListener("submit", validateForm)
+})
+
+
+    </script>
 </body>
+
 </html>
+

@@ -53,7 +53,7 @@ const otp = async(req,res)=>{
                 password: passwordHash
             })
 
-            console.log('asdfghjkl',newUser)
+            // console.log('asdfghjkl',newUser)
             req.session.userOtp = null;
             req.session.userData = null;
             req.session.user = newUser._id
@@ -226,11 +226,9 @@ const resendOtp = async (req,res)=>{
     try {
         
         const {email} = req.session.userData;
-        
         const otp = generateOTP();
-        
-        
         const emailSent = await sendVerificationMail(email,otp)
+        
         if(!emailSent){
             return res.json("email-error")
         }
