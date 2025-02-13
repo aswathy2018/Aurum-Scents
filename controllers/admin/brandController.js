@@ -33,7 +33,10 @@ const getBrandPage = async (req, res) => {
 const addBrand = async (req, res) => {
     try {
         const brand = req.body.brandName
-        const findBrand = await Brand.findOne({ brandName: brand })
+        // console.log(brand)   
+        const findBrand = await Brand.findOne({ 
+            brandName: { $regex: new RegExp(`^${brand}$`, 'i') } 
+        });
         if (!findBrand) {
             const image = req.file.filename
             const newBrand = new Brand({
@@ -41,13 +44,13 @@ const addBrand = async (req, res) => {
                 brandImage: image,
             })
             await newBrand.save()
-            res.redirect('/admin/brands')
+           res.status(201).json({ success: true, message: "Brand added successfully" });
         } else {
-            res.render('brands', { message: 'Brand already exists!' });
+             return res.status(409).json({ success: false, message: "The brand already exists" });
         }
     } catch (error) {
         console.error('Error adding brand:', error);
-        res.redirect('/404error')
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
 

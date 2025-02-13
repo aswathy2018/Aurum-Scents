@@ -39,8 +39,6 @@ router.get('/unlistcategory',adminAuth, categoryController.unlistcategory)
 //Brand management
 router.get('/brands', brandController.getBrandPage)
 router.post('/addBrand', adminAuth,(req,res,next)=>{
-    // console.log(req.body);
-    // console.log(req.files);
     next();
 }, uploads.single ('brandImage'), brandController.addBrand);
 router.get('/blockBrand',adminAuth,brandController.blockBrand)

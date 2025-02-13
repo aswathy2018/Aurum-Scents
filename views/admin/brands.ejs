@@ -37,8 +37,8 @@
     font-weight: 500;
     margin-bottom: 7px;
     color: #495057;
-    display: block; /* Ensure label is above the input */
-    text-align: left; /* Keep label alignment consistent */
+    display: block;
+    text-align: left;
 }
 .add-brand-btn {
     background-color: #009688;
@@ -219,17 +219,20 @@ button:hover + a {
 }
 
 .error-message {
-    color: red;
-    font-size: 14px;
+    color: #dc3545;
+    font-size: 12px;
     margin-top: 5px;
+    display: block;
+    text-align: left;
 }
 
-.brand-form input.error {
-    border-color: red;
+.error {
+    border: 1px solid #dc3545 !important;
+    background-color: #fff8f8 !important;
 }
     </style>
 </head>
-<body>
+
 
 
     <div class="main-content">
@@ -237,7 +240,7 @@ button:hover + a {
 
         <!-- Add Brand Form -->
         <div class="brand-form">
-            <form action="/admin/addBrand" method="POST" enctype="multipart/form-data">
+            <form   enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="brandName">Brand Name</label>
                     <input type="text" id="brandName" name="brandName" placeholder="Type here">
@@ -264,7 +267,7 @@ button:hover + a {
                     </tr>
                 </thead>
                 <tbody>
-                    <% data.reverse().forEach((brand,index)=>{%>
+                    <%data.forEach((brand,index)=>{%>
                         <tr>
                             <td><%=brand.brandName%></td>
                             <td>
@@ -323,33 +326,33 @@ button:hover + a {
 
 
     <script>
-
-document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form');
     const brandNameInput = document.getElementById('brandName');
     const brandImageInput = document.getElementById('brandImage');
 
-    // Function to check if string contains only letters and spaces
-    function containsOnlyLetters(str) {
-    return /^[A-Za-z0-9\s]+$/.test(str);
-}
+    // Function to check if string starts with space or contains only spaces
+    function hasInvalidSpaces(str) {
+        return str.startsWith(' ') || str.trim().length === 0;
+    }
 
-    // Function to check if string contains only spaces
-    function isOnlySpaces(str) {
-        return str.trim().length === 0;
+    // Function to check if string contains only letters, numbers and spaces (not at start)
+    function isValidBrandName(str) {
+        return /^[A-Za-z0-9][A-Za-z0-9\s]*$/.test(str);
     }
 
     // Function to validate image format
     function isValidImageFormat(file) {
         const validFormats = ['image/jpeg', 'image/jpg', 'image/png'];
-        return validFormats.includes(file.type);
+        const fileType = file.type;
+        const fileSize = file.size / (1024 * 1024); // Convert to MB
+        return validFormats.includes(fileType) && fileSize <= 5; // 5MB limit
     }
 
     // Function to display error message
     function showError(element, message) {
         let errorDiv = element.parentElement.querySelector('.error-message');
         
-        // If error div doesn't exist, create it
         if (!errorDiv) {
             errorDiv = document.createElement('div');
             errorDiv.className = 'error-message';
@@ -369,164 +372,145 @@ document.addEventListener('DOMContentLoaded', () => {
         element.classList.remove('error');
     }
 
-    // Add CSS styles dynamically
-    const styles = document.createElement('style');
-    styles.textContent = `
-        .error-message {
-            color: red;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-        .error {
-            border: 1px solid red !important;
-        }
-        .file-input-wrapper {
-            margin-top: 15px;
-        }
-    `;
-    document.head.appendChild(styles);
-
     // Real-time brand name validation
     brandNameInput.addEventListener('input', () => {
         const value = brandNameInput.value;
         
         if (!value) {
             showError(brandNameInput, 'Brand name is required');
-        } else if (isOnlySpaces(value)) {
-            showError(brandNameInput, 'Brand name cannot be empty');
-        } else if (!containsOnlyLetters(value)) {
-            showError(brandNameInput, 'Only letters are allowed');
+        } else if (hasInvalidSpaces(value)) {
+            showError(brandNameInput, 'Brand name cannot start with or contain only spaces');
+        } else if (!isValidBrandName(value)) {
+            showError(brandNameInput, 'Brand name can only contain letters, numbers and spaces');
         } else {
             removeError(brandNameInput);
         }
     });
 
-    // Image upload validation
-    // In your real-time validation listener
-brandNameInput.addEventListener('input', () => {
-    const value = brandNameInput.value;
-    
-    if (!value) {
-        showError(brandNameInput, 'Brand name is required');
-    } else if (isOnlySpaces(value)) {
-        showError(brandNameInput, 'Brand name cannot be empty');
-    } else if (!containsOnlyLetters(value)) {
-        showError(brandNameInput, 'Only letters and numbers are allowed'); // Updated message
-    } else {
-        removeError(brandNameInput);
-    }
-});
-
-    // Form submission validation
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    let isValid = true;
-
-    // Brand name validation
-    const brandName = brandNameInput.value;
-    if (!brandName || isOnlySpaces(brandName)) {
-        showError(brandNameInput, 'Brand name is required');
-        isValid = false;
-    } else if (!containsOnlyLetters(brandName)) {
-        showError(brandNameInput, 'Only letters and numbers are allowed');
-        isValid = false;
-    }
-
-    // Image validation
-    if (!brandImageInput.files || !brandImageInput.files[0]) {
-        showError(brandImageInput, 'Please select an image');
-        isValid = false;
-    } else {
+    // Real-time image validation
+    brandImageInput.addEventListener('change', () => {
         const file = brandImageInput.files[0];
-        if (!isValidImageFormat(file)) {
-            showError(brandImageInput, 'Only JPEG, JPG, or PNG images are allowed');
+        
+        if (!file) {
+            showError(brandImageInput, 'Please select an image');
+        } else if (!isValidImageFormat(file)) {
+            showError(brandImageInput, 'Please select a valid image file (JPG, JPEG, PNG) under 5MB');
+            brandImageInput.value = ''; // Clear the invalid selection
+        } else {
+            removeError(brandImageInput);
+        }
+    });
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let isValid = true;
+
+        // Validate brand name
+        const brandName = brandNameInput.value;
+        if (!brandName || hasInvalidSpaces(brandName) || !isValidBrandName(brandName)) {
+            showError(brandNameInput, 'Please enter a valid brand name');
             isValid = false;
         }
-    }
 
-    if (isValid) {
-        const formData = new FormData(form);
-        
-        try {
-            const response = await fetch('/admin/addBrand', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Brand added successfully',
-                    icon: 'success',
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.reset();
-                        // Optionally redirect or refresh
-                        // window.location.reload();
-                        // or
-                        // window.location.href = '/admin/brands';
-                    }
-                });
-            } else {
-                throw new Error('Failed to add brand');
-            }
-        } catch (error) {
-            Swal.fire({
-                title: 'Error!',
-                text: 'Failed to add brand. Please try again.',
-                icon: 'error',
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'OK'
-            });
+        // Validate image
+        if (!brandImageInput.files || !brandImageInput.files[0]) {
+            showError(brandImageInput, 'Please select an image');
+            isValid = false;
+        } else if (!isValidImageFormat(brandImageInput.files[0])) {
+            showError(brandImageInput, 'Please select a valid image file');
+            isValid = false;
         }
-    }
+
+        if (isValid) {
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/admin/addBrand', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Brand added successfully',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/admin/brands';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Brand already exists!',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to add brand. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    });
 });
-});
 
-
-
+// Delete confirmation function
 function confirmDelete(brandId) {
-  const swalWithBootstrapButtons = Swal.mixin({
-    customClass: {
-      confirmButton: "btn btn-success",
-      cancelButton: "btn btn-danger"
-    },
-    buttonsStyling: false
-  });
-
-
-  swalWithBootstrapButtons.fire({
-    title: "Are you sure?",
-    text: "Do you want to delete this brand?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes",
-    cancelButtonText: "No",
-    reverseButtons: true
-  }).then((result) => {
-    if (result.isConfirmed) {
-
-      swalWithBootstrapButtons.fire({
-        title: "Deleted!",
-        text: "Brand has been deleted successfully.",
-        icon: "success"
-      }).then(() => {
-
-        window.location.href = `/admin/deleteBrand?id=${brandId}`;
-      });
-    } else if (result.dismiss === Swal.DismissReason.cancel) {
-
-      swalWithBootstrapButtons.fire({
-        title: "Cancelled",
-        text: "Your action was cancelled.",
-        icon: "error"
-      });
-    }
-  });
-
-  return false;
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to delete this brand?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, cancel!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Send delete request
+            fetch(`/admin/deleteBrand?id=${brandId}`, {
+                method: 'GET'
+            }).then(response => {
+                if (response.ok) {
+                    Swal.fire(
+                        'Deleted!',
+                        'Brand has been deleted successfully.',
+                        'success'
+                    ).then(() => {
+                        window.location.href = '/admin/brands';
+                    });
+                } else {
+                    throw new Error('Failed to delete');
+                }
+            }).catch(() => {
+                Swal.fire(
+                    'Error!',
+                    'Failed to delete brand.',
+                    'error'
+                );
+            });
+        } else {
+            Swal.fire(
+                'Cancelled',
+                'Your brand is safe.',
+                'info'
+            );
+        }
+    });
+    return false;
 }
         
     </script>
