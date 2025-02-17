@@ -1,0 +1,138 @@
+/* Main theme colors matching the dashboard */
+body {
+    background-color: #f8f9fa;
+    margin-left: 300px;
+}
+
+.content-main {
+    padding: 90px;
+}
+
+.card {
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: 800px;
+}
+
+/* Form styling */
+.form-control,
+.form-select {
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    color: #212529;
+    padding: 0.4rem;
+}
+
+.form-label {
+    color: #212529;
+    font-weight: 500;
+}
+
+.card-mb-2 {
+    width: 120px;
+}
+
+.card-body .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+}
+
+.card-body .align-items-center {
+    flex: 1;
+    min-width: 100px;
+    margin-bottom: 10px !important;
+}
+
+.image-cropper {
+    width: 150px !important;
+    height: 100px !important;
+    margin-top: -10px !important;
+    margin-bottom: 5px !important;
+}
+
+[id^="imgView"] {
+    max-width: 10px;
+    height: 20px;
+    margin-bottom: 30px;
+}
+
+#updatebtn {
+    background-color: #0d6efd;
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    margin: 20px auto;
+    display: block;
+}
+
+#updatebtn:hover {
+    background-color: #0b5ed7;
+}
+
+/* Error message styling */
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 4px;
+}
+
+/* Image preview styling */
+[id^="imgView"] {
+    max-width: 100px;
+    height: auto;
+    margin-bottom: 8px;
+}
+
+/* Existing image thumbnails */
+.rounded {
+    border: 1px solid #dee2e6;
+    padding: 2px;
+}
+
+/* Layout for image section */
+.card-body .align-items-center {
+    display: inline-block;
+    vertical-align: top;
+}
+
+/* Save button styling */
+.btn-sm.btn-primary {
+    background-color: #0d6efd;
+    color: #fff;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+.btn-sm.btn-primary:hover {
+    background-color: #0b5ed7;
+}
+
+#croppedImg1,
+#croppedImg2,
+#croppedImg3,
+#croppedImg4 {
+    width: 100px;
+    /* Adjust width as needed */
+    height: 90px;
+    /* Adjust height as needed */
+    object-fit: cover;
+    /* Ensures the image fills the container */
+    border-radius: 10px;
+    /* Rounded corners */
+    overflow: hidden;
+    /* Hides overflow content */
+    display: flex;
+    /* Centering if needed */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    /* Subtle shadow */
+    background-color: #f0f0f0;
+    /* Light background for contrast */
+}

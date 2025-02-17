@@ -11,16 +11,12 @@
         justify-content: center;
         min-height: 100vh;
     }
-
-    /* Header */
-    .content-title {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #3b4553;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
+    .main-content h1{
+            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+    
     /* Search Bar */
     .search-bar {
         margin-bottom: 20px;
@@ -38,7 +34,6 @@
         max-width: 1300px; /* Sets a max limit */
         text-align: center;
     }
-
     .table {
         width: 100%;
     }
@@ -63,11 +58,11 @@
         margin-top: 20px;
     }
     .pagination .page-link {
-        color: #2e3744;
+        color: #000916;
     }
     .pagination .page-item.active .page-link {
-        background-color: #2e3744;
-        border-color: #2e3744;
+        background-color: #000000;
+        border-color: #000000;
         color: #ffffff;
     }
 </style>
@@ -76,7 +71,7 @@
 
 <!-- Main Content -->
 <div class="main-content">
-    <h2 class="content-title">Customers</h2>
+    <h1 class="content-title">Customers</h1>
 
     <!-- Search Bar -->
     <form action="/admin/users/" method="get" class="input-group search-bar shadow-sm">

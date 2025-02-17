@@ -100,6 +100,8 @@ const editCategory = async (req, res) => {
         res.status(500).json({ error: "Internal server error" })
     }
 }
+
+
 const listcategory = async (req, res) => {
     try {
         const categoryId = req.query.id;

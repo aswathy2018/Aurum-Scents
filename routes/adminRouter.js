@@ -50,6 +50,17 @@ router.get('/deleteBrand', adminAuth, brandController.deleteBrand)
 //Product management
 router.get('/productAdd', adminAuth, productController.getProductAddPage)
 router.post('/productAdd', adminAuth, uploads.array("images", 4), productController.productAdd)
+router.get('/products', adminAuth, productController.getAllProducts)
+router.get('/blockProduct', adminAuth, productController.productBlocked)
+router.get('/unblockProduct', adminAuth, productController.productunBlocked)
+// Update your router to:
+router.get('/editProduct', adminAuth, productController.getEditProduct)
+router.post('/editProduct/:id',adminAuth,uploads.array("images",4),productController.updateProduct)
+router.post('/deleteImage',adminAuth,productController.deleteoneimage)
+// router.post('/editProduct/:id', adminAuth, productController.editProduct)
+// router.get('/editProduct', adminAuth, productController.getEditProduct)
+// router.post('/getEditProduct/:id', adminAuth, productController.editProduct)
+
 
 
 router.get('/*', adminController.errorPage)
