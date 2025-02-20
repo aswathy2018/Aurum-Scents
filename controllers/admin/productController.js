@@ -26,8 +26,6 @@ const getProductAddPage = async (req, res) => {
 
 const productAdd = async (req, res) => {
     try {
-        console.log('Request body:', req.body);
-        console.log('Uploaded file:', req.files);
 
         const products = req.body;
 
@@ -134,25 +132,41 @@ const getAllProducts = async (req, res) => {
     }
 }
 
-const productBlocked = async (req, res) => {
+
+const productBlocked = async (req, res, next) => {
     try {
-        let id = req.query.id;
-        await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
-        res.redirect('/admin/products')
+        let id = req.body.id;
+        const result = await Product.updateOne(
+            { _id: id }, 
+            { $set: { isBlocked: true } }
+        );
+
+        if (result.matchedCount === 0) {
+            throw createError(404, 'Product not found');
+        }
+
+        res.redirect('/admin/products');
     } catch (error) {
-        res.redirect('/404error')
-    }
+                res.redirect('/404error')
+            }
 }
 
-
-const productunBlocked = async (req, res) => {
+const productunBlocked = async (req, res, next) => {
     try {
-        let id = req.query.id
-        await Product.updateOne({ _id: id }, { $set: { isBlocked: false } })
-        res.redirect('/admin/products')
+        let id = req.body.id;
+        const result = await Product.updateOne(
+            { _id: id }, 
+            { $set: { isBlocked: false } }
+        );
+
+        if (result.matchedCount === 0) {
+            throw createError(404, 'Product not found');
+        }
+
+        res.redirect('/admin/products');
     } catch (error) {
-        res.redirect('/404error')
-    }
+                res.redirect('/404error')
+            }
 }
 
 
@@ -166,7 +180,6 @@ const getEditProduct = async (req, res) => {
         if (!product) {
             return res.redirect("/404error");
         }
-        console.log("jshgdfjhgsdj", product);
 
         res.render("editProduct", {
             product: product,
@@ -182,7 +195,6 @@ const getEditProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
     try {
         const id = req.params.id.replace(/^id=/, "");
-        // console.log("Extracted Product ID:", id);
 
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ error: "Invalid Product ID format" });
@@ -246,12 +258,10 @@ const deleteoneimage = async (req, res) => {
         const { imageNameToServer, productIdToServer } = req.body;
         console.log(imageNameToServer, productIdToServer)
 
-        // Validate request body
         if (!imageNameToServer || !productIdToServer) {
             return res.status(400).json({ status: false, message: "Invalid data provided" });
         }
 
-        // Find the product and pull the image name from the productImage array
         const product = await Product.findByIdAndUpdate(productIdToServer, {
             $pull: { productImage: imageNameToServer },
         });
@@ -260,7 +270,6 @@ const deleteoneimage = async (req, res) => {
             return res.status(404).json({ status: false, message: "Product not found" });
         }
 
-        // Build the file path to delete the image file
         const imagePath = path.join(__dirname, "public", "uploads", "product-images", imageNameToServer);
 
         if (fs.existsSync(imagePath)) {

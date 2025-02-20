@@ -1,7 +1,6 @@
 <%- include('../partials/admin/adminHeader.ejs') %>
 
 <style>
-    /* Custom CSS */
     .main-content {
         display: flex;
         flex-direction: column;
@@ -152,17 +151,21 @@
                             <td><%= data[i].offer || 0 %>%</td>
                             <td><%= data[i].size %></td>
                             <td><%= data[i].quantity || 0 %></td>
+
                             <td>
                                 <% if (data[i].isBlocked === false) { %>
-                                <button class="btn btn-danger me-2">
-                                    <a href="/admin/blockProduct?id=<%= data[i]._id %>" class="text-white text-decoration-none">Block</a>
-                                </button>
+                                    <form action="/admin/blockProduct?_method=PATCH" method="POST" style="display: inline;">
+                                        <input type="hidden" name="id" value="<%= data[i]._id %>">
+                                        <button type="submit" class="btn btn-danger me-2">Block</button>
+                                    </form>
                                 <% } else { %>
-                                <button class="btn btn-success">
-                                    <a href="/admin/unblockProduct?id=<%= data[i]._id %>" class="text-white text-decoration-none">Unblock</a>
-                                </button>
+                                    <form action="/admin/unblockProduct?_method=PATCH" method="POST" style="display: inline;">
+                                        <input type="hidden" name="id" value="<%= data[i]._id %>">
+                                        <button type="submit" class="btn btn-success">Unblock</button>
+                                    </form>
                                 <% } %>
                             </td>
+                            
                             <td>
                                 <a href="/admin/editProduct?id=<%= data[i]._id %>" class="btn">Edit</a>
                             </td>

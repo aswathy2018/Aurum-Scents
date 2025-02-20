@@ -3,27 +3,30 @@ const Category = require('../../model/categorySchema')
 
 const categoryInfo = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1
-        const limit = 6
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
         const skip = (page - 1) * limit;
+
+        const totalCategories = await Category.countDocuments();
+        const totalPages = Math.max(1, Math.ceil(totalCategories / limit));
+
+        const validatedPage = Math.min(Math.max(1, page), totalPages);
 
         const categoryData = await Category.find({})
             .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-
-        const totalCategories = await Category.countDocuments();
-        const totalPages = Math.ceil(totalCategories / limit);
+            .skip((validatedPage - 1) * limit)
+            .limit(limit);
 
         res.render('category', {
             cat: categoryData,
-            currentPage: page,
+            currentPage: validatedPage,
             totalPages: totalPages,
-            totalCategories: totalCategories
-        })
+            totalCategories: totalCategories,
+            limit: limit
+        });
     } catch (error) {
-        console.error(error)
-        res.redirect('/404error')
+        console.error(error);
+        res.redirect('/404error');
     }
 }
 
@@ -76,57 +79,69 @@ const getEditCategory = async (req, res) => {
 }
 
 
+// 
+
+
 const editCategory = async (req, res) => {
     try {
-        const id = req.params.id
-        const { categoryname, description } = req.body
-        const existingCategory = await Category.findOne({ name: categoryname ,_id:{$ne:id}})
+        const id = req.params.id;
+        const { categoryname, description } = req.body;
+        
+        // Convert both strings to lowercase for case-insensitive comparison
+        const existingCategory = await Category.findOne({
+            name: { $regex: new RegExp(`^${categoryname}$`, 'i') },
+            _id: { $ne: id }
+        });
 
         if (existingCategory) {
-            return res.status(400).json({ error: "Category already exist, please add another category" })
+            return res.status(400).json({ 
+                error: "Category already exists, please use a different name" 
+            });
         }
 
         const updateCategory = await Category.findByIdAndUpdate(id, {
             name: categoryname,
             description: description,
-        }, { new: true })
+        }, { new: true });
 
         if (updateCategory) {
-            res.redirect('/admin/category')
+            res.status(200).json({ 
+                success: true, 
+                message: 'Category updated successfully' 
+            });
         } else {
-            res.status(400).json({ error: 'Category not found' })
+            res.status(404).json({ 
+                error: 'Category not found' 
+            });
         }
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" })
+        console.error('Error in editCategory:', error);
+        res.status(500).json({ 
+            error: "Internal server error" 
+        });
     }
-}
+};
 
 
 const listcategory = async (req, res) => {
     try {
-        const categoryId = req.query.id;
-        // console.log("id", categoryId);
-        await Category.updateOne({ _id: categoryId }, { $set: { islisted: true } });
-
-        res.redirect('/admin/category')
+        const { id } = req.body;
+        await Category.updateOne({ _id: id }, { $set: { islisted: true } });
+        res.json({ success: true });
     } catch (error) {
-        console.log("category listing error:", error)
-        res.redirect('/404error')
+        console.log("category listing error:", error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
 
 const unlistcategory = async (req, res) => {
     try {
-        console.log('asfhkl', req.query);
-
-        const categoryId = req.query.id;
-        console.log("id", categoryId);
-        await Category.updateOne({ _id: categoryId }, { $set: { islisted: false } });
-
-        res.redirect('/admin/category')
+        const { id } = req.body;
+        await Category.updateOne({ _id: id }, { $set: { islisted: false } });
+        res.json({ success: true });
     } catch (error) {
-        console.log("category listing error:", error)
-        res.redirect('/404error')
+        console.log("category listing error:", error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
 

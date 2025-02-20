@@ -39,30 +39,49 @@ const customerinfo = async (req, res) => {
 }
 
 
+// const customerBlocked = async (req, res) => {
+//     try {
+//         let id = req.body.id;
+//         await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
+//         res.status(200).json({ success: true, message: "User blocked successfully" });
+//     } catch (error) {
+//         res.status(500).json({ success: false, message: "An error occurred" });
+//     }
+// };
+
+// const customerunBlocked = async (req, res) => {
+//     try {
+//         let id = req.body.id;
+//         await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
+//         res.status(200).json({ success: true, message: "User unblocked successfully" });
+//     } catch (error) {
+//         res.status(500).json({ success: false, message: "An error occurred" });
+//     }
+// };
+
 const customerBlocked = async (req, res) => {
     try {
-        let id = req.query.id;
+        let id = req.body.id;
         await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
-        res.redirect('/admin/users')
+        res.status(200).json({ success: true, message: "User blocked successfully" });
     } catch (error) {
-        res.redirect('/404error')
+        res.status(500).json({ success: false, message: "An error occurred" });
     }
-}
-
+};
 
 const customerunBlocked = async (req, res) => {
     try {
-        let id = req.query.id
-        await User.updateOne({ _id: id }, { $set: { isBlocked: false } })
-        res.redirect('/admin/users')
+        let id = req.body.id;
+        await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
+        res.status(200).json({ success: true, message: "User unblocked successfully" });
     } catch (error) {
-        res.redirect('/404error')
+        res.status(500).json({ success: false, message: "An error occurred" });
     }
-}
+};
 
 
 module.exports = {
     customerinfo,
     customerBlocked,
-    customerunBlocked
+    customerunBlocked,
 }

@@ -53,29 +53,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const usernameError = document.getElementById("username-error")
   const passwordError = document.getElementById("password-error")
 
-  // Function to validate email format
   function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
-  // Function to count numbers in a string
   function countNumbers(str) {
     return (str.match(/\d/g) || []).length
   }
 
-  // Function to validate the form
   function validateForm(e) {
     e.preventDefault()
     let isValid = true
 
-    // Reset error states
     usernameInput.classList.remove("error")
     passwordInput.classList.remove("error")
     usernameError.textContent = ""
     passwordError.textContent = ""
 
-    // Validate username (email)
     if (!usernameInput.value.trim()) {
       usernameError.textContent = "Username is required"
       usernameInput.classList.add("error")
@@ -86,7 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
       isValid = false
     }
 
-    // Validate password
     if (!passwordInput.value) {
       passwordError.textContent = "Password is required"
       passwordInput.classList.add("error")
@@ -97,13 +91,11 @@ document.addEventListener("DOMContentLoaded", () => {
       isValid = false
     }
 
-    // If form is valid, submit it
     if (isValid) {
       form.submit()
     }
   }
 
-  // Real-time validation for email
   usernameInput.addEventListener("input", function () {
     usernameInput.classList.remove("error")
     usernameError.textContent = ""
@@ -114,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Real-time validation for password
   passwordInput.addEventListener("input", function () {
     passwordInput.classList.remove("error")
     passwordError.textContent = ""
@@ -125,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Toggle password visibility
   const togglePassword = document.getElementById("togglePassword")
   togglePassword.addEventListener("click", function () {
     const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
@@ -134,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
     this.classList.toggle("fa-eye-slash")
   })
 
-  // Form submission event
   form.addEventListener("submit", validateForm)
 })
 

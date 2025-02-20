@@ -8,6 +8,8 @@ const userRouter = require('./routes/userRouter')
 const db = require("./config/db")
 const adminRouter = require('./routes/adminRouter')
 const nocache = require("nocache");
+const errorHandler = require('./middlewares/errorMiddleware')
+const methodOverride = require('method-override');
 
 
 app.use(express.json())
@@ -23,7 +25,8 @@ app.use(session({
     }
 }))
 app.use(nocache())
-
+app.use(errorHandler);
+app.use(methodOverride('_method'));
 
 app.use(passport.initialize())
 app.use(passport.session())

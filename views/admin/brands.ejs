@@ -1,237 +1,260 @@
 <%- include('../partials/admin/adminHeader.ejs') %>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
     <style>
-.main-content {
+        .main-content {
             margin-left: 250px;
             padding: 20px;
             background-color: #f4f6f9;
             min-height: 100vh;
             margin-bottom: 60px;
         }
-        .main-content h1{
-            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+
+        .main-content h1 {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
             text-align: center;
             margin-bottom: 25px;
         }
+
         .brand-form {
-    background: white;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin: 0 auto 30px;
-    max-width: 400px;
-    text-align: center;
-}
-.brand-form input[type="text"],
-.brand-form input[type="file"] {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 8px 12px;
-    width: 100%;
-    margin-bottom: 20px;
-    border-radius: 4px;
-}
-.brand-form label {
-    font-weight: 500;
-    margin-bottom: 7px;
-    color: #495057;
-    display: block;
-    text-align: left;
-}
-.add-brand-btn {
-    background-color: #009688;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 10px;
-}
-.add-brand-btn:hover {
-    background-color: #00796b;
-}
-.brands-table {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    max-width: 1000px;
-    align-items: center;
-    margin-left: 40px; /* Center the table */
-    overflow-x: hidden;
-}
-.table {
-    width: 1000px;
-    border-collapse: collapse;
-    text-align: center;
-    font-size: 0.95rem;
-}
-.table thead th {
-    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    font-size: 14px;
-    background-color: #f8f9fa;
-    padding: 12px;
-    border-bottom: 3px solid #dee2e6;
-}
-.table tbody td {
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    font-size: 13px;
-    padding: 12px;
-    font-style:oblique;
-    border-bottom: 1px solid #dee2e6;
-    vertical-align: middle;
-}
-.table tbody tr:hover {
-    background-color: #f1f3f5; /* Highlight row on hover */
-}
-.table img {
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.status-badge {
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    display: inline-block;
-    text-align: center;
-}
-.status-active {
-    background-color: #d4edda;
-    color: #155724;
-}
-.status-blocked {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-/* Block button */
-.action-btn {
-    display: inline-block;
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin: 10px;
-}
-/* Block button */
-.btn-block {
-    background-color: #e74c3c;
-}
-.btn-block:hover {
-    background-color: #c0392b;
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-}
-/* Unblock button */
-.btn-unblock {
-    background-color: #27ae60;
-}
-.btn-unblock:hover {
-    background-color: #1e8449;
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-}
-/* Delete button */
-.btn-delete {
-    background-color: #f1c40f;
-    color: #212529;
-}
-.btn-delete:hover {
-    background-color: #d4ac0d;
-    color: #000;
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-}
-.action-btn a {
-    color: inherit;
-    text-decoration: none;
-    font-weight: bold;
-}
-.action-btn a:hover {
-    text-decoration: none;
-}
-button + a {
-    display: block;
-    margin-top: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6c757d;
-    text-align: center;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-button:hover + a {
-    color: #343a40;
-    text-decoration: none;
-}
-/* Responsive Design */
-@media (max-width: 768px) {
-    .brands-table {
-        padding: 10px;
-    }
-    .action-btn {
-        padding: 4px 8px;
-        font-size: 0.8rem;
-    }
-}
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 30px;
+            max-width: 400px;
+            text-align: center;
+        }
 
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    top: 128%;
-    left: 62%;
-    transform: translateX(-50%);
-}
+        .brand-form input[type="text"],
+        .brand-form input[type="file"] {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
 
-.pagination-container a,
-.pagination-container .current-page {
-    display: inline-block;
-    padding: 3px 7px;
-    margin: 0 4px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 10px;
-    border: 1px solid #ddd;
-    color: #292a2c;
-    background-color: #f8f9fa;
-    transition: 0.3s;
-}
+        .brand-form label {
+            font-weight: 500;
+            margin-bottom: 7px;
+            color: #495057;
+            display: block;
+            text-align: left;
+        }
 
-.pagination-container a:hover {
-    background-color: #212529;
-    color: white;
-}
+        .add-brand-btn {
+            background-color: #009688;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
 
-.current-page {
-    background-color: #343a40;
-    color: white;
-    border: 1px solid #343a40;
-}
+        .add-brand-btn:hover {
+            background-color: #00796b;
+        }
 
-.error-message {
-    color: #dc3545;
-    font-size: 12px;
-    margin-top: 5px;
-    display: block;
-    text-align: left;
-}
+        .brands-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 1000px;
+            align-items: center;
+            margin-left: 40px;
+            overflow-x: hidden;
+        }
 
-.error {
-    border: 1px solid #dc3545 !important;
-    background-color: #fff8f8 !important;
-}
+        .table {
+            width: 1000px;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .table thead th {
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-size: 14px;
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-bottom: 3px solid #dee2e6;
+        }
+
+        .table tbody td {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            font-size: 13px;
+            padding: 12px;
+            font-style: oblique;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .table img {
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-blocked {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+        }
+
+        .btn-block {
+            background-color: #e74c3c;
+        }
+
+        .btn-block:hover {
+            background-color: #c0392b;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-unblock {
+            background-color: #27ae60;
+        }
+
+        .btn-unblock:hover {
+            background-color: #1e8449;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-delete {
+            background-color: #f1c40f;
+            color: #212529;
+        }
+
+        .btn-delete:hover {
+            background-color: #d4ac0d;
+            color: #000;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-btn a {
+            color: inherit;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .action-btn a:hover {
+            text-decoration: none;
+        }
+
+        button+a {
+            display: block;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+            text-align: center;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        button:hover+a {
+            color: #343a40;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .brands-table {
+                padding: 10px;
+            }
+
+            .action-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 128%;
+            left: 62%;
+            transform: translateX(-50%);
+        }
+
+        .pagination-container a,
+        .pagination-container .current-page {
+            display: inline-block;
+            padding: 3px 7px;
+            margin: 0 4px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 10px;
+            border: 1px solid #ddd;
+            color: #292a2c;
+            background-color: #f8f9fa;
+            transition: 0.3s;
+        }
+
+        .pagination-container a:hover {
+            background-color: #212529;
+            color: white;
+        }
+
+        .current-page {
+            background-color: #343a40;
+            color: white;
+            border: 1px solid #343a40;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+            text-align: left;
+        }
+
+        .error {
+            border: 1px solid #dc3545 !important;
+            background-color: #fff8f8 !important;
+        }
     </style>
-</head>
+    </head>
 
 
 
@@ -240,7 +263,7 @@ button:hover + a {
 
         <!-- Add Brand Form -->
         <div class="brand-form">
-            <form   enctype="multipart/form-data">
+            <form action="/admin/addBrand" method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="brandName">Brand Name</label>
                     <input type="text" id="brandName" name="brandName" placeholder="Type here">
@@ -269,9 +292,12 @@ button:hover + a {
                 <tbody>
                     <%data.forEach((brand,index)=>{%>
                         <tr>
-                            <td><%=brand.brandName%></td>
                             <td>
-                                <img src="/uploads/image/<%=brand.brandImage[0]%>" alt="<%=brand.brandName%>" style="width: 50px; height: 50px; object-fit: contain;">
+                                <%=brand.brandName%>
+                            </td>
+                            <td>
+                                <img src="/uploads/image/<%=brand.brandImage[0]%>" alt="<%=brand.brandName%>"
+                                    style="width: 50px; height: 50px; object-fit: contain;">
                             </td>
                             <td>
                                 <span class="status-badge <%= brand.isBlocked ? 'status-blocked' : 'status-active' %>">
@@ -280,46 +306,56 @@ button:hover + a {
                             </td>
                             <td>
                                 <% if (!brand.isBlocked) { %>
-                                    <button class="action-btn btn-block" >
-                                        <a href="/admin/blockBrand?id=<%=brand._id %>">Block</a>
+                                    <button class="action-btn btn-block"
+                                        onclick="updateBrandStatus('<%= brand._id %>', true)">
+                                        Block
                                     </button>
-                                <% } else { %>
-                                    <button class="action-btn btn-unblock" >
-                                        <a href="/admin/unBlockBrand?id=<%=brand._id %>">Unblock</a>
-                                    </button>
-                                <% } %>
-                                <button class="action-btn btn-delete" onclick="confirmDelete('<%= brand._id %>')">Delete</button>
+                                    <% } else { %>
+                                        <button class="action-btn btn-unblock"
+                                            onclick="updateBrandStatus('<%= brand._id %>', false)">
+                                            Unblock
+                                        </button>
+                                        <% } %>
+                                            <button class="action-btn btn-delete"
+                                                onclick="confirmDelete('<%= brand._id %>')">Delete</button>
                             </td>
                         </tr>
-                    <%})%>
+                        <%})%>
                 </tbody>
             </table>
         </div>
     </div>
-<!-- Pagination -->
-<div class="pagination-container" style="text-align: center; margin: 20px auto 0;">
-    <% if (totalPages > 1) { %>
-        <% if (currentPage > 1) { %>
-            <a href="?page=<%= currentPage - 1 %>" style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">&laquo; Prev</a>
-        <% } %>
 
-        <% for (let i = 1; i <= totalPages; i++) { %>
-            <% if (i === currentPage) { %>
-                <span class="current-page" style="padding: 8px 12px; margin: 0 5px; background-color: #6c757d; color: white; border-radius: 5px;">
-                    <%= i %>
-                </span>
-            <% } else { %>
-                <a href="?page=<%= i %>" style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-                    <%= i %>
-                </a>
-            <% } %>
-        <% } %>
+    <!-- Pagination -->
+    <div class="pagination-container" style="text-align: center; margin: 20px auto 0;">
+        <% if (totalPages> 1) { %>
+            <% if (currentPage> 1) { %>
+                <a href="?page=<%= currentPage - 1 %>"
+                    style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">&laquo;
+                    Prev</a>
+                <% } %>
 
-        <% if (currentPage < totalPages) { %>
-            <a href="?page=<%= currentPage + 1 %>" style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Next &raquo;</a>
-        <% } %>
-    <% } %>
-</div>
+                    <% for (let i=1; i <=totalPages; i++) { %>
+                        <% if (i===currentPage) { %>
+                            <span class="current-page"
+                                style="padding: 8px 12px; margin: 0 5px; background-color: #6c757d; color: white; border-radius: 5px;">
+                                <%= i %>
+                            </span>
+                            <% } else { %>
+                                <a href="?page=<%= i %>"
+                                    style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+                                    <%= i %>
+                                </a>
+                                <% } %>
+                                    <% } %>
+
+                                        <% if (currentPage < totalPages) { %>
+                                            <a href="?page=<%= currentPage + 1 %>"
+                                                style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Next
+                                                &raquo;</a>
+                                            <% } %>
+                                                <% } %>
+    </div>
 
 
 
@@ -327,190 +363,240 @@ button:hover + a {
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form');
-    const brandNameInput = document.getElementById('brandName');
-    const brandImageInput = document.getElementById('brandImage');
+            const form = document.querySelector('form');
+            const brandNameInput = document.getElementById('brandName');
+            const brandImageInput = document.getElementById('brandImage');
 
-    // Function to check if string starts with space or contains only spaces
-    function hasInvalidSpaces(str) {
-        return str.startsWith(' ') || str.trim().length === 0;
-    }
-
-    // Function to check if string contains only letters, numbers and spaces (not at start)
-    function isValidBrandName(str) {
-        return /^[A-Za-z0-9][A-Za-z0-9\s]*$/.test(str);
-    }
-
-    // Function to validate image format
-    function isValidImageFormat(file) {
-        const validFormats = ['image/jpeg', 'image/jpg', 'image/png'];
-        const fileType = file.type;
-        const fileSize = file.size / (1024 * 1024); // Convert to MB
-        return validFormats.includes(fileType) && fileSize <= 5; // 5MB limit
-    }
-
-    // Function to display error message
-    function showError(element, message) {
-        let errorDiv = element.parentElement.querySelector('.error-message');
-        
-        if (!errorDiv) {
-            errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            element.parentElement.appendChild(errorDiv);
-        }
-        
-        errorDiv.textContent = message;
-        element.classList.add('error');
-    }
-
-    // Function to remove error message
-    function removeError(element) {
-        const errorDiv = element.parentElement.querySelector('.error-message');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
-        element.classList.remove('error');
-    }
-
-    // Real-time brand name validation
-    brandNameInput.addEventListener('input', () => {
-        const value = brandNameInput.value;
-        
-        if (!value) {
-            showError(brandNameInput, 'Brand name is required');
-        } else if (hasInvalidSpaces(value)) {
-            showError(brandNameInput, 'Brand name cannot start with or contain only spaces');
-        } else if (!isValidBrandName(value)) {
-            showError(brandNameInput, 'Brand name can only contain letters, numbers and spaces');
-        } else {
-            removeError(brandNameInput);
-        }
-    });
-
-    // Real-time image validation
-    brandImageInput.addEventListener('change', () => {
-        const file = brandImageInput.files[0];
-        
-        if (!file) {
-            showError(brandImageInput, 'Please select an image');
-        } else if (!isValidImageFormat(file)) {
-            showError(brandImageInput, 'Please select a valid image file (JPG, JPEG, PNG) under 5MB');
-            brandImageInput.value = ''; // Clear the invalid selection
-        } else {
-            removeError(brandImageInput);
-        }
-    });
-
-    // Form submission
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        let isValid = true;
-
-        // Validate brand name
-        const brandName = brandNameInput.value;
-        if (!brandName || hasInvalidSpaces(brandName) || !isValidBrandName(brandName)) {
-            showError(brandNameInput, 'Please enter a valid brand name');
-            isValid = false;
-        }
-
-        // Validate image
-        if (!brandImageInput.files || !brandImageInput.files[0]) {
-            showError(brandImageInput, 'Please select an image');
-            isValid = false;
-        } else if (!isValidImageFormat(brandImageInput.files[0])) {
-            showError(brandImageInput, 'Please select a valid image file');
-            isValid = false;
-        }
-
-        if (isValid) {
-            const formData = new FormData(form);
-            
-            try {
-                const response = await fetch('/admin/addBrand', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Brand added successfully',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/admin/brands';
-                        }
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: data.message || 'Brand already exists!',
-                        icon: 'error',
-                        confirmButtonColor: '#d33',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            } catch (error) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Failed to add brand. Please try again.',
-                    icon: 'error',
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'OK'
-                });
+            function hasInvalidSpaces(str) {
+                return str.startsWith(' ') || str.trim().length === 0;
             }
-        }
-    });
-});
 
-// Delete confirmation function
-function confirmDelete(brandId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to delete this brand?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'No, cancel!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Send delete request
-            fetch(`/admin/deleteBrand?id=${brandId}`, {
-                method: 'GET'
-            }).then(response => {
-                if (response.ok) {
-                    Swal.fire(
-                        'Deleted!',
-                        'Brand has been deleted successfully.',
-                        'success'
-                    ).then(() => {
-                        window.location.href = '/admin/brands';
-                    });
-                } else {
-                    throw new Error('Failed to delete');
+            function isValidBrandName(str) {
+                return /^[A-Za-z0-9][A-Za-z0-9\s]*$/.test(str);
+            }
+
+            function isValidImageFormat(file) {
+                const validFormats = ['image/jpeg', 'image/jpg', 'image/png'];
+                const fileType = file.type;
+                const fileSize = file.size / (1024 * 1024);
+                return validFormats.includes(fileType) && fileSize <= 5;
+            }
+
+            function showError(element, message) {
+                let errorDiv = element.parentElement.querySelector('.error-message');
+
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message';
+                    element.parentElement.appendChild(errorDiv);
                 }
-            }).catch(() => {
-                Swal.fire(
-                    'Error!',
-                    'Failed to delete brand.',
-                    'error'
-                );
+
+                errorDiv.textContent = message;
+                element.classList.add('error');
+            }
+
+
+            function removeError(element) {
+                const errorDiv = element.parentElement.querySelector('.error-message');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+                element.classList.remove('error');
+            }
+
+            brandNameInput.addEventListener('input', () => {
+                const value = brandNameInput.value;
+
+                if (!value) {
+                    showError(brandNameInput, 'Brand name is required');
+                } else if (hasInvalidSpaces(value)) {
+                    showError(brandNameInput, 'Brand name cannot start with or contain only spaces');
+                } else if (!isValidBrandName(value)) {
+                    showError(brandNameInput, 'Brand name can only contain letters, numbers and spaces');
+                } else {
+                    removeError(brandNameInput);
+                }
             });
-        } else {
-            Swal.fire(
-                'Cancelled',
-                'Your brand is safe.',
-                'info'
-            );
+
+            brandImageInput.addEventListener('change', () => {
+                const file = brandImageInput.files[0];
+
+                if (!file) {
+                    showError(brandImageInput, 'Please select an image');
+                } else if (!isValidImageFormat(file)) {
+                    showError(brandImageInput, 'Please select a valid image file (JPG, JPEG, PNG) under 5MB');
+                    brandImageInput.value = '';
+                } else {
+                    removeError(brandImageInput);
+                }
+            });
+
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                let isValid = true;
+
+
+                const brandName = brandNameInput.value;
+                if (!brandName || hasInvalidSpaces(brandName) || !isValidBrandName(brandName)) {
+                    showError(brandNameInput, 'Please enter a valid brand name');
+                    isValid = false;
+                }
+
+
+                if (!brandImageInput.files || !brandImageInput.files[0]) {
+                    showError(brandImageInput, 'Please select an image');
+                    isValid = false;
+                } else if (!isValidImageFormat(brandImageInput.files[0])) {
+                    showError(brandImageInput, 'Please select a valid image file');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    const formData = new FormData(form);
+
+                    try {
+                        const response = await fetch('/admin/addBrand', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    form.reset();
+                                    window.location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Failed to add brand. Please try again.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                }
+            });
+        });
+
+        function confirmDelete(brandId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to delete this brand?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch('/admin/deleteBrand', {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ id: brandId })
+                        });
+
+                        if (response.ok) {
+                            Swal.fire(
+                                'Deleted!',
+                                'Brand has been deleted successfully.',
+                                'success'
+                            ).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error('Failed to delete');
+                        }
+                    } catch (error) {
+                        Swal.fire(
+                            'Error!',
+                            'Failed to delete brand.',
+                            'error'
+                        );
+                    }
+                } else {
+                    Swal.fire(
+                        'Cancelled',
+                        'Your brand is safe.',
+                        'info'
+                    );
+                }
+            });
+            return false;
         }
-    });
-    return false;
-}
-        
+
+        async function updateBrandStatus(brandId, shouldBlock) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to ${shouldBlock ? 'block' : 'unblock'} this brand?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Yes, ${shouldBlock ? 'block' : 'unblock'} it!`,
+                cancelButtonText: 'No, cancel!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const endpoint = shouldBlock ? '/admin/blockBrand' : '/admin/unBlockBrand';
+                        const response = await fetch(endpoint, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ id: brandId })
+                        });
+
+                        if (response.ok) {
+                            Swal.fire(
+                                `${shouldBlock ? 'Blocked' : 'Unblocked'}!`,
+                                `Brand has been ${shouldBlock ? 'blocked' : 'unblocked'} successfully.`,
+                                'success'
+                            ).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error(`Failed to ${shouldBlock ? 'block' : 'unblock'}`);
+                        }
+                    } catch (error) {
+                        Swal.fire(
+                            'Error!',
+                            `Failed to ${shouldBlock ? 'block' : 'unblock'} brand.`,
+                            'error'
+                        );
+                    }
+                } else {
+                    Swal.fire(
+                        'Cancelled',
+                        'Operation cancelled.',
+                        'info'
+                    );
+                }
+            });
+        }
+
     </script>

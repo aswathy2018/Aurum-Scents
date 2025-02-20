@@ -2,6 +2,10 @@ const User = require('../../model/userSchema')
 const env = require ('dotenv').config()
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
+const mongoose = require('mongoose')
+const Product = require('../../model/productSchema')
+const Category= require('../../model/categorySchema')
+const Brand = require('../../model/brandSchema')
 
 
 const pageNotFound = async(req,res)=>{
@@ -52,8 +56,6 @@ const otp = async(req,res)=>{
                 phone: user.phone,
                 password: passwordHash
             })
-
-            // console.log('asdfghjkl',newUser)
             req.session.userOtp = null;
             req.session.userData = null;
             req.session.user = newUser._id
@@ -70,28 +72,41 @@ const otp = async(req,res)=>{
     }
 }
 
-const loadHomepage = async (req,res)=>{
-    try{
+const loadHomepage = async (req, res, next) => {
+    try {
         const user = req.session.user
         
-        if(user){
-            const userData = await User.findById(user)
-            res.render('home', {user: userData})
-            
+
+        const category = await Category.find({ islisted: true })
+
+        const product = await Product.find({
+            isBlocked: false,
+            quantity: { $gt: 0 },
+            category: { $in: category.map(cat => cat._id) },
+        })
+
+        product.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+
+        if (user) {
+            const userData = await User.findById(user);
+            res.render('home', {
+                user: userData,
+                product
+            })
+        } else {
+            return res.render('home', { product })
         }
-        else{
-            return res.render('home')
-        }
-    }
-    catch(error){
-        console.log("Home page not found!!");
-        res.status(500).send("Internal server issue")
+    } catch (error) {
+        console.error('Error in loadHomepage:', error);
+        next(error);
     }
 }
 
 const loadSignup = async (req,res)=>{
     try{
-        return res.render('signup')
+        const message = req.query.message
+
+        return res.render('signup',{message})
     }
     catch(error){
         console.log("page not loading..", error);
@@ -158,7 +173,6 @@ const signup = async(req,res)=>{
 
         res.render("otp")
         console.log("OTP Sent", otp);
-        //res.redirect('/otp')
         
     }
     catch(error){
@@ -257,6 +271,33 @@ const logout = async(req,res)=>{
     }
 }
 
+const productDetails = async (req,res)=>{
+    try {
+        const {id} = req.query;
+        const productData = await Product.findById(id).populate('category').populate('brand')
+        const userId = req.session.user
+        const user = await User.findById(userId)
+
+        const findCategory = productData.category;
+        console.log(findCategory,'category');
+
+        const relatedproducts=await Product.find({category:findCategory._id,_id:{$ne:id}}).limit(4)
+
+        res.render('productDetails',{
+            product:productData,
+            category:findCategory,
+            relatedproducts:relatedproducts,
+            user:user
+        })
+
+    } catch (error) {
+        console.log("Product detail page error", error);
+        res.redirect('/pageNotFound')
+    }
+}
+
+
+
 module.exports = {
     loadHomepage,
     pageNotFound,
@@ -268,5 +309,6 @@ module.exports = {
     otp,
     getOtp,
     resendOtp,
-    logout
+    logout,
+    productDetails
 }

@@ -11,14 +11,10 @@
             <div class="col-9">
                 <div class="content-header">
                     <h2 class="content-title">Edit Product</h2>
-
-
                 </div>
             </div>
             <div class="col-lg-6">
                 <div class="card mb-4">
-
-
                     <div class="card-body">
                         <form method="post" action="/admin/editProduct/id=<%=product._id%>"
                             enctype="multipart/form-data" onsubmit="validateForm()">
@@ -31,6 +27,9 @@
                             <div class="col-lg-4 mb-4">
                                 <label class="form-label">Brand</label>
                                 <select class="form-select border" name="brand">
+                                    <option value="<%= product.brand %>" selected>
+                                        <%= product.brand %>
+                                    </option>
                                     <% for(let i=0;i<brand.length;i++){%>
                                         <option value="<%=brand[i].brandName%>">
                                             <%=brand[i].brandName%>
@@ -38,23 +37,20 @@
                                         <%}%>
                                 </select>
                                 <div id="brand-error" class="error-message"></div>
-
-
                             </div>
-
-
                             <div class="row gx-2">
                                 <div class="col-sm-6 mb-3">
                                     <label class="form-label">Category</label>
                                     <select class="form-select border" style="width: 150px;" name="category">
+                                        <option value="<%= product.category._id %>" selected>
+                                            <%= product.category.name %>
+                                        </option>
                                         <%for(let i=0;i<cat.length;i++){%>
                                             <option value="<%=cat[i]._id%>">
                                                 <%=cat[i].name%>
                                             </option>
                                             <%}%>
                                     </select>
-
-
                                     <div id="category-error" class="error-message"></div>
                                 </div>
 
@@ -103,11 +99,7 @@
                                 </div>
 
                             </div>
-                            <!-- <div class="card mb-4"> -->
 
-
-
-                            <!-- </div> -->
                             <div class="card mb-2 w-75">
                                 <div class="card-header">
                                     <h4>Choose images</h4>
@@ -116,10 +108,8 @@
                                             <div class="mb-4">
                                                 <div class="col-12">
                                                     <td>
-                                                        <!-- Hidden input for the image name -->
                                                         <img class="rounded" style="width: 50px; height: 60px;"
                                                             src="/uploads/image/<%= product.productImage[i] %>" alt="">
-                                                        <!-- Delete icon with onclick -->
                                                         <i onclick="deleteSingleImage('<%= product.productImage[i] %>', '<%= product._id %>')"
                                                             class="fa-thin fa-x"></i>
                                                     </td>
@@ -196,8 +186,6 @@
                                 </div>
                             </div>
                             <div>
-
-
                                 <button class="btn btn-md rounded font-sm hover-up" id="updatebtn" type="button"
                                     onclick="validateAndSubmit()">Update</button>
                             </div>
