@@ -221,16 +221,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <button type="button" id="add-variant" class="btn btn-outline">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Add variant
-                        </button>
                     </div>
             </div>
             <div>
@@ -536,54 +526,6 @@
                     form.submit();
                 }
             });
-        });
-
-
-        document.getElementById('add-variant').addEventListener('click', function () {
-            const container = document.getElementById('variants-container');
-            const variantCount = container.children.length;
-
-            const newVariant = document.createElement('div');
-            newVariant.className = 'variant-item';
-            newVariant.innerHTML = `
-            <div class="variant-header">
-                <h4>ML</h4>
-                <div class="ml-options">
-                    <select name="variants[${variantCount}][size]" class="form-control size-select">
-                        <option value="50">50ml</option>
-                        <option value="100">100ml</option>
-                        <option value="200">200ml</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="variant-details">
-                <div class="form-group">
-                    <label class="form-label">Stock quantity</label>
-                    <input type="number" name="variants[${variantCount}][stock]" class="form-control" placeholder="Enter quantity">
-                </div>
-                
-                <div class="variant-prices">
-                    <div class="form-group">
-                        <label class="form-label">Regular Price</label>
-                        <div class="price-input">
-                            <span class="currency">₹</span>
-                            <input type="number" name="variants[${variantCount}][regularPrice]" class="form-control" placeholder="₹1000">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Sale Price</label>
-                        <div class="price-input">
-                            <span class="currency">₹</span>
-                            <input type="number" name="variants[${variantCount}][salePrice]" class="form-control" placeholder="₹2500">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-            container.appendChild(newVariant);
         });
     </script>
 

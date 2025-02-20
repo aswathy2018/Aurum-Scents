@@ -75,7 +75,6 @@ const otp = async(req,res)=>{
 const loadHomepage = async (req, res, next) => {
     try {
         const user = req.session.user
-        
 
         const category = await Category.find({ islisted: true })
 
@@ -297,6 +296,36 @@ const productDetails = async (req,res)=>{
 }
 
 
+const shop = async(req,res)=>{
+    try{
+        const user = req.session.user
+        const category = await Category.find({islisted:true})
+        console.log("ccccccccccccccccccccccccccc",category)
+        const products = await Product.find({
+            isBlocked: false,
+            quantity: { $gt: 0 },
+            category: { $in: category.map(cat => cat._id) },
+        })
+
+        products.sort((a,b)=>new Date(b.createdAt) - new Date(a.createdAt))
+
+        
+            const userData = await User.findById(user)
+            console.log("u", userData);
+            
+            res.render('shop',{
+                user:userData,
+                products,
+                category
+            })
+
+    }
+    catch(error){
+        console.error('Error in loadHomepage:', error);
+        next(error);
+    }
+}
+
 
 module.exports = {
     loadHomepage,
@@ -310,5 +339,6 @@ module.exports = {
     getOtp,
     resendOtp,
     logout,
-    productDetails
+    productDetails,
+    shop
 }

@@ -6,7 +6,7 @@ const { userAuth } = require('../middlewares/auth');
 
 
 router.get('/pageNotFound', userController.pageNotFound)
-router.get('/shop', userController.loadShop)
+
 
 
 //signup routes
@@ -28,6 +28,9 @@ router.get('/logout', userController.logout)
 //google authentication
 router.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']}))
 
+
+//shop Page
+router.get('/shop',userAuth,userController.shop)
 
 //success and failure state handling
 router.get('/google/callback', passport.authenticate('google', {failureRedirect: '/signup?message=Your account has been blocked by Admin'}), (req,res)=>{
