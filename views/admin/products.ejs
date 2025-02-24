@@ -1,5 +1,6 @@
 <%- include('../partials/admin/adminHeader.ejs') %>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     .main-content {
         display: flex;
@@ -154,15 +155,13 @@
 
                             <td>
                                 <% if (data[i].isBlocked === false) { %>
-                                    <form action="/admin/blockProduct?_method=PATCH" method="POST" style="display: inline;">
-                                        <input type="hidden" name="id" value="<%= data[i]._id %>">
-                                        <button type="submit" class="btn btn-danger me-2">Block</button>
-                                    </form>
+                                    <button type="button" class="btn btn-danger me-2" onclick="updateProductStatus('<%= data[i]._id %>', true)">
+                                        Block
+                                    </button>
                                 <% } else { %>
-                                    <form action="/admin/unblockProduct?_method=PATCH" method="POST" style="display: inline;">
-                                        <input type="hidden" name="id" value="<%= data[i]._id %>">
-                                        <button type="submit" class="btn btn-success">Unblock</button>
-                                    </form>
+                                    <button type="button" class="btn btn-success" onclick="updateProductStatus('<%= data[i]._id %>', false)">
+                                        Unblock
+                                    </button>
                                 <% } %>
                             </td>
                             
@@ -208,4 +207,60 @@
             this.form.submit();
         }, 500);
     });
+
+    function updateProductStatus(productId, block) {
+    // Prevent any default form submission
+    event.preventDefault();
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: block ? 'Do you want to block this product?' : 'Do you want to unblock this product?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: block ? '#d33' : '#28a745',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: block ? 'Yes, block it!' : 'Yes, unblock it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(block ? '/admin/blockProduct' : '/admin/unblockProduct', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: productId })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.href = '/admin/products';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message,
+                        icon: 'error'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Something went wrong!',
+                    icon: 'error'
+                });
+            });
+        }
+    });
+}
 </script>

@@ -11,7 +11,6 @@ const loadLogin = (req, res) => {
 }
 
 
-
 const login = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -19,7 +18,6 @@ const login = async (req, res) => {
         const admin = await User.findOne({ email: username, isAdmin: true });
 
         if (admin) {
-            // Use await with bcrypt.compare as it returns a promise
             const passwordMatch = await bcrypt.compare(password, admin.password);
             
             if (passwordMatch) {
@@ -27,14 +25,12 @@ const login = async (req, res) => {
 
                 return res.redirect('/admin/dashboard');
             } else {
-                // Pass error message for incorrect password
                 return res.render('adminLogin', { 
                     error: 'Invalid Username or password',
                     username: username 
                 });
             }
         } else {
-            // Pass error message for no admin found
             return res.render('adminLogin', { 
                 error: 'Invalid email or password',
                 username: username 

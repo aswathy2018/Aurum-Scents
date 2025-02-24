@@ -10,7 +10,6 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: true,
-        // unique: true
     },
     phone: {
         type: String,
@@ -35,18 +34,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
-    cart: [{
-        type:Schema.Types.ObjectId,
-        ref: "Cart"
-    }],
     wallet: {
         type: Number,
         default: 0
     },
-    wishlist: [{
-        type:Schema.Types.ObjectId,
-        ref: "Wishlist"
-    }],
     orderHistory: [{
         type:Schema.Types.ObjectId,
         ref: "Order"

@@ -24,6 +24,7 @@ const getProductAddPage = async (req, res) => {
 
 }
 
+
 const productAdd = async (req, res) => {
     try {
 
@@ -142,13 +143,13 @@ const productBlocked = async (req, res, next) => {
         );
 
         if (result.matchedCount === 0) {
-            throw createError(404, 'Product not found');
+            return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
-        res.redirect('/admin/products');
+        res.status(200).json({ success: true, message: 'Product blocked successfully' });
     } catch (error) {
-                res.redirect('/404error')
-            }
+        res.status(500).json({ success: false, message: 'An error occurred' });
+    }
 }
 
 const productunBlocked = async (req, res, next) => {
@@ -160,13 +161,13 @@ const productunBlocked = async (req, res, next) => {
         );
 
         if (result.matchedCount === 0) {
-            throw createError(404, 'Product not found');
+            return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
-        res.redirect('/admin/products');
+        res.status(200).json({ success: true, message: 'Product unblocked successfully' });
     } catch (error) {
-                res.redirect('/404error')
-            }
+        res.status(500).json({ success: false, message: 'An error occurred' });
+    }
 }
 
 
@@ -191,6 +192,7 @@ const getEditProduct = async (req, res) => {
         res.redirect("/404error");
     }
 }
+
 
 const updateProduct = async (req, res) => {
     try {
@@ -249,9 +251,10 @@ const updateProduct = async (req, res) => {
         res.redirect("/admin/products");
     } catch (error) {
         console.error("Error updating product:", error);
-        res.redirect("/pagenotfound");
+        res.redirect("/404error");
     }
 };
+
 
 const deleteoneimage = async (req, res) => {
     try {

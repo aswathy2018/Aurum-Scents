@@ -29,7 +29,6 @@ const getBrandPage = async (req, res) => {
 };
 
 
-
 const addBrand = async (req, res) => {
     try {
         const brand = req.body.brandName;
@@ -91,6 +90,7 @@ const blockBrand = async (req, res) => {
     }
 }
 
+
 const unBlockBrand = async (req, res) => {
     try {
         const { id } = req.body;
@@ -100,6 +100,7 @@ const unBlockBrand = async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
+
 
 const deleteBrand = async (req, res) => {
     try {
@@ -114,6 +115,7 @@ const deleteBrand = async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
+
 
 module.exports = {
     getBrandPage,

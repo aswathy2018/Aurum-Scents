@@ -16,13 +16,14 @@ router.post('/signup', userController.signup)
 router.get('/otp', userController.getOtp)
 router.post('/otp', userController.otp)
 router.get('/resend-otp', userController.resendOtp)
-router.get('/productDetails', userAuth, userController.productDetails)
+router.get('/productDetails/:id', userAuth, userController.productDetails)
 
 
 //login and logout routes
 router.get('/login', userController.loadLogin)
 router.post('/login', userController.login)
 router.get('/logout', userController.logout)
+router.get('/check-user-status', userController.checkUserStatus);
 
 
 //google authentication

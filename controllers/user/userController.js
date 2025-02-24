@@ -148,6 +148,7 @@ async function sendVerificationMail(email,otp){
     }
 }
 
+
 const signup = async(req,res)=>{
     try{
         const {name, phone, email, password, cpassword} = req.body
@@ -180,6 +181,7 @@ const signup = async(req,res)=>{
     }
 }
 
+
 const loadLogin = async (req,res)=>{
     try{
         const userId = req.session.user
@@ -198,6 +200,7 @@ const loadLogin = async (req,res)=>{
         
     }
 }
+
 
 const login = async(req, res)=>{
     try {
@@ -225,6 +228,7 @@ const login = async(req, res)=>{
     }
 }
 
+
 const loadShop = async (req,res)=>{
     try{
         return res.render('shop')
@@ -234,6 +238,7 @@ const loadShop = async (req,res)=>{
         res.status(500).send("Internal server error..")
     }
 }
+
 
 const resendOtp = async (req,res)=>{
     try {
@@ -272,16 +277,16 @@ const logout = async(req,res)=>{
 
 const productDetails = async (req,res)=>{
     try {
-        const {id} = req.query;
+        const {id} = req.params;
+        
         const productData = await Product.findById(id).populate('category').populate('brand')
+        
         const userId = req.session.user
         const user = await User.findById(userId)
 
         const findCategory = productData.category;
-        console.log(findCategory,'category');
-
         const relatedproducts=await Product.find({category:findCategory._id,_id:{$ne:id}}).limit(4)
-
+        
         res.render('productDetails',{
             product:productData,
             category:findCategory,
@@ -300,7 +305,6 @@ const shop = async(req,res)=>{
     try{
         const user = req.session.user
         const category = await Category.find({islisted:true})
-        console.log("ccccccccccccccccccccccccccc",category)
         const products = await Product.find({
             isBlocked: false,
             quantity: { $gt: 0 },
@@ -309,9 +313,7 @@ const shop = async(req,res)=>{
 
         products.sort((a,b)=>new Date(b.createdAt) - new Date(a.createdAt))
 
-        
             const userData = await User.findById(user)
-            console.log("u", userData);
             
             res.render('shop',{
                 user:userData,
@@ -327,6 +329,38 @@ const shop = async(req,res)=>{
 }
 
 
+const checkUserStatus = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.json({ isBlocked: true });
+        }
+
+        const user = await User.findById(req.session.user);
+        
+        if (user.isBlocked) {
+            console.log('User is blocked, destroying session...');
+            
+            req.session.destroy((err) => {
+                if (err) {
+                    console.log("Session destruction error", err.message);
+                    return res.redirect('/pageNotFound');
+                }
+                return res.redirect('/login');
+            });
+            
+            return;
+        }
+        
+
+        return res.json({ isBlocked: false });
+
+    } catch (error) {
+        console.log("Error checking user status:", error);
+        return res.json({ isBlocked: true });
+    }
+};
+
+
 module.exports = {
     loadHomepage,
     pageNotFound,
@@ -340,5 +374,6 @@ module.exports = {
     resendOtp,
     logout,
     productDetails,
-    shop
+    shop,
+    checkUserStatus
 }
