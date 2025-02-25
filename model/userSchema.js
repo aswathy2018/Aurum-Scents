@@ -18,6 +18,10 @@ const userSchema = new Schema({
         sparse: true,
         default: null
     },
+    userImage: {
+        type: String,
+        required: false
+    },
     googleId: {
         type: String,
         unique: true

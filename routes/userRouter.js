@@ -3,10 +3,10 @@ const router = express.Router()
 const userController = require('../controllers/user/userController')
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
+const profileController = require('../controllers/user/profileController')
 
 
 router.get('/pageNotFound', userController.pageNotFound)
-
 
 
 //signup routes
@@ -33,6 +33,7 @@ router.get('/auth/google', passport.authenticate('google', {scope: ['profile', '
 //shop Page
 router.get('/shop',userAuth,userController.shop)
 
+
 //success and failure state handling
 router.get('/google/callback', passport.authenticate('google', {failureRedirect: '/signup?message=Your account has been blocked by Admin'}), (req,res)=>{
     console.log('sucyrbiu', req.user);
@@ -40,6 +41,15 @@ router.get('/google/callback', passport.authenticate('google', {failureRedirect:
     req.session.user = user._id
     res.redirect('/')
 })
+
+
+//Profile Management
+router.get('/forgotPassword', profileController.getForgotPassPage)
+router.post('/mailverification', profileController.forgotEmailValid)
+router.post('/verify-forgotPassOTP', profileController.verifyForgotPassOTP)
+router.get('/resetPassword', profileController.getResetPassword)
+router.post('/resendfpotp', profileController.resendOtp)
+router.post('/resetPassword', profileController.resetPassword)
 
 
 module.exports = router
