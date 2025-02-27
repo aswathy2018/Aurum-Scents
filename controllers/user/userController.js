@@ -202,7 +202,7 @@ const loadLogin = async (req,res)=>{
 }
 
 
-const login = async(req, res)=>{
+const login = async(req, res) => {
     try {
         const {email, password} = req.body
         const findUser = await User.findOne({isAdmin:0, email: email})
@@ -221,7 +221,8 @@ const login = async(req, res)=>{
         }
 
         req.session.user = findUser._id;
-        res.redirect('/')
+        // Redirect with query parameter to trigger SweetAlert
+        res.redirect('/?login_success=true')
     } catch (error) {
         console.error("Login error", error)
         res.render('login', {message: "Login failed. Please try again"})

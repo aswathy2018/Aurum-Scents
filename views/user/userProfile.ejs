@@ -1,0 +1,218 @@
+<%-include("../../views/partials/user/header")%>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+
+<link rel="stylesheet" href="/assets/css/user_profile.css">
+<body>
+
+    <a class="ml-20 " href="/">Home</a> > Profile
+
+
+<div class="value">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="ml-20 mb-15">
+        <a href="/userProfile" class="item active">
+            <i class="fas fa-user"></i> Profile Detailes
+        </a>
+        </div>
+        <div class="ml-20 mb-15">
+        <a href="/address" class="item">
+            <i class="fas fa-map-marker-alt"></i> My Address
+        </a>
+        </div>
+        <div class="ml-20 mb-15">
+        <a href="/orders" class="item">
+            <i class="fas fa-box"></i> Orders
+        </a>
+        </div>
+        <div class="ml-20 mb-15">
+        <a href="/wallet" class="item">
+            <i class="fas fa-wallet"></i> Wallet
+        </a>
+        </div>
+        <div class="ml-20 mb-15">
+        <a href="/logout" class="item">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="profile-photo-section">
+            <div class="profile-photo">
+                <img src="/uploads/image/<%=user.userImage%>" alt="image" id="profileImage">
+                <div class="photo-overlay">
+                    <label for="photoInput" class="change-photo-btn">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <div class="profile-details">
+                <div class="detail-item">
+                    <span class="detail-label">Name: </span>
+                    <span class="detail-value "><%=user.name%></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Phone:</span>
+                    <span class="detail-value"><%=user.phone%></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value"><%=user.email%></span>
+                </div>
+                <button class="change-password-btn">
+                    <a href="/changePassword" class="text-white">Change Password</a>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Cropper Modal -->
+<div class="modal" id="cropperModal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="cropper-container">
+            <img id="cropperImage" src="/placeholder.svg" alt="Image to crop">
+        </div>
+
+            <button class="save-crop-btn" onclick="uploadImage()">Save Photo</button>
+
+    </div>
+</div>
+</body>
+<%-include("../../views/partials/user/footer")%>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Cropper.js CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+<!-- Cropper.js JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('photoInput');
+    const cropperModal = document.getElementById('cropperModal');
+    const cropperImage = document.getElementById('cropperImage');
+    const profileImage = document.getElementById('profileImage');
+    const closeModal = document.querySelector('.close-modal');
+    const saveCropBtn = document.querySelector('.save-crop-btn');
+    let cropper;
+
+    // Handle file input change
+    photoInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                // Set image source and show modal
+                cropperImage.src = e.target.result;
+                cropperModal.style.display = 'block';
+                
+                // Destroy previous cropper instance
+                if (cropper) {
+                    cropper.destroy();
+                }
+                
+                // Initialize cropper
+                cropper = new Cropper(cropperImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    cropBoxResizable: false,
+                    cropBoxMovable: false,
+                    guides: false,
+                    center: false,
+                    highlight: false,
+                    background: false
+                });
+            };
+            
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Close modal
+    closeModal.addEventListener('click', function() {
+        cropperModal.style.display = 'none';
+        if (cropper) {
+            cropper.destroy();
+        }
+    });
+
+    // Save cropped image and upload
+    saveCropBtn.addEventListener('click', function() {
+        if (cropper) {
+            const canvas = cropper.getCroppedCanvas({
+                width: 300,
+                height: 300
+            });
+
+            canvas.toBlob(async function(blob) {
+                const formData = new FormData();
+                formData.append('profileImage', blob, 'profile.jpg');
+
+                try {
+                    const response = await fetch('/profileImage', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        // Close the cropper modal
+                        cropperModal.style.display = 'none';
+                        if (cropper) {
+                            cropper.destroy();
+                        }
+                        
+                        // Show SweetAlert2 success popup
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Profile photo updated successfully!',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            willClose: () => {
+                                // Refresh the page after popup closes
+                                window.location.reload();
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Failed to update profile photo: ' + (data.message || ''),
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Failed to update profile photo.',
+                    });
+                }
+            }, 'image/jpeg');
+        }
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(e) {
+        if (e.target === cropperModal) {
+            cropperModal.style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+            }
+        }
+    });
+});
+
+    </script>
+

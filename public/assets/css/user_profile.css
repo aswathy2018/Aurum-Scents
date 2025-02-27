@@ -1,0 +1,210 @@
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+/* Layout */
+.value {
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 200px;
+    background: #f8f9fa;
+    padding: 1rem 0;
+    border-right: 4px solid #e5e7eb;
+    margin-left: 10%;
+    margin-top: 45px;
+    margin-bottom: 90px;
+    border-radius: 7px;
+}
+
+/* Style for nav items */
+.item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #0c5047;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    border-radius: 5px;
+}
+
+/* Hover effect */
+.item:hover {
+    background: #5b9994; /* Change background color */
+    color: white; /* Change text color */
+    transform: translateX(1px); /* Slide effect */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon Styling */
+.item i {
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+/* Icon animation on hover */
+.item:hover i {
+    transform: scale(1.1);
+}
+
+.main-content {
+    height: 320px;
+    flex: 1;
+    padding: 20px;
+    background-color: #f9faf3;
+    margin-right: 10%;
+    margin-bottom: 90px;
+    border-radius: 8px;
+    margin-left: 50px;
+    margin-top: 44px;
+}
+
+.profile-photo-section {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.profile-photo {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #98D8AA;
+    margin-left: 25%;
+    margin-top: 60px;
+}
+
+.profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(53, 83, 77, 0.5);
+    padding: 8px 0;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.profile-photo:hover .photo-overlay {
+    opacity: 1;
+}
+
+.change-photo-btn {
+    color: white;
+    cursor: pointer;
+}
+
+.change-photo-btn i {
+    font-size: 20px;
+}
+
+.profile-details {
+    display: grid;
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    gap: 0.6rem;
+    margin-left: 90px;
+    margin-top: 30px;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #2d5a56;
+}
+
+.detail-value {
+    color: #09756c;
+}
+
+.change-password-btn {
+    margin-top: 1.5rem;
+    margin-left: 45px;
+    padding: 0.75rem 1.5rem;
+    background-color: #5b9994;  /* Green button */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+
+.change-password-btn:hover {
+    background-color: #1e8868;
+}
+
+/* Modal Styles */
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    border: 2px solid #26918b;
+}
+
+.save-crop-btn {
+    background: #1d6e6a; /* Button color set */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.save-crop-btn:hover {
+    background: #0a5c5c; /* Darker shade on hover */
+    box-shadow: 0 4px 8px rgba(12, 107, 102, 0.3); /* Smooth shadow effect */
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #043535;
+    transition: color 0.3s;
+}
+
+.close-modal:hover {
+    color: #084946; /* Close button hover effect */
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .profile-section {
+        padding: 1rem;
+    }
+}

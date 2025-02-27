@@ -168,8 +168,29 @@
                 </div>
             </div>
         </section>
-
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('login_success') === 'true') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Successful!',
+                text: 'Welcome back to our platform',
+                confirmButtonColor: '#3085d6',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            
+            // Clean up the URL (optional)
+            if (window.history && window.history.replaceState) {
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        }
+    });
+
 function checkUserBlockStatus() {
     fetch('/check-user-status')
         .then(response => response.json())

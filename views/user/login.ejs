@@ -1,5 +1,5 @@
 <%- include("../partials/user/header.ejs") %>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     .custom-container {
@@ -117,4 +117,22 @@
             icon.classList.replace('bi-eye-slash', 'bi-eye');
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('password_changed') === 'true') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Password Changed Successfully!',
+            text: 'You can now login with your new password',
+            confirmButtonColor: '#3085d6'
+        });
+        
+        // Clean up the URL (optional)
+        if (window.history && window.history.replaceState) {
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+    }
+});
 </script>

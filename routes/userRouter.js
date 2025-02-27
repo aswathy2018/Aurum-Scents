@@ -3,7 +3,8 @@ const router = express.Router()
 const userController = require('../controllers/user/userController')
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
-const profileController = require('../controllers/user/profileController')
+const profileController = require('../controllers/user/profileController');
+const {uploads} = require('../helpers/multer');
 
 
 router.get('/pageNotFound', userController.pageNotFound)
@@ -50,6 +51,19 @@ router.post('/verify-forgotPassOTP', profileController.verifyForgotPassOTP)
 router.get('/resetPassword', profileController.getResetPassword)
 router.post('/resendfpotp', profileController.resendOtp)
 router.post('/resetPassword', profileController.resetPassword)
+router.get('/userProfile', userAuth, profileController.profile)
+router.post('/profileImage',uploads.single('profileImage'),profileController.profileImage)
+router.get('/address', userAuth, profileController.address)
+router.get('/changePassword', userAuth, profileController.changePasswordPage);
+router.post('/changePassword', userAuth, profileController.changePassword);
+
+
+//Address management
+router.get('/addAddress', userAuth, profileController.addAddress)
+router.post('/addAddress', userAuth, profileController.postAddAddress)
+router.get('/editAddress', userAuth, profileController.editAddress)
+router.post('/editAddress', userAuth, profileController.postEditAddress)
+router.get('/deleteAddress', userAuth, profileController.deleteAddress)
 
 
 module.exports = router
