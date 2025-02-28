@@ -4,6 +4,8 @@ const userController = require('../controllers/user/userController')
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
 const profileController = require('../controllers/user/profileController');
+const cartController = require('../controllers/user/cartController')
+const orderController = require('../controllers/user/orderController')
 const {uploads} = require('../helpers/multer');
 
 
@@ -56,6 +58,10 @@ router.post('/profileImage',uploads.single('profileImage'),profileController.pro
 router.get('/address', userAuth, profileController.address)
 router.get('/changePassword', userAuth, profileController.changePasswordPage);
 router.post('/changePassword', userAuth, profileController.changePassword);
+router.get('/editProfile', userAuth, profileController.editProfile)
+router.post('/editProfile', userAuth, profileController.postEditProfile)
+router.post('/verify-otp', userAuth, profileController.otpVerification);
+router.get('/resend-otp', userAuth, profileController.resendOTP);
 
 
 //Address management
@@ -65,5 +71,15 @@ router.get('/editAddress', userAuth, profileController.editAddress)
 router.post('/editAddress', userAuth, profileController.postEditAddress)
 router.get('/deleteAddress', userAuth, profileController.deleteAddress)
 
+
+//Cart management
+router.get('/cart', userAuth, cartController.getCart)
+router.post('/manageCart', userAuth, cartController.addToCart)
+router.post('/updateCart', userAuth, cartController.updateCart);
+router.post('/removeFromCart', userAuth, cartController.removeFromCart);
+
+
+//Order Management
+router.get('/checkOut', userAuth, orderController.getCheckOut)
 
 module.exports = router

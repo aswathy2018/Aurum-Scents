@@ -1,4 +1,4 @@
-<%-include("../../views/partials/user/header")%>
+<%-include(".. /../views/partials/user/header")%>
 
     <style>
         body {
@@ -7,27 +7,32 @@
             margin: 0;
             padding: 20px;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
+
         h2 {
             color: #32553e;
             text-align: center;
             margin-top: 20px;
             margin-bottom: 30px;
         }
+
         .address-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
         }
+
         .address-card {
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px #b6ffd0;
             overflow: hidden;
         }
+
         .address-card-header {
             background-color: #98ceab;
             color: #fff;
@@ -35,39 +40,48 @@
             font-size: 18px;
             font-weight: bold;
         }
+
         .address-card-body {
             padding: 15px;
         }
+
         .address-card-body p {
             margin: 5px 0;
             color: #555;
         }
+
         .address-actions {
             display: flex;
             justify-content: space-between;
             margin-top: 15px;
         }
+
         .btn {
             padding: 8px 12px;
             border-radius: 4px;
             text-decoration: none;
             font-weight: bold;
             transition: background-color 0.3s;
-            
+
         }
+
         .btn-edit {
             background-color: #70b98b;
             color: white;
             border-color: #70b98b;
         }
+
         .btn-delete {
             background-color: #7e413c;
             color: white;
             border-color: #7e413c;
         }
-        .btn-edit:hover, .btn-delete:hover {
+
+        .btn-edit:hover,
+        .btn-delete:hover {
             opacity: 0.9;
         }
+
         .add-address-btn {
             display: block;
             width: 150px;
@@ -83,122 +97,123 @@
             transition: background-color 0.3s;
             margin-bottom: 20px;
         }
+
         .add-address-btn:hover {
             background-color: #4adaaa;
         }
     </style>
 
-<body>
-    <div class="container">
-        <h2>Manage My Addresses</h2>
-        
-        <div class="address-grid">
-            <% if (address && address.address && address.address.length > 0) { %>
-                <% address.address.forEach((address) => { %>
-                    <div class="address-card">
-                        <div class="address-card-header">
-                            <%= address.addressType %>
-                        </div>
-                        <div class="address-card-body">
-                            <p><strong><%= address.name %></strong></p>
-                            <p><%= address.city %></p>
-                            <p><%= address.landMark %></p>
-                            <p><%= address.state %></p>
-                            <p>PIN: <%= address.pincode %></p>
-                            <p>Phone: <%= address.phone %></p>
-                            <% if (address.alternativePhone) { %>
-                                <p>Alt.Phone: <%= address.alternativePhone %></p>
-                            <% } %>
-                            <div class="address-actions">
-                                <a href="/editAddress?id=<%=address._id %>" class="btn btn-edit">Edit</a>
-                                <a href="/deleteAddress?id=<%=address._id %>" class="btn btn-delete delete-address-btn">Delete</a>
+    <body>
+        <div class="container">
+            <h2>Manage My Addresses</h2>
+
+            <div class="address-grid">
+                <% if (address && address.address && address.address.length> 0) { %>
+                    <% address.address.forEach((address)=> { %>
+                        <div class="address-card">
+                            <div class="address-card-header">
+                                <%= address.addressType %>
+                            </div>
+                            <div class="address-card-body">
+                                <p><strong>
+                                        <%= address.name %>
+                                    </strong></p>
+                                <p>
+                                    <%= address.city %>
+                                </p>
+                                <p>
+                                    <%= address.landMark %>
+                                </p>
+                                <p>
+                                    <%= address.state %>
+                                </p>
+                                <p>PIN: <%= address.pincode %>
+                                </p>
+                                <p>Phone: <%= address.phone %>
+                                </p>
+                                <% if (address.alternativePhone) { %>
+                                    <p>Alt.Phone: <%= address.alternativePhone %>
+                                    </p>
+                                    <% } %>
+                                        <div class="address-actions">
+                                            <a href="/editAddress?id=<%=address._id %>" class="btn btn-edit">Edit</a>
+                                            <a href="/deleteAddress?id=<%=address._id %>"
+                                                class="btn btn-delete delete-address-btn">Delete</a>
+                                        </div>
                             </div>
                         </div>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <div class="address-card">
-                    <div class="address-card-header">
-                        No Addresses
-                    </div>
-                    <div class="address-card-body">
-                        <p>You haven't added any addresses yet.</p>
-                    </div>
-                </div>
-            <% } %>
+                        <% }) %>
+                            <% } else { %>
+                                <div class="address-card">
+                                    <div class="address-card-header">
+                                        No Addresses
+                                    </div>
+                                    <div class="address-card-body">
+                                        <p>You haven't added any addresses yet.</p>
+                                    </div>
+                                </div>
+                                <% } %>
+            </div>
+
+            <a href="/addAddress" class="add-address-btn">Add Address</a>
         </div>
-        
-        <a href="/addAddress" class="add-address-btn">Add Address</a>
-    </div>
-</body>
+    </body>
 
 
-<%-include("../../views/partials/user/footer")%>
+    <%-include(".. /../views/partials/user/footer")%>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, looking for delete buttons');
-    // Get all delete buttons
-    const deleteButtons = document.querySelectorAll('.delete-address-btn');
-    console.log('Found delete buttons:', deleteButtons.length);
-    
-    // Add click event listener to each delete button
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function(event) {
-            // Prevent the default link navigation
-            event.preventDefault();
-            
-            // Get the URL from the href attribute
-            const deleteUrl = this.getAttribute('href');
-            
-            // Show SweetAlert confirmation
-            Swal.fire({
-                title: 'Delete Address',
-                text: 'Do you want to delete this address?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // User clicked "Yes", proceed with deletion
-                    // Use fetch to make the request
-                    fetch(deleteUrl)
-                        .then(response => {
-                            if (response.ok) {
-                                // Show success message
-                                Swal.fire({
-                                    title: 'Deleted!',
-                                    text: 'Address has been deleted successfully.',
-                                    icon: 'success',
-                                    timer: 2000,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    // Redirect to address page
-                                    window.location.href = '/address';
-                                });
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                console.log('DOM loaded, looking for delete buttons');
+
+                const deleteButtons = document.querySelectorAll('.delete-address-btn');
+                console.log('Found delete buttons:', deleteButtons.length);
+
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        const deleteUrl = this.getAttribute('href');
+                        Swal.fire({
+                            title: 'Delete Address',
+                            text: 'Do you want to delete this address?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch(deleteUrl)
+                                    .then(response => {
+                                        if (response.ok) {
+                                            Swal.fire({
+                                                title: 'Deleted!',
+                                                text: 'Address has been deleted successfully.',
+                                                icon: 'success',
+                                                timer: 2000,
+                                                showConfirmButton: false
+                                            }).then(() => {
+                                                window.location.href = '/address';
+                                            });
+                                        } else {
+                                            throw new Error('Failed to delete address');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        Swal.fire({
+                                            title: 'Error',
+                                            text: 'Failed to delete address. Please try again.',
+                                            icon: 'error'
+                                        });
+                                    });
                             } else {
-                                throw new Error('Failed to delete address');
+                                window.location.href = '/address';
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Failed to delete address. Please try again.',
-                                icon: 'error'
-                            });
                         });
-                } else {
-                    // User clicked "Cancel", do nothing or redirect to address page
-                    // If you want to redirect on cancel, uncomment the next line
-                    window.location.href = '/address';
-                }
+                    });
+                });
             });
-        });
-    });
-});
-</script>
+        </script>

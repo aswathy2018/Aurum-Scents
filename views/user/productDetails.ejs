@@ -1,7 +1,7 @@
 <%- include('../partials/user/header.ejs') %>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
         .ProductContainer {
@@ -173,7 +173,7 @@
                                                 onclick="changeImage(this)">
                                         </div>
                                         <%}%>
-                                           
+
                                 </div>
                             </div>
                             <div class="col-md-6 col-sm-12 col-xs-12">
@@ -184,8 +184,8 @@
                                     <div class="product-detail-rating">
                                         <div class="pro-details-brand">
                                             <span> Category: <%=product.category.name%><a href="shop-grid-right.html">
-                                              
-                                                </a></span>
+
+                                                    </a></span>
                                         </div>
                                         <div class="product-rate-cover text-end">
                                             <div class="product-rate d-inline-block">
@@ -195,7 +195,7 @@
                                             <span class="font-small ml-5 text-muted"> (25 reviews)</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="clearfix product-price-cover">
                                         <div class="product-price primary-color float-left">
                                             <ins><span class="text-brand">
@@ -214,128 +214,139 @@
                                         </div>
                                     </div>
                                     <%if(product.quantity<=5){%>
-                                        <br><h4 class="text-danger">Only <%=product.quantity%> left hurry!</h4>
-                                    <%}%>        
-                                    <div class="bt-1 border-color-1 mt-15 mb-15"></div>
-                                    <div class="short-desc mb-30">
-                                        <p>
-                                            <%=product.description%>
-                                        </p>
-                                    </div>
-                                    <div class="product_sort_info font-xs mb-30">
-                                        <ul>
-                                            <li class="mb-10"><i class="fi-rs-crown mr-5"></i> 1 Year Manufacturing Warranty</li>
-                                            <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return
-                                                Policy</li>
-                                            <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available
-                                            </li>
-                                        </ul>
-                                    </div>
+                                        <br>
+                                        <h4 class="text-danger">Only <%=product.quantity%> left hurry!</h4>
+                                        <%}%>
+                                            <div class="bt-1 border-color-1 mt-15 mb-15"></div>
+                                            <div class="short-desc mb-30">
+                                                <p>
+                                                    <%=product.description%>
+                                                </p>
+                                            </div>
+                                            <div class="product_sort_info font-xs mb-30">
+                                                <ul>
+                                                    <li class="mb-10"><i class="fi-rs-crown mr-5"></i> 1 Year
+                                                        Manufacturing Warranty</li>
+                                                    <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return
+                                                        Policy</li>
+                                                    <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery
+                                                        available
+                                                    </li>
+                                                </ul>
+                                            </div>
 
-                                    <div class="attr-detail attr-material">
-                                        <strong class="mr-10">Highlights</strong>
-                                        <ul class="list-filter material-filter font-small">
-                                            <li><a href="#"> Size (ML): <%=product.size%></a></li>
-                                        </ul>
-                                        <ul class="list-filter material-filter font-small">
-                                            <li><a href="#"> Brand: <%=product.brand%></a></li>
-                                        </ul>
-                                    </div>
-                                    
+                                            <div class="attr-detail attr-material">
+                                                <strong class="mr-10">Highlights</strong>
+                                                <ul class="list-filter material-filter font-small">
+                                                    <li><a href="#"> Size (ML): <%=product.size%></a></li>
+                                                </ul>
+                                                <ul class="list-filter material-filter font-small">
+                                                    <li><a href="#"> Brand: <%=product.brand%></a></li>
+                                                </ul>
+                                            </div>
 
 
-                                    <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                    <div class="detail-extralink">
-                                        <div class="product-extra-link2">
-                                            <button type="submit" class="button button-add-to-cart"
-                                                onclick="addToCart('<%=product._id%>')">Add to
-                                                cart</button>
-                                          
-                                            <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                            onclick="addToWishlist('<%= product._id %>')"                                                                                ><i class="fi-rs-heart"></i></a>
-                                           
-                                           
-                                        </div>
-                                    </div>
-                                    <ul class="product-meta font-xs color-grey mt-50">
-                                        <li class="mb-5">Name <a href="#"> <%=product.productName%></a></li>
-                                        <li class="mb-5">Tags: <a href="#" rel="tag">Perfumes</a>, <a href="#"
-                                                rel="tag">Premium Branded</a>, <a href="#" rel="tag">Limited edition</a>
-                                        </li>
-                                        <li>Availability:<span class="in-stock text-success ml-5">
-                                                <%=product.quantity%> Items In Stock
-                                            </span></li>
-                                    </ul>
+
+                                            <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                                            <div class="detail-extralink">
+                                                <div class="product-extra-link2">
+                                                    <button type="button" class="button button-add-to-cart"
+                                                        onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+                                                    <a aria-label="Add To Wishlist" class="action-btn hover-up"
+                                                        onclick="addToWishlist('<%= product._id %>')"><i
+                                                            class="fi-rs-heart"></i></a>
+                                                </div>
+                                            </div>
                                 </div>
-                                <!-- Detail Info -->
+                                <ul class="product-meta font-xs color-grey mt-50">
+                                    <li class="mb-5">Name <a href="#">
+                                            <%=product.productName%>
+                                        </a></li>
+                                    <li class="mb-5">Tags: <a href="#" rel="tag">Perfumes</a>, <a href="#"
+                                            rel="tag">Premium Branded</a>, <a href="#" rel="tag">Limited edition</a>
+                                    </li>
+                                    <li>Availability:<span class="in-stock text-success ml-5">
+                                            <%=product.quantity%> Items In Stock
+                                        </span></li>
+                                </ul>
                             </div>
+                            <!-- Detail Info -->
+                        </div>
 
-                        </div>
-                    </div>
-
-                        </div>
-                            
-                            
-                            <div class="banner-img banner-big wow fadeIn f-none animated mt-50">
-                                <img class="border-radius-10" src="assets/imgs/banner/banner-4.webp" alt="">
-                                <div class="banner-text">
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
+
             </div>
-           
-            </div>
-        </div>
 
 
-        <div class="row product-grid-4">
-            <%relatedproducts.forEach((related)=>{%>
-               
-                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                    <div class="product-cart-wrap mb-30">
-                        <div class="product-img-action-wrap">
-                            <div class="product-img product-img-zoom">
-                                <a href="/productDetails/<%= related._id %>" tabindex="0">
-                                    <img class="default-img" src="/uploads/image/<%= related.productImage[0] %>" alt="">
-                                    
-                                </a>
+            <div class="banner-img banner-big wow fadeIn f-none animated mt-50">
+                <img class="border-radius-10" src="assets/imgs/banner/banner-4.webp" alt="">
+                <div class="banner-text">
+                </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+
+            </div>
+            </div>
+
+
+            <div class="row product-grid-4">
+                <%relatedproducts.forEach((related)=>{%>
+
+                    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                        <div class="product-cart-wrap mb-30">
+                            <div class="product-img-action-wrap">
+                                <div class="product-img product-img-zoom">
+                                    <a href="/productDetails/<%= related._id %>" tabindex="0">
+                                        <img class="default-img" src="/uploads/image/<%= related.productImage[0] %>"
+                                            alt="">
+
+                                    </a>
+                                </div>
+                                <div class="product-action-1">
+                                    <a aria-label="Quick view" class="action-btn hover-up"
+                                        href="/productDetails/<%= related._id %>" data-bs-toggle="modal">
+                                        <i class="fi-rs-eye"></i>
+                                    </a>
+                                    <a aria-label="Add To Wishlist" class="action-btn hover-up"
+                                        onclick="addToWishlist('<%= related._id %>')">
+                                        <i class="fi-rs-heart"></i>
+                                    </a>
+                                    <a aria-label="Compare" class="action-btn hover-up" href="#">
+                                        <i class="fi-rs-shuffle"></i>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="product-action-1">
-                                <a aria-label="Quick view" class="action-btn hover-up" href="/productDetails/<%= related._id %>" data-bs-toggle="modal">
-                                    <i class="fi-rs-eye"></i>
-                                </a>
-                                <a aria-label="Add To Wishlist" class="action-btn hover-up" onclick="addToWishlist('<%= related._id %>')" >
-                                    <i class="fi-rs-heart"></i>
-                                </a>
-                                <a aria-label="Compare" class="action-btn hover-up" href="#">
-                                    <i class="fi-rs-shuffle"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="product-content-wrap">
-                            <div class="product-category">
-                                <a href="shop-grid-right.html"><%= related.brand %></a>
-                            </div>
-                            <h2><a href="shop-product-right.html"><%= related.productName %></a></h2>
-                            <div class="rating-result" title="90%">
-                                <span><span>90%</span></span>
-                            </div>
-                            <div class="product-price">
-                                <span>₹<%= related.salesPrice %></span>
-                                <span class="old-price">₹<%= related.regularPrice %></span>
-                            </div>
-                            <div class="product-action-1 show">
-                                <a aria-label="Add To Cart" class="action-btn hover-up"  onclick="addToCart('<%=related._id%>')">
-                                    <i class="fi-rs-shopping-bag-add"></i>
-                                </a>
+                            <div class="product-content-wrap">
+                                <div class="product-category">
+                                    <a href="shop-grid-right.html">
+                                        <%= related.brand %>
+                                    </a>
+                                </div>
+                                <h2><a href="shop-product-right.html">
+                                        <%= related.productName %>
+                                    </a></h2>
+                                <div class="rating-result" title="90%">
+                                    <span><span>90%</span></span>
+                                </div>
+                                <div class="product-price">
+                                    <span>₹<%= related.salesPrice %></span>
+                                    <span class="old-price">₹<%= related.regularPrice %></span>
+                                </div>
+                                <div class="product-action-1 show">
+                                    <a aria-label="Add To Cart" class="action-btn hover-up"
+                                        onclick="addToCart('<%=related._id%>')">
+                                        <i class="fi-rs-shopping-bag-add"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            <% }) %> 
-        </div>
+                    <% }) %>
+            </div>
 
         </section>
     </main>
@@ -348,7 +359,6 @@
             mainImage.src = thumbnail.src;
             mainImage.alt = thumbnail.alt;
 
-            // Update active thumbnail
             document.querySelectorAll('.thumbnail').forEach(thumb => {
                 thumb.classList.remove('active');
             });
@@ -358,34 +368,84 @@
         function changeQuantity(change) {
             const quantityElement = document.getElementById('quantity');
             let quantity = parseInt(quantityElement.textContent) + change;
-            quantity = Math.max(1, quantity); // Ensure quantity is at least 1
+            quantity = Math.max(1, quantity);
             quantityElement.textContent = quantity;
         }
 
-       
+
 
         function zoomImage(e) {
-    const image = e.target;
-    const zoomer = e.currentTarget;
-    const rect = zoomer.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width; // Calculate relative X position
-    const y = (e.clientY - rect.top) / rect.height; // Calculate relative Y position
-    const zoomLevel = 2;
+            const image = e.target;
+            const zoomer = e.currentTarget;
+            const rect = zoomer.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+            const zoomLevel = 2;
 
-    // Use template literals for transformOrigin and transform
-    image.style.transformOrigin = `${x * 100}% ${y * 100}%`;
-    image.style.transform = `scale(${zoomLevel})`;
-}
+            image.style.transformOrigin = `${x * 100}% ${y * 100}%`;
+            image.style.transform = `scale(${zoomLevel})`;
+        }
 
-     
-function resetZoom(e) {
-    console.log("Mouse left the container");
 
-    const image = e.target; // The image being reset
-    image.style.transformOrigin = 'center center';
-    image.style.transform = 'scale(1)';
-}
+        function resetZoom(e) {
+            console.log("Mouse left the container");
 
+            const image = e.target;
+            image.style.transformOrigin = 'center center';
+            image.style.transform = 'scale(1)';
+        }
+
+
+        function addToCart(productId) {
+
+            const data = {
+                productId: productId,
+                quantity: 1
+            };
+
+            fetch('/manageCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "success",
+                            title: "Product added to cart",
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    } else if (data.exists) {
+                        Swal.fire({
+                            title: 'Product Already in Cart',
+                            text: 'This product is already in your cart',
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Something went wrong',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Something went wrong',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
+        }
 
     </script>
-<%- include('../partials/user/footer.ejs') %>
+    <%- include('../partials/user/footer.ejs') %>

@@ -243,24 +243,96 @@
     });
 
     async function updateCategoryStatus(categoryId, shouldList) {
-      try {
-        const endpoint = shouldList ? '/admin/listcategory' : '/admin/unlistcategory';
-        const response = await fetch(endpoint, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ id: categoryId })
-        });
-
-        if (response.ok) {
-          window.location.reload();
-        } else {
-          console.error('Failed to update category status');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      }
+  // First show a confirmation dialog
+  const action = shouldList ? 'list' : 'unlist';
+  const confirmResult = await Swal.fire({
+    title: `Confirm ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+    text: `Are you sure you want to ${action} this category?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: `Yes, ${action} it!`,
+    cancelButtonText: 'Cancel',
+    showClass: {
+      popup: 'animate__animated animate__fadeInUp animate__faster'
+    },
+    hideClass: {
+      popup: 'animate__animated animate__fadeOutDown animate__faster'
     }
+  });
+
+  // If user confirmed, proceed with the action
+  if (confirmResult.isConfirmed) {
+    try {
+      // Show loading state
+      Swal.fire({
+        title: 'Processing...',
+        text: 'Please wait while we update the category status',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        showClass: {
+          popup: 'animate__animated animate__fadeInUp animate__faster'
+        }
+      });
+
+      const endpoint = shouldList ? '/admin/listcategory' : '/admin/unlistcategory';
+      const response = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: categoryId })
+      });
+
+      if (response.ok) {
+        // Show success message
+        const result = await Swal.fire({
+          title: 'Success!',
+          text: `Category ${shouldList ? 'listed' : 'unlisted'} successfully`,
+          icon: 'success',
+          showClass: {
+            popup: 'animate__animated animate__fadeInUp animate__faster'
+          },
+          hideClass: {
+            popup: 'animate__animated animate__fadeOutDown animate__faster'
+          }
+        });
+        
+        // Reload page after user acknowledges the success message
+        if (result.isConfirmed || result.isDismissed) {
+          window.location.reload();
+        }
+      } else {
+        // Handle error response
+        const errorData = await response.json();
+        Swal.fire({
+          title: 'Error',
+          text: errorData.message || `Failed to ${action} category`,
+          icon: 'error',
+          showClass: {
+            popup: 'animate__animated animate__fadeInUp animate__faster'
+          },
+          hideClass: {
+            popup: 'animate__animated animate__fadeOutDown animate__faster'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Swal.fire({
+        title: 'Error',
+        text: `Something went wrong while trying to ${action} the category`,
+        icon: 'error',
+        showClass: {
+          popup: 'animate__animated animate__fadeInUp animate__faster'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutDown animate__faster'
+        }
+      });
+    }
+  }
+}
 
   </script>

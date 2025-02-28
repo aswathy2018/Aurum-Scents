@@ -1,234 +1,225 @@
-<%-include("../../views/partials/user/header")%>
-<div class="container mt-4">
-   <h3 class="mt-3" style="color: #046963; margin-bottom:70px">Edit User Address</h3>
-   <form id="addressForm" method="POST" action="/editAddress?id=<%=address._id.toLocaleString() %>" class="border-0 p-3">
-       <div class="row mb-50">
-           <div class="form-group col-md-4">
-               <label for="addressType">Address Type:</label>
-               <input type="text" class="form-control border-3" value="<%= address.addressType %>" id="addressType" name="addressType">
-           </div>
-           <div class="form-group col-md-4">
-               <label for="name">Name:</label>
-               <input type="text" class="form-control border-3" value="<%= address.name %>" id="name" name="name">
-           </div>
-           <div class="form-group col-md-4">
-               <label for="city">City:</label>
-               <input type="text" class="form-control border-3" id="city" value="<%= address.city %>" name="city">
-           </div>
-       </div>
-       <div class="row mb-3">
-           <div class="form-group col-md-4">
-               <label for="landMark">Landmark:</label>
-               <input type="text" class="form-control border-3" value="<%= address.landMark%>" id="landMark" name="landMark">
-           </div>
-           <div class="form-group col-md-4">
-               <label for="state">State:</label>
-               <input type="text" class="form-control border-3" value="<%= address.state %>" id="state" name="state">
-           </div>
-           <div class="form-group col-md-4">
-               <label for="pincode">Pincode:</label>
-               <input type="number" class="form-control border-3" value="<%= address.pincode %>" id="pincode" name="pincode">
-           </div>
-       </div>
-       <div class="row mb-3">
-           <div class="form-group col-md-4">
-               <label for="phone">Phone:</label>
-               <input type="number" class="form-control border-3" id="phone" value="<%= address.phone %>" name="phone">
-           </div>
-           <div class="form-group col-md-4">
-               <label for="alternativePhone">Alternate Phone:</label>
-               <input type="number" class="form-control border-3" id="alternativePhone" value="<%= address.alternativePhone %>" name="alternativePhone">
-           </div>
-       </div>
-       <button type="submit" id="submitButton" class="btn btn-primary">Update</button>
-   </form>
-</div>
+<%-include(".. /../views/partials/user/header")%>
+    <div class="container mt-4">
+        <h3 class="mt-3" style="color: #046963; margin-bottom:70px">Edit User Address</h3>
+        <form id="addressForm" method="POST" action="/editAddress?id=<%=address._id.toLocaleString() %>"
+            class="border-0 p-3">
+            <div class="row mb-50">
+                <div class="form-group col-md-4">
+                    <label for="addressType">Address Type:</label>
+                    <input type="text" class="form-control border-3" value="<%= address.addressType %>" id="addressType"
+                        name="addressType">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control border-3" value="<%= address.name %>" id="name" name="name">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="city">City:</label>
+                    <input type="text" class="form-control border-3" id="city" value="<%= address.city %>" name="city">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="form-group col-md-4">
+                    <label for="landMark">Landmark:</label>
+                    <input type="text" class="form-control border-3" value="<%= address.landMark%>" id="landMark"
+                        name="landMark">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="state">State:</label>
+                    <input type="text" class="form-control border-3" value="<%= address.state %>" id="state"
+                        name="state">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="pincode">Pincode:</label>
+                    <input type="number" class="form-control border-3" value="<%= address.pincode %>" id="pincode"
+                        name="pincode">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="form-group col-md-4">
+                    <label for="phone">Phone:</label>
+                    <input type="number" class="form-control border-3" id="phone" value="<%= address.phone %>"
+                        name="phone">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="alternativePhone">Alternate Phone:</label>
+                    <input type="number" class="form-control border-3" id="alternativePhone"
+                        value="<%= address.alternativePhone %>" name="alternativePhone">
+                </div>
+            </div>
+            <button type="submit" id="submitButton" class="btn btn-primary">Update</button>
+        </form>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-   document.getElementById('addressForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Always prevent default to handle the form submission ourselves
-    
-    if (validateForm()) {
-        // If validation passes, submit the form using fetch or AJAX
-        const formData = new FormData(this);
-        const url = this.getAttribute('action');
-        
-        fetch(url, {
-            method: 'POST',
-            body: new URLSearchParams(formData),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('addressForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (validateForm()) {
+                const formData = new FormData(this);
+                const url = this.getAttribute('action');
+
+                fetch(url, {
+                    method: 'POST',
+                    body: new URLSearchParams(formData),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Address updated successfully',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = '/address';
+                            });
+                        } else {
+                            throw new Error('Network response was not ok');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to update address. Please try again.',
+                            icon: 'error'
+                        });
+                    });
             }
-        })
-        .then(response => {
-            if (response.ok) {
-                // Show success message
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Address updated successfully',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    // Redirect after the alert is closed or timer expires
-                    window.location.href = '/address';
-                });
-            } else {
-                throw new Error('Network response was not ok');
+        });
+
+        function validateForm() {
+            let isValid = true;
+            const requiredFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "alternativePhone"];
+
+            document.querySelectorAll('.text-danger').forEach(el => el.remove());
+
+            requiredFields.forEach(function (field) {
+                const input = document.getElementById(field);
+                if (!input) return;
+
+                const inputValue = input.value.trim();
+
+                if (inputValue === "") {
+                    addErrorMessage(input, "This field is required.");
+                    isValid = false;
+                }
+            });
+
+            const addressType = document.getElementById('addressType').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const landMark = document.getElementById('landMark').value.trim();
+            const state = document.getElementById('state').value.trim();
+            const pincode = document.getElementById('pincode').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const alternativePhone = document.getElementById('alternativePhone').value.trim();
+
+            const letterOnlyPattern = /^[A-Za-z\s]+$/;
+            const pincodePattern = /^\d{6}$/;
+            const phonePattern = /^\d{10}$/;
+            const onlyZerosPattern = /^0+$/;
+
+            requiredFields.forEach(function (field) {
+                const input = document.getElementById(field);
+                if (!input) return;
+
+                if (input.value.startsWith(' ')) {
+                    addErrorMessage(input, "Field cannot start with a space.");
+                    isValid = false;
+                }
+            });
+
+            if (addressType && !letterOnlyPattern.test(addressType)) {
+                showSweetAlert("Address Type should contain letters only.");
+                isValid = false;
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+
+            if (name && !letterOnlyPattern.test(name)) {
+                showSweetAlert("Name should contain letters only.");
+                isValid = false;
+            }
+
+            if (city && !letterOnlyPattern.test(city)) {
+                showSweetAlert("City should contain letters only.");
+                isValid = false;
+            }
+
+            if (landMark && !letterOnlyPattern.test(landMark)) {
+                showSweetAlert("Landmark should contain letters only.");
+                isValid = false;
+            }
+
+            if (state && !letterOnlyPattern.test(state)) {
+                showSweetAlert("State should contain letters only.");
+                isValid = false;
+            }
+
+            if (pincode) {
+                if (!pincodePattern.test(pincode)) {
+                    showSweetAlert("Pincode should be a 6-digit number.");
+                    isValid = false;
+                } else if (onlyZerosPattern.test(pincode)) {
+                    showSweetAlert("Pincode cannot be all zeros.");
+                    isValid = false;
+                }
+            }
+
+            if (phone) {
+                if (!phonePattern.test(phone)) {
+                    showSweetAlert("Phone number should be a 10-digit number.");
+                    isValid = false;
+                } else if (onlyZerosPattern.test(phone)) {
+                    showSweetAlert("Phone number cannot be all zeros.");
+                    isValid = false;
+                }
+            }
+
+            if (alternativePhone) {
+                if (!phonePattern.test(alternativePhone)) {
+                    showSweetAlert("Alternate phone number should be a 10-digit number.");
+                    isValid = false;
+                } else if (onlyZerosPattern.test(alternativePhone)) {
+                    showSweetAlert("Alternate phone number cannot be all zeros.");
+                    isValid = false;
+                }
+            }
+
+            if (phone && alternativePhone && phone === alternativePhone) {
+                showSweetAlert("Phone number and alternate phone number should be different.");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function addErrorMessage(input, message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = "text-danger";
+            errorDiv.textContent = message;
+            errorDiv.id = input.id + '-error';
+            input.parentNode.appendChild(errorDiv);
+        }
+
+        function showSweetAlert(message) {
             Swal.fire({
                 title: 'Error',
-                text: 'Failed to update address. Please try again.',
+                text: message,
                 icon: 'error'
             });
+        }
+
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', function () {
+                const errorElement = document.getElementById(this.id + '-error');
+                if (errorElement) {
+                    errorElement.remove();
+                }
+            });
         });
-    }
-});
-
-function validateForm() {
-    let isValid = true;
-    // Fix the field name here - alternativePhone not altPhone
-    const requiredFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "alternativePhone"];
-    
-    // Clear all previous error messages
-    document.querySelectorAll('.text-danger').forEach(el => el.remove());
-    
-    // Validate required fields and no spaces only
-    requiredFields.forEach(function(field) {
-        const input = document.getElementById(field);
-        if (!input) return; // Skip if element doesn't exist
-        
-        const inputValue = input.value.trim();
-        
-        // Check if empty or only spaces
-        if (inputValue === "") {
-            addErrorMessage(input, "This field is required.");
-            isValid = false;
-        }
-    });
-    
-    // Get all field values after trim
-    const addressType = document.getElementById('addressType').value.trim();
-    const name = document.getElementById('name').value.trim();
-    const city = document.getElementById('city').value.trim();
-    const landMark = document.getElementById('landMark').value.trim();
-    const state = document.getElementById('state').value.trim();
-    const pincode = document.getElementById('pincode').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const alternativePhone = document.getElementById('alternativePhone').value.trim();
-    
-    // Pattern validations
-    const letterOnlyPattern = /^[A-Za-z\s]+$/;
-    const pincodePattern = /^\d{6}$/;
-    const phonePattern = /^\d{10}$/;
-    const onlyZerosPattern = /^0+$/;
-    
-    // Check for no starting space
-    requiredFields.forEach(function(field) {
-        const input = document.getElementById(field);
-        if (!input) return; // Skip if element doesn't exist
-        
-        if (input.value.startsWith(' ')) {
-            addErrorMessage(input, "Field cannot start with a space.");
-            isValid = false;
-        }
-    });
-    
-    // Text fields validation (letters only)
-    if (addressType && !letterOnlyPattern.test(addressType)) {
-        showSweetAlert("Address Type should contain letters only.");
-        isValid = false;
-    }
-    
-    if (name && !letterOnlyPattern.test(name)) {
-        showSweetAlert("Name should contain letters only.");
-        isValid = false;
-    }
-    
-    if (city && !letterOnlyPattern.test(city)) {
-        showSweetAlert("City should contain letters only.");
-        isValid = false;
-    }
-    
-    if (landMark && !letterOnlyPattern.test(landMark)) {
-        showSweetAlert("Landmark should contain letters only.");
-        isValid = false;
-    }
-    
-    if (state && !letterOnlyPattern.test(state)) {
-        showSweetAlert("State should contain letters only.");
-        isValid = false;
-    }
-    
-    // Pincode validation
-    if (pincode) {
-        if (!pincodePattern.test(pincode)) {
-            showSweetAlert("Pincode should be a 6-digit number.");
-            isValid = false;
-        } else if (onlyZerosPattern.test(pincode)) {
-            showSweetAlert("Pincode cannot be all zeros.");
-            isValid = false;
-        }
-    }
-    
-    // Phone number validation
-    if (phone) {
-        if (!phonePattern.test(phone)) {
-            showSweetAlert("Phone number should be a 10-digit number.");
-            isValid = false;
-        } else if (onlyZerosPattern.test(phone)) {
-            showSweetAlert("Phone number cannot be all zeros.");
-            isValid = false;
-        }
-    }
-    
-    // Alternative phone validation
-    if (alternativePhone) {
-        if (!phonePattern.test(alternativePhone)) {
-            showSweetAlert("Alternate phone number should be a 10-digit number.");
-            isValid = false;
-        } else if (onlyZerosPattern.test(alternativePhone)) {
-            showSweetAlert("Alternate phone number cannot be all zeros.");
-            isValid = false;
-        }
-    }
-    
-    // Check if phone and alternative phone are different
-    if (phone && alternativePhone && phone === alternativePhone) {
-        showSweetAlert("Phone number and alternate phone number should be different.");
-        isValid = false;
-    }
-    
-    return isValid;
-}
-
-function addErrorMessage(input, message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = "text-danger";
-    errorDiv.textContent = message;
-    errorDiv.id = input.id + '-error';
-    input.parentNode.appendChild(errorDiv);
-}
-
-function showSweetAlert(message) {
-    Swal.fire({
-        title: 'Error',
-        text: message,
-        icon: 'error'
-    });
-}
-
-document.querySelectorAll('.form-control').forEach(input => {
-    input.addEventListener('input', function() {
-        const errorElement = document.getElementById(this.id + '-error');
-        if (errorElement) {
-            errorElement.remove();
-        }
-    });
-});
-</script>
-<%-include("../../views/partials/user/footer")%>
+    </script>
+    <%-include(".. /../views/partials/user/footer")%>

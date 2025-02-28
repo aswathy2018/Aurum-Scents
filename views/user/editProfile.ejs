@@ -1,0 +1,38 @@
+<%-include(".. /../views/partials/user/header")%>
+
+    <section class="content-main mt-80 mb-80">
+        <div class="card mx-auto card-login" style="max-width: 400px;">
+            <div class="card-body">
+                <h4 class="card-title mb-4 text-center">Edit Profile</h4>
+                <form method="post" action="/editProfile">
+                    <div class="mb-4 position-relative">
+                        <h6>Name: </h6>
+                        <input class="form-control" name="userName" id="userName" value="<%= user.name %>" type="text"
+                            style="border: 1px solid #ced4da; padding-right: 40px;">
+                    </div>
+                    <div class="mb-4 position-relative">
+                        <h6>Email: </h6>
+                        <input class="form-control" name="email" id="email" value="<%= user.email %>" type="text"
+                            style="border: 1px solid #ced4da; padding-right: 40px;">
+                    </div>
+                    <div class="mb-4 position-relative">
+                        <h6>Phone: </h6>
+                        <input class="form-control" name="number" id="number" value="<%= user.phone %>" type="number"
+                            style="border: 1px solid #ced4da; padding-right: 40px;">
+                    </div>
+                    <div class="mb-4">
+                        <button type="submit" class="btn btn-primary w-100">Verify</button>
+                    </div>
+                    <% if (locals.message && message.length> 0) { %>
+                        <div id="alertMessage" class="alert alert-danger text-center">
+                            <%= message %>
+                        </div>
+                        <% } %>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <%-include(".. /../views/partials/user/footer")%>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

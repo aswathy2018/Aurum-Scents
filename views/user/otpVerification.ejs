@@ -1,0 +1,163 @@
+<%-include(".. /../views/partials/user/header")%>
+
+    <section class="content-main mt-80 mb-80">
+        <div class="card mx-auto card-login" style="max-width: 400px;">
+            <div class="card-body">
+                <h1>OTP Verification</h1>
+                <p>Please enter the 6-digit code sent to your email</p>
+                <div id="timer" class="timer" style="color: #4CAF50; margin-bottom: 15px;">Time remaining: 01:00</div>
+
+                <form id="otpForm" method="post">
+                    <div class="mb-4">
+                        <input type="text" class="form-control" maxlength="6" id="otp-input"
+                            placeholder="Enter 6-digit OTP">
+                    </div>
+                    <div class="mb-4">
+                        <button type="submit" id="submitBtn" class="btn btn-primary w-100">Verify</button>
+                    </div>
+                </form>
+                <button type="button" id="resetBtn" class="btn btn-outline-secondary w-100" onclick="resendOTP()"
+                    disabled>Resend OTP</button>
+            </div>
+        </div>
+    </section>
+
+    <%-include(".. /../views/partials/user/footer")%>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            let timeLeft = 60;
+            const timerElement = document.getElementById('timer');
+            const submitBtn = document.getElementById('submitBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const otpInput = document.getElementById('otp-input');
+            let timerInterval;
+
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                timerElement.textContent = `Time remaining: ${minutes}:${seconds}`;
+
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    timerElement.textContent = 'Time expired!';
+                    timerElement.style.color = '#ff0000';
+                    submitBtn.disabled = true;
+                    otpInput.disabled = true;
+                    resetBtn.disabled = false;
+                }
+                timeLeft--;
+            }
+
+            function startTimer() {
+                timeLeft = 60;
+                timerElement.style.color = '#4CAF50';
+                submitBtn.disabled = false;
+                otpInput.disabled = false;
+                resetBtn.disabled = true;
+                clearInterval(timerInterval);
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+
+            startTimer();
+
+            function resendOTP() {
+                resetBtn.disabled = true;
+                otpInput.value = '';
+                startTimer();
+
+                $.ajax({
+                    type: "GET",
+                    url: "/resend-otp",
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'OTP Reset',
+                                text: 'A new OTP has been sent to your email.',
+                                timer: 2500,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Failed to resend OTP. Please try again later.',
+                            });
+                            resetBtn.disabled = false;
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Something went wrong while resending OTP!',
+                        });
+                        resetBtn.disabled = false;
+                    }
+                });
+            }
+
+            otpInput.addEventListener('input', (e) => {
+                if (e.target.value.length === 6) {
+                    submitBtn.focus();
+                }
+            });
+
+            document.getElementById('otpForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                validateOTPForm();
+            });
+
+            function validateOTPForm() {
+                const otpValue = otpInput.value;
+
+                if (otpValue.length !== 6) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Input',
+                        text: 'Please enter a 6-digit OTP.',
+                    });
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/verify-otp",
+                    data: { otp: otpValue },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Profile updated successfully.',
+                                showConfirmButton: false,
+                                timer: 2500
+                            }).then(() => {
+                                window.location.href = '/userProfile';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.message || 'Invalid OTP. Please try again.',
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        let errorMessage = 'Something went wrong! Please try again later.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage,
+                        });
+                    }
+                });
+                return false;
+            }
+        </script>

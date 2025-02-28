@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zxx">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="description" content="Male_Fashion Template" />
@@ -7,9 +8,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Aurum Scents</title>
-    <link rel="shortcut icon" type="image/x-icon" href="/images/DALL·E 2024-11-26 17.18.24 - A sleek and modern logo design featuring the name 'HDK TIMES' integrated with a watch theme. The design should have a minimalist, premium aesthetic wi.webp">
+    <link rel="shortcut icon" type="image/x-icon"
+        href="/images/DALL·E 2024-11-26 17.18.24 - A sleek and modern logo design featuring the name 'HDK TIMES' integrated with a watch theme. The design should have a minimalist, premium aesthetic wi.webp">
 
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css" />
     <link rel="stylesheet" href="css/elegant-icons.css" type="text/css" />
@@ -20,11 +23,12 @@
     <link rel="stylesheet" href="css/style.css" type="text/css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   
-   
+
+
     <style>
         /* General Reset */
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             height: 100%;
@@ -173,179 +177,182 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <div class="login_wrap">
-        <div class="padding_eight_all bg-white">
-            <div class="heading_s1">
-                <h3>Email Verification</h3>
-            </div>
-            <form id="otpForm" action="/verify-fpsotp" method="post" onsubmit="return validateformsubmition()">
-                <div class="form-group">
-                    <label for="otp">Enter OTP:</label>
-                    <input type="text" id="otp" name="otp" class="form-control" required maxlength="6" pattern="\d*" />
+    <div class="container">
+        <div class="login_wrap">
+            <div class="padding_eight_all bg-white">
+                <div class="heading_s1">
+                    <h3>Email Verification</h3>
                 </div>
-                <button type="submit" class="btn btn-primary">Verify Email</button>
-                <div class="form-group text-center">
-                    <div id="otpTimer" class="otp-timer">
-                        <span id="timerValue">60</span>
+                <form id="otpForm" action="/verify-fpsotp" method="post" onsubmit="return validateformsubmition()">
+                    <div class="form-group">
+                        <label for="otp">Enter OTP:</label>
+                        <input type="text" id="otp" name="otp" class="form-control" required maxlength="6"
+                            pattern="\d*" />
                     </div>
-                    <button type="button" class="btn btn-secondary" id="resendButton" disabled onclick="resendOTP()">Resend OTP</button>
+                    <button type="submit" class="btn btn-primary">Verify Email</button>
+                    <div class="form-group text-center">
+                        <div id="otpTimer" class="otp-timer">
+                            <span id="timerValue">60</span>
+                        </div>
+                        <button type="button" class="btn btn-secondary" id="resendButton" disabled
+                            onclick="resendOTP()">Resend OTP</button>
+                    </div>
+                    <% if (locals.message && message.length> 0) { %>
+                        <div class="alert alert-danger">
+                            <%= message %>
+                        </div>
+                        <% } %>
+                </form>
+                <div class="text-muted text-center pt-25">
+                    Already verified? <a href="/login">Login now</a>
                 </div>
-                <% if (locals.message && message.length > 0) { %>
-                <div class="alert alert-danger"><%= message %></div>
-                <% } %>
-            </form>
-            <div class="text-muted text-center pt-25">
-                Already verified? <a href="/login">Login now</a>
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-<script>
+    <script>
 
-document.getElementById("otp").focus();
+        document.getElementById("otp").focus();
 
-let timer = 60;
-let timerInterval;
+        let timer = 60;
+        let timerInterval;
 
-// Function to start the timer
-function startTimer() {
-    const timerValue = document.getElementById("timerValue");
-    const resendButton = document.getElementById("resendButton");
-    const otpInput = document.getElementById("otp");
-    
-    otpInput.disabled = false;
-    resendButton.disabled = true;
+        function startTimer() {
+            const timerValue = document.getElementById("timerValue");
+            const resendButton = document.getElementById("resendButton");
+            const otpInput = document.getElementById("otp");
 
-    timerInterval = setInterval(() => {
-        timer--;
-        timerValue.textContent = timer;
+            otpInput.disabled = false;
+            resendButton.disabled = true;
 
-        if (timer <= 0) {
-            clearInterval(timerInterval);
-            timerValue.classList.add("expired");
-            timerValue.textContent = "Expired";
+            timerInterval = setInterval(() => {
+                timer--;
+                timerValue.textContent = timer;
 
-            resendButton.disabled = false;
-            resendButton.classList.add("active");
-            otpInput.disabled = true;
-            otpInput.value = '';
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    timerValue.classList.add("expired");
+                    timerValue.textContent = "Expired";
+
+                    resendButton.disabled = false;
+                    resendButton.classList.add("active");
+                    otpInput.disabled = true;
+                    otpInput.value = '';
+                }
+            }, 1000);
         }
-    }, 1000);
-}
 
-function resetTimer() {
-    clearInterval(timerInterval);
-    timer = 60;
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timer = 60;
 
-    const timerValue = document.getElementById("timerValue");
-    const resendButton = document.getElementById("resendButton");
-    const otpInput = document.getElementById("otp");
+            const timerValue = document.getElementById("timerValue");
+            const resendButton = document.getElementById("resendButton");
+            const otpInput = document.getElementById("otp");
 
-    timerValue.textContent = timer;
-    timerValue.classList.remove("expired");
-    resendButton.disabled = true;
-    resendButton.classList.remove("active");
-    otpInput.disabled = false;
-    otpInput.value = '';
-    otpInput.focus();
+            timerValue.textContent = timer;
+            timerValue.classList.remove("expired");
+            resendButton.disabled = true;
+            resendButton.classList.remove("active");
+            otpInput.disabled = false;
+            otpInput.value = '';
+            otpInput.focus();
 
-    startTimer();
-}
+            startTimer();
+        }
 
-function resendOTP() {
-    document.getElementById("resendButton").disabled = true;
+        function resendOTP() {
+            document.getElementById("resendButton").disabled = true;
 
-    $.ajax({
-        type: "POST",
-        url: "/resendfpotp",
-        success: function (response) {
-            if (response.success) {
-                resetTimer();
-                Swal.fire({
-                    icon: "success",
-                    title: "OTP Resent Successfully",
-                    showConfirmButton: true,
-                    timer: 1500,
-                });
-            } else {
-                document.getElementById("resendButton").disabled = false;
-                document.getElementById("otp").disabled = true;
+            $.ajax({
+                type: "POST",
+                url: "/resendfpotp",
+                success: function (response) {
+                    if (response.success) {
+                        resetTimer();
+                        Swal.fire({
+                            icon: "success",
+                            title: "OTP Resent Successfully",
+                            showConfirmButton: true,
+                            timer: 1500,
+                        });
+                    } else {
+                        document.getElementById("resendButton").disabled = false;
+                        document.getElementById("otp").disabled = true;
+                        Swal.fire({
+                            icon: "error",
+                            title: "Session Expired",
+                            text: response.message,
+                        });
+                    }
+                },
+                error: function () {
+                    document.getElementById("resendButton").disabled = false;
+                    document.getElementById("otp").disabled = true;
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Could not resend OTP. Please try again later.",
+                    });
+                },
+            });
+
+            return false;
+        }
+
+        function validateformsubmition() {
+            const otpInput = document.getElementById("otp");
+
+            if (otpInput.disabled) {
                 Swal.fire({
                     icon: "error",
-                    title: "Session Expired",
-                    text: response.message,
+                    title: "OTP Expired",
+                    text: "Please resend OTP to try again.",
                 });
+                return false;
             }
-        },
-        error: function () {
-            document.getElementById("resendButton").disabled = false;
-            document.getElementById("otp").disabled = true;
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "Could not resend OTP. Please try again later.",
+
+            $.ajax({
+                type: "POST",
+                url: "/verify-forgotPassOTP",
+                data: JSON.stringify({ otp: otpInput.value }),
+                contentType: "application/json",
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "OTP Verified Successfully",
+                            showConfirmButton: false,
+                            timer: 1500,
+                        }).then(() => {
+                            window.location.href = response.redirectUrl;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: response.message,
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Invalid OTP",
+                        text: "Please try again.",
+                    });
+                },
             });
-        },
-    });
 
-    return false;
-}
+            return false;
+        }
 
-function validateformsubmition() {
-    const otpInput = document.getElementById("otp");
-    
-    // Don't submit if input is disabled
-    if (otpInput.disabled) {
-        Swal.fire({
-            icon: "error",
-            title: "OTP Expired",
-            text: "Please resend OTP to try again.",
-        });
-        return false;
-    }
-
-    $.ajax({
-        type: "POST",
-        url: "/verify-forgotPassOTP",
-        data: JSON.stringify({ otp: otpInput.value }),
-        contentType: "application/json",
-        success: function (response) {
-            if (response.success) {
-                Swal.fire({
-                    icon: "success",
-                    title: "OTP Verified Successfully",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    window.location.href = response.redirectUrl;
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: response.message,
-                });
-            }
-        },
-        error: function () {
-            Swal.fire({
-                icon: "error",
-                title: "Invalid OTP",
-                text: "Please try again.",
-            });
-        },
-    });
-
-    return false;
-}
-
-startTimer();
-</script>
+        startTimer();
+    </script>
