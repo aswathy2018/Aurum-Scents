@@ -1,4 +1,61 @@
 <%- include('../partials/user/header.ejs') %>
+<style>
+    .search-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .search-container input {
+        width: 300px;
+        height: 35px;
+        padding: 3px 30px;
+        border: 1px solid #e7eff0;
+        border-radius: 5px;
+    }
+
+    .search-container button {
+        margin-left: 10px;
+        padding: 4px 30px;
+        background-color: rgb(65, 138, 143);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .breadcrumb{
+        font-size: 12px;
+    }
+
+    .clear-filter {
+    background-color: rgb(65, 138, 143);
+    color: white;
+    width: 10%;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+.clear-filter:hover {
+    background-color:   #7dc0b7; /* Darker red on hover */
+    transform: scale(1.05);
+}
+
+.clear-filter:active {
+    background-color: #c7f0e2;
+    transform: scale(0.98);
+}
+
+
+</style>
     <div class="mobile-header-active mobile-header-wrapper-style">
         <div class="mobile-header-wrapper-inner">
             <div class="mobile-header-top">
@@ -175,45 +232,68 @@
         </div>
     </div>
     <main class="main">
-        <div class="page-header breadcrumb-wrap">
+        
+        <section class="mt-10 mb-50">
+            
             <div class="container">
-                <div class="breadcrumb">
-                    <a href="/" rel="nofollow">Home</a>
-                    <span></span> Shop
+                    <div class="breadcrumb">
+                        <a href="/" rel="nofollow">Home &nbsp;&nbsp;</a>>&nbsp;&nbsp;
+                        <span></span>&nbsp;Shop
+                    </div>
+<!-- --------------------------------------------------------------------------------------------- -->
+                <div class="search-container mt-2 mb-50">
+                    <form action="" method="GET">
+                        <input type="text" name="query" placeholder="Search customers..." value="<%= searchQuery || '' %>">
+                        <input type="hidden" name="category" value="<%= selectedCategory || '' %>" />
+                        <input type="hidden" name="priceRange" value="<%= selectedPriceRange || '' %>" />
+                        <input type="hidden" name="sort" value="<%= selectedSort || '' %>" />
+                        <button type="submit">Search</button>
+                    </form>
                 </div>
-            </div>
-        </div>
-        <section class="mt-50 mb-50">
-            <div class="container">
                 <div class="row">
-                    <div class="col-lg-9">
+                    <div class="col-lg-10 ml-70">
                         <div class="shop-product-fillter">
                             <div class="totall-product">
                                 <p> We found <strong class="text-brand">
                                         <%=products.length%>
                                     </strong> items for you!</p>
                             </div>
+                            <!-- Price Sort -->
                             <div class="sort-by-product-area">
                                 <div class="sort-by-cover mr-10">
                                     <div class="sort-by-product-wrap">
                                         <div class="sort-by">
-                                            <span><i class="fi-rs-apps"></i>Show:</span>
+                                            <span><i class="fi-rs-apps"></i>Sort:</span>
                                         </div>
                                         <div class="sort-by-dropdown-wrap">
-                                            <span> 50 <i class="fi-rs-angle-small-down"></i></span>
+                                            <span> 10000 <i class="fi-rs-angle-small-down"></i></span>
                                         </div>
                                     </div>
                                     <div class="sort-by-dropdown">
                                         <ul>
-                                            <li><a class="active" href="#">50</a></li>
-                                            <li><a href="#">100</a></li>
-                                            <li><a href="#">150</a></li>
-                                            <li><a href="#">200</a></li>
-                                            <li><a href="#">All</a></li>
+                                            <li>
+                                                <a href="/shop?query=<%= searchQuery || '' %>&category=<%= selectedCategory || '' %>&sort=<%= selectedSort || '' %>"
+                                                    class="<%= !selectedPriceRange ? 'active' : '' %>">
+                                                    All
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/shop?priceRange=10000-20000&query=<%= searchQuery || '' %>&category=<%= selectedCategory || '' %>&sort=<%= selectedSort || '' %>"
+                                                    class="<%= selectedPriceRange === '10000-20000' ? 'active' : '' %>">
+                                                    ₹ 10000 - 20000
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/shop?priceRange=20000-30000&query=<%= searchQuery || '' %>&category=<%= selectedCategory || '' %>&sort=<%= selectedSort || '' %>"
+                                                    class="<%= selectedPriceRange === '20000-30000' ? 'active' : '' %>">
+                                                    ₹ 20000 - 30000
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
-                                <div class="sort-by-cover">
+                                <!-- Featured sorting -->
+                                <div class="sort-by-cover mr-10">
                                     <div class="sort-by-product-wrap">
                                         <div class="sort-by">
                                             <span><i class="fi-rs-apps-sort"></i>Sort by:</span>
@@ -224,16 +304,68 @@
                                     </div>
                                     <div class="sort-by-dropdown">
                                         <ul>
-                                            <li><a class="active" href="#">Featured</a></li>
-                                            <li><a href="#">Price: Low to High</a></li>
-                                            <li><a href="#">Price: High to Low</a></li>
-                                            <li><a href="#">Release Date</a></li>
-                                            <li><a href="#">Avg. Rating</a></li>
+                                            
+                                            <li>
+                                                <a href="/shop?sort=lowToHigh&query=<%= searchQuery || '' %>&category=<%= selectedCategory || '' %>&priceRange=<%= selectedPriceRange || '' %>"
+                                                    class="<%= selectedSort === 'lowToHigh' ? 'active' : '' %>">
+                                                    Price: Low to High
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/shop?sort=highToLow&query=<%= searchQuery || '' %>&category=<%= selectedCategory || '' %>&priceRange=<%= selectedPriceRange || '' %>"
+                                                    class="<%= selectedSort === 'highToLow' ? 'active' : '' %>">
+                                                    Price: High to Low
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/shop?sort=aToZ&query=<%= searchQuery || '' %>&category=<%= selectedCategory || '' %>&priceRange=<%= selectedPriceRange || '' %>"
+                                                    class="<%= selectedSort === 'aToZ' ? 'active' : '' %>">
+                                                    A to Z
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/shop?sort=zToA&query=<%= searchQuery || '' %>&category=<%= selectedCategory || '' %>&priceRange=<%= selectedPriceRange || '' %>"
+                                                    class="<%= selectedSort === 'zToA' ? 'active' : '' %>">
+                                                    Z to A
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
+                                <!-- sort by category -->  
+                            <div class="sort-by-cover mr-10">
+                                <div class="sort-by-product-wrap">
+                                    <div class="sort-by">
+                                            <span><i class="fi-rs-apps"></i>Filter By :</span>
+                                        </div>
+                                        <div class="sort-by-dropdown-wrap">
+                                            <span>Category <i class="fi-rs-angle-small-down"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="sort-by-dropdown">
+                                        <ul>
+                                            <li>
+                                                <a href="/shop?query=<%= searchQuery || '' %>&priceRange=<%= selectedPriceRange || '' %>&sort=<%= selectedSort || '' %>"
+                                                    class="<%= !selectedCategory ? 'active' : '' %>">
+                                                    All
+                                                </a>
+                                            </li>
+                                            <% for(let i=0; i < category.length; i++) { %>
+                                                <li>
+                                                    <a href="/shop?category=<%= category[i]._id %>&query=<%= searchQuery || '' %>&priceRange=<%= selectedPriceRange || '' %>&sort=<%= selectedSort || '' %>"
+                                                        class="<%= selectedCategory === category[i]._id.toString() ? 'active' : '' %>">
+                                                        <%= category[i].name %>
+                                                    </a>
+                                                </li>
+                                                <% } %>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div> 
                             </div>
+                            
                         </div>
+                        <button class="clear-filter "><a class="text-white" href="/shop" >Cleare filter</a></button>
                         <div class="row product-grid-3">
                             <% for(let i=0;i<products.length;i++){%>
                                 <div class="col-lg-4 col-md-4 col-12 col-sm-6">
@@ -250,7 +382,7 @@
                                                     data-bs-toggle="modal" data-bs-target="#quickViewModal">
                                                     <i class="fi-rs-search"></i></a>
                                                 <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                                    href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                onclick="addToWishlist('<%= products[i]._id %>')"><i class="fi-rs-heart"></i></a>
                                                 <a aria-label="Compare" class="action-btn hover-up"
                                                     href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                             </div>
@@ -298,79 +430,8 @@
                             </nav>
                         </div>
                     </div>
-                    <div class="col-lg-3 primary-sidebar sticky-sidebar">
-                        <div class="row">
-                            <div class="col-lg-12 col-mg-6"></div>
-                            <div class="col-lg-12 col-mg-6"></div>
-                        </div>
-                        <div class="widget-category mb-30">
-                            <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
-                            <ul class="categories">
-                                <%category.forEach(cat=>{%>
-                                    <li>
-                                        <%=cat.name%>
-                                    </li>
-                                    <%})%>
-
-                            </ul>
-                        </div>
-                        <!-- Fillter By Price -->
-                        <div class="sidebar-widget price_range range mb-30">
-                            <div class="widget-header position-relative mb-20 pb-10">
-                                <h5 class="widget-title mb-10">Fill by price</h5>
-                                <div class="bt-1 border-color-1"></div>
-                            </div>
-                            <div class="price-filter">
-                                <div class="price-filter-inner">
-                                    <div id="slider-range"></div>
-                                    <div class="price_slider_amount">
-                                        <div class="label-input">
-                                            <span>Range:</span><input type="text" id="amount" name="price"
-                                                placeholder="Add Your Price" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="list-group">
-                                <div class="list-group-item mb-10 mt-10">
-                                    <label class="fw-900">Color</label>
-                                    <div class="custome-checkbox">
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox1" value="">
-                                        <label class="form-check-label" for="exampleCheckbox1"><span>Red
-                                                (56)</span></label>
-                                        <br>
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox2" value="">
-                                        <label class="form-check-label" for="exampleCheckbox2"><span>Green
-                                                (78)</span></label>
-                                        <br>
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox3" value="">
-                                        <label class="form-check-label" for="exampleCheckbox3"><span>Blue
-                                                (54)</span></label>
-                                    </div>
-                                    <label class="fw-900 mt-15">Item Condition</label>
-                                    <div class="custome-checkbox">
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox11" value="">
-                                        <label class="form-check-label" for="exampleCheckbox11"><span>New
-                                                (1506)</span></label>
-                                        <br>
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox21" value="">
-                                        <label class="form-check-label" for="exampleCheckbox21"><span>Refurbished
-                                                (27)</span></label>
-                                        <br>
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox31" value="">
-                                        <label class="form-check-label" for="exampleCheckbox31"><span>Used
-                                                (45)</span></label>
-                                    </div>
-                                </div>
-                            </div>
-                            <a href="shop" class="btn btn-sm btn-default"><i class="fi-rs-filter mr-5"></i> Fillter</a>
-                        </div>
+                    
+                        
 
         </section>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -423,6 +484,32 @@
                             confirmButtonText: 'OK'
                         });
                     });
+            }
+
+            async function addToWishlist(productId) {
+                try {
+                    const response = await fetch("/addTowishlist", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ productId }),
+                    });
+
+                    const data = await response.json();
+                    Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: data.success ? "success" : "error",
+                        title:
+                            data.message ||
+                            (data.success ? "Added to wishlist" : "Failed to add to wishlist"),
+                        showConfirmButton: false,
+                        timer: 3000,
+                    });
+                } catch (error) {
+                    console.error("Error adding to wishlist:", error);
+                }
             }
         </script>
 

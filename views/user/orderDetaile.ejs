@@ -1,0 +1,301 @@
+<%- include("../partials/user/header.ejs") %>
+
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #088178;
+  }
+  h5 {
+    color:#ffffff
+  }
+
+  .card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, #088178, #088178);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .badge {
+    font-size: 0.85em;
+    padding: 0.5em 0.75em;
+    border-radius: 12px;
+  }
+
+  .btn-sm {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 5px;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+  }
+
+  .btn-sm:hover {
+    transform: scale(1.05);
+    background-color: #f8f9fa;
+  }
+
+  table {
+    font-size: 0.95rem;
+  }
+
+  .thead-light th {
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: bold;
+  }
+
+  .card-footer {
+    background: #f1f1f1;
+  }
+
+  .btn-primary {
+    background-color: #088178;
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background-color: #088178;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .pagination a {
+    text-decoration: none;
+    color: #088178;
+    background-color: #f1f1f1;
+    padding: 0.5rem 0.75rem;
+    border-radius: 5px;
+    margin: 0 0.25rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+
+  .pagination a:hover {
+    background-color: #088178;
+    color: #ffffff;
+    transform: scale(1.05);
+  }
+
+  .pagination a.active {
+    background-color: #088178;
+    color: #ffffff;
+    font-weight: bold;
+  }
+
+  .pagination a:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .modal {
+  transition: none;
+}
+
+.modal-dialog {
+  transform: none !important;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.modal-open .card:hover {
+  transform: none;
+  pointer-events: none;
+}
+
+  
+</style>
+<div class="container my-5">
+  <h2 class="text-center mb-4">Your Orders</h2>
+  <div class="row">
+    <% orderDetails.forEach(order => { %>
+      <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">Order Id: #<%= order._id %></h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="thead-light">
+                  <tr>
+                    <th>Product</th>
+                    <th>Status</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Payment Status</th>
+                    <th>payment Method</th>
+                    <th>Actions</th>
+                    <th>More Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% order.orderedItems.forEach(item => { %>
+                    <tr>
+                      <td><%= item.product?.productName %></td>
+                      <td>
+                        <span>
+                          <%= item.status %>
+                        </span>
+                      </td>
+                      <td><%= item.quantity %></td>
+                      <td>₹<%= item.price %></td>
+                      <td><%=order.paymentStatus%></td>
+                      <td><%=order.paymentMethod%></td>
+                      <td>
+                        <% if (item.status === 'Pending' && order.paymentStatus=== "Paid" || item.status === 'Shipped'&& order.paymentStatus=== "Paid") { %>
+                          <button type="button" class="btn btn-danger btn-sm" onclick="confirmCancel('<%= order._id %>', '<%= item.product?._id %>')">
+                            Cancel
+                          </button>
+                        <% } else if (item.status === 'Cancelled') { %>
+                          <span class="text-danger">Cancelled</span>
+                        <% } else if (item.status === 'Delivered') { %>
+                          <!-- Button to trigger the modal -->
+                          <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal<%= item.product?._id %>">
+                            Return
+                          </button>
+
+                          <!-- Modal -->
+                          <div class="modal fade" id="returnModal<%= item.productId?._id %>" tabindex="-1" aria-labelledby="returnModalLabel<%= item.product?._id %>" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="returnModalLabel<%= item.product?._id %>">Return Product</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="/orders/<%= order._id %>/product/<%= item.product?._id %>/return" method="POST">
+                                  <div class="modal-body">
+                                    <div class="mb-3">
+                                      <label for="returnReason<%= item.product?._id %>" class="form-label">Reason for Return</label>
+                                      <textarea class="form-control" id="returnReason<%= item.product?._id %>" name="returnReason" rows="3" required></textarea>
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-danger">Submit Return</button>
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        <% } else if (item.status === 'Return') { %>
+                          <span class="text-warning">Returned</span>
+                          <%}%>
+                      </td>
+                      <td><a href="/invoice?orderId=<%=order._id%>">View Details</a></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<div class="pagination">
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>"><</a>
+  <% } %>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="?page=<%= i %>" <%= currentPage === i ? "class='active'" : "" %>><%= i %></a>
+  <% } %>
+  <% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %>">></a>
+  <% } %>
+</div>
+
+<%- include("../partials/user/footer.ejs") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.querySelector(this.getAttribute('href')).scrollIntoView({
+        behavior: 'smooth'
+      });
+    });
+  });
+
+  async function retryPayment(orderId) {
+    try {
+        const response = await fetch('/retrypayment', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId })
+        });
+
+        const data = await response.json();
+
+        var options = {
+            key: "rzp_test_LbJY0AM5BiuG4B",
+            amount: data.amount * 100,
+            currency: data.currency,
+            name: "HDK TIMES",
+            description: "Retry Payment",
+            order_id: data.razorpayOrderId,
+            handler: function (response) {
+                fetch("/update-payment-status", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature,
+                        orderId: data.orderId
+                    }),
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data.success) {
+                            
+                            window.location.href = "/paymentsuccess";
+                        } else {
+                            alert("Payment verification failed. Please try again.");
+                        }
+                    })
+                    .catch((err) => console.error("Error:", err));
+            },
+            theme: {
+                color: "#F37254",
+            },
+        };
+
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+    } catch (error) {
+        console.log("Retry payment failed", error);
+        alert("Payment failed");
+    }
+}
+
+</script>

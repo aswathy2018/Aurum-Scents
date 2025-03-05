@@ -1,4 +1,4 @@
-<%-include(".. /../views/partials/user/header")%>
+<%- include('../partials/user/header.ejs') %>
 
     <section class="content-main mt-80 mb-80">
         <div class="card mx-auto card-login" style="max-width: 400px;">
@@ -21,8 +21,7 @@
             </div>
         </div>
     </section>
-
-    <%-include(".. /../views/partials/user/footer")%>
+    <%- include('../partials/user/footer.ejs') %>
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
@@ -69,7 +68,7 @@
 
                 $.ajax({
                     type: "GET",
-                    url: "/resend-otp",
+                    url: "/resendOtp",
                     success: function (response) {
                         if (response.success) {
                             Swal.fire({

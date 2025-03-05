@@ -1,4 +1,4 @@
-<%-include("../../views/partials/user/header")%>
+<%- include('../partials/user/header.ejs') %>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
@@ -23,7 +23,7 @@
         </a>
         </div>
         <div class="ml-20 mb-15">
-        <a href="/orders" class="item">
+        <a href="/orderDetaile" class="item">
             <i class="fas fa-box"></i> Orders
         </a>
         </div>
@@ -92,7 +92,7 @@
     </div>
 </div>
 </body>
-<%-include("../../views/partials/user/footer")%>
+<%- include('../partials/user/footer.ejs') %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Cropper.js CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
@@ -110,22 +110,19 @@
     const saveCropBtn = document.querySelector('.save-crop-btn');
     let cropper;
 
-    // Handle file input change
     photoInput.addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
             const reader = new FileReader();
             
             reader.onload = function(e) {
-                // Set image source and show modal
                 cropperImage.src = e.target.result;
                 cropperModal.style.display = 'block';
                 
-                // Destroy previous cropper instance
                 if (cropper) {
                     cropper.destroy();
                 }
                 
-                // Initialize cropper
+                // Initializing cropper
                 cropper = new Cropper(cropperImage, {
                     aspectRatio: 1,
                     viewMode: 1,
@@ -152,7 +149,6 @@
         }
     });
 
-    // Save cropped image and upload
     saveCropBtn.addEventListener('click', function() {
         if (cropper) {
             const canvas = cropper.getCroppedCanvas({
@@ -172,13 +168,12 @@
 
                     const data = await response.json();
                     if (data.success) {
-                        // Close the cropper modal
+
                         cropperModal.style.display = 'none';
                         if (cropper) {
                             cropper.destroy();
                         }
-                        
-                        // Show SweetAlert2 success popup
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
@@ -186,7 +181,6 @@
                             timer: 2000,
                             showConfirmButton: false,
                             willClose: () => {
-                                // Refresh the page after popup closes
                                 window.location.reload();
                             }
                         });
@@ -209,7 +203,6 @@
         }
     });
 
-    // Close modal when clicking outside
     window.addEventListener('click', function(e) {
         if (e.target === cropperModal) {
             cropperModal.style.display = 'none';

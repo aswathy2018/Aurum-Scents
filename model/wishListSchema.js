@@ -1,5 +1,3 @@
-const Product = require("./productSchema")
-
 const mongoose = require('mongoose')
 const {Schema} = mongoose
 

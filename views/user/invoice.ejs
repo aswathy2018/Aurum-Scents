@@ -1,0 +1,148 @@
+<%- include("../partials/user/header.ejs") %>
+
+    <style>
+       
+        main {
+            display: flex;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+        .bill-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+        }
+        .bill-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .bill-header h1 {
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        .bill-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .bill-details {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            background-color: #fafafa;
+            margin-bottom: 1.5rem;
+        }
+        .bill-details p {
+            margin: 0.5rem 0;
+            color: #333;
+        }
+        .bill-details p span {
+            font-weight: bold;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .items-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .total {
+            text-align: right;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 480px) {
+            .bill-container {
+                padding: 1.5rem;
+            }
+            .items-table th, .items-table td {
+                font-size: 0.9rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+    <main>
+        <div class="bill-container">
+            <div class="bill-header">
+                <h1>Order Details</h1>
+                <p>Thank you for your purchase!</p>
+            </div>
+            <div class="dowlodingpdf">
+            <div class="bill-details">
+                <p><span>Order ID:<%=order._id%></span></p>
+                <p><span>Date:</span> <%= order.createdAt.toDateString() %></p>
+                <p><span>Customer Name:</span> <%=order?.userId?.name%></p>
+                <p><span>Email:</span> <%=order.userId.email%></p>
+            </div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <%order.orderedItems.forEach((item)=>{%>
+                    <tr>
+                        <td><%=item.product?.productName%></td>
+                        <td><%=item.quantity%></td>
+                        <td><%=item.status%></td>
+                        <td><%=item.price%></td>
+                        <td><%=item.price* item.quantity -order.discount%></td>
+                    </tr>
+                    <%})%>
+
+                </tbody>
+            </table>
+            <p class="total">Discount:<%=order.discount%></p>
+            <p class="total">Total Amount:<%=order.totalAmount%></p>
+            <div style="text-align: center;">
+                <a
+                  class="btn"
+                  href="/download-invoice?orderId=<%= order._id %>"
+                  target="_blank"
+                >
+                  Download Invoice
+                </a>
+              </div>
+    </main>
+    
+
+
+    <%- include("../partials/user/footer.ejs") %>

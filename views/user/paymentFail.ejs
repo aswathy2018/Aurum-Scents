@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Failed</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        text-align: center;
+        max-width: 90%;
+        width: 400px;
+      }
+      h1 {
+        color: #f44336;
+        margin-bottom: 1rem;
+      }
+      p {
+        color: #333;
+        margin-bottom: 1.5rem;
+      }
+      .icon {
+        font-size: 4rem;
+        color: #f44336;
+        margin-bottom: 1rem;
+        animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      }
+      .details {
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .details p {
+        margin: 0.5rem 0;
+      }
+      .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .btn {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+      }
+      .btn:hover {
+        background-color: #d32f2f;
+      }
+      .btn-secondary {
+        background-color: #2196f3;
+      }
+      .btn-secondary:hover {
+        background-color: #1e88e5;
+      }
+      .btn-tertiary {
+        background-color: #9e9e9e;
+      }
+      .btn-tertiary:hover {
+        background-color: #757575;
+      }
+      @keyframes shake {
+        10%,
+        90% {
+          transform: translate3d(-1px, 0, 0);
+        }
+        20%,
+        80% {
+          transform: translate3d(2px, 0, 0);
+        }
+        30%,
+        50%,
+        70% {
+          transform: translate3d(-4px, 0, 0);
+        }
+        40%,
+        60% {
+          transform: translate3d(4px, 0, 0);
+        }
+      }
+      @media (max-width: 480px) {
+        .container {
+          padding: 1.5rem;
+        }
+        h1 {
+          font-size: 1.5rem;
+        }
+        .icon {
+          font-size: 3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon">❌</div>
+      <h1>Payment Failed</h1>
+      <p>
+        We're sorry, but your payment could not be processed at this time.
+        Please review the details and try again.
+      </p>
+      
+      <div class="btn-container">
+        <a href="/orderdetails" class="btn">Try Again</a>
+        <a href="#" class="btn btn-secondary">Contact Support</a>
+        <a href="/" class="btn btn-tertiary">Back to Home</a>
+      </div>
+    </div>
+  </body>
+</html>

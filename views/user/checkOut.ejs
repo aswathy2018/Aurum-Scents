@@ -228,13 +228,80 @@
                         <div class="form-group">
                             <label for="addressSelect">Select Address</label>
                             <select id="addressSelect" name="selectedAddress" class="form-control" required>
-                                <% address?.address?.forEach((add)=> { %>
-                                    <option value="<%= address._id %>">
+                                <% address?.address?.forEach((add) => { %>
+                                    <option value="<%= add._id %>">
                                         <%= add.addressType %>, <%= add.city %>, <%= add.landMark %>, <%= add.state %>,
-                                                        <%= add.pincode %>, <%= add.phone %>
+                                        <%= add.pincode %>, <%= add.phone %>, <%= add.alternativePhone %>
                                     </option>
-                                    <% }) %>
+                                <% }) %>
                             </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn mt-3" data-bs-toggle="modal"
+                                data-bs-target="#addAddressModal">
+                                Add Address
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form id="addAddressForm" action="/checkAddAddress" method = 'post'>
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="addAddressModalLabel">Add Address</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="addType">Address Type</label>
+                                            <input type="text" class="form-control" id="addType" name="addressType"
+                                                required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="addName">Name</label>
+                                            <input type="text" class="form-control" id="addName" name="name" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="addCity">City</label>
+                                            <input type="text" class="form-control" id="addCity" name="city" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="addState">State</label>
+                                            <input type="text" class="form-control" id="addState" name="state"
+                                                required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="addPincode">Pincode</label>
+                                            <input type="text" class="form-control" id="addPincode" name="pincode"
+                                                required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="addLandmark">Landmark</label>
+                                            <input type="text" class="form-control" id="addLandmark" name="landMark" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="addPhone">Phone</label>
+                                            <input type="text" class="form-control" id="addPhone" name="phone"
+                                                required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="addAltPhone">Alternate Phone</label>
+                                            <input type="text" class="form-control" id="addAltPhone" name="alternativePhone" />
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Close
+                                        </button>
+                                        <button type="submit" id="submitButton" class="btn btn-primary">Add address</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -292,45 +359,331 @@
                                     <h5>Payment</h5>
                                 </div>
                                 <div class="payment_option">
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios3" checked="">
-                                        <label class="form-check-label" for="exampleRadios3" data-bs-toggle="collapse"
-                                            data-target="#bankTranfer" aria-controls="bankTranfer">Direct Bank
-                                            Transfer</label>
-                                        <div class="form-group collapse in" id="bankTranfer">
-                                            <p class="text-muted mt-5">There are many variations of passages of Lorem
-                                                Ipsum available, but the majority have suffered alteration. </p>
-                                        </div>
-                                    </div>
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios4" checked="">
-                                        <label class="form-check-label" for="exampleRadios4" data-bs-toggle="collapse"
-                                            data-target="#checkPayment" aria-controls="checkPayment">Check
-                                            Payment</label>
-                                        <div class="form-group collapse in" id="checkPayment">
-                                            <p class="text-muted mt-5">Please send your cheque to Store Name, Store
-                                                Street, Store Town, Store State / County, Store Postcode. </p>
-                                        </div>
-                                    </div>
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios5" checked="">
-                                        <label class="form-check-label" for="exampleRadios5" data-bs-toggle="collapse"
-                                            data-target="#paypal" aria-controls="paypal">Paypal</label>
-                                        <div class="form-group collapse in" id="paypal">
-                                            <p class="text-muted mt-5">Pay via PayPal; you can pay with your credit card
-                                                if you don't have a PayPal account.</p>
-                                        </div>
-                                    </div>
+                                    <div style="margin-top: 10px">
+                                        <input id="cod" type="radio" name="paymentMethod" value="COD"
+                                            style="width: 15px; height: 15px; margin-right: 5px; cursor: pointer;" required/>
+                                        <label for="cod" style="cursor: pointer; font-size: 14px">Cash On Delivery</label>
+                                      </div>
                                 </div>
                             </div>
-                            <a href="#" class="btn btn-fill-out btn-block mt-30">Place Order</a>
+                            <button id="placeOrderButton" class="btn btn-fill-out btn-block mt-30">Place Order</button>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
-    <%-include(".. /../views/partials/user/footer")%>
+    <%- include('../partials/user/footer.ejs') %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+
+function validateAddressForm() {
+    let isValid = true;
+    const requiredFields = ["addType", "addName", "addCity", "addLandmark", "addState", "addPincode", "addPhone", "addAltPhone"];
+
+    // Regular expressions for validation
+    const namePattern = /^[A-Za-z\s]+$/; // Only letters and spaces
+    const pincodePattern = /^\d{6}$/; // Exactly 6-digit numbers
+    const phonePattern = /^[6-9]\d{9}$/; // Valid Indian phone numbers (starting with 6-9)
+
+    requiredFields.forEach(function(field) {
+        const input = document.getElementById(field);
+        let inputValue = input.value.trim();
+        const errorElement = document.getElementById(field + '-error');
+
+        if (inputValue === "") {
+            showError(field, "This field is required.");
+            isValid = false;
+        } else {
+            clearError(field);
+        }
+    });
+
+    const name = document.getElementById('addName').value.trim();
+    const city = document.getElementById('addCity').value.trim();
+    const landMark = document.getElementById('addLandmark').value.trim();
+    const state = document.getElementById('addState').value.trim();
+    const pincode = document.getElementById('addPincode').value.trim();
+    const phone = document.getElementById('addPhone').value.trim();
+    const alternativePhone = document.getElementById('addAltPhone').value.trim();
+
+    // Name, City, Landmark & State validation (Only letters and spaces)
+    if (!namePattern.test(name)) {
+        showSwalError("Name should contain only letters.");
+        isValid = false;
+    }
+    if (!namePattern.test(city)) {
+        showSwalError("City should contain only letters.");
+        isValid = false;
+    }
+    if (landMark && !namePattern.test(landMark)) {
+        showSwalError("Landmark should contain only letters.");
+        isValid = false;
+    }
+    if (!namePattern.test(state)) {
+        showSwalError("State should contain only letters.");
+        isValid = false;
+    }
+
+    // Pincode validation (Exactly 6-digit numbers)
+    if (!pincodePattern.test(pincode)) {
+        showSwalError("Pincode must be exactly 6 digits.");
+        isValid = false;
+    }
+
+    // Phone number validation (10-digit valid numbers starting with 6-9)
+    if (!phonePattern.test(phone)) {
+        showSwalError("Phone number must be a valid 10-digit number starting with 6-9.");
+        isValid = false;
+    }
+    if (alternativePhone && !phonePattern.test(alternativePhone)) {
+        showSwalError("Alternate phone number must be a valid 10-digit number starting with 6-9.");
+        isValid = false;
+    }
+
+    // Ensure phone and alternate phone are not the same
+    if (phone === alternativePhone) {
+        showSwalError("Phone number and alternate phone number must be different.");
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+// Function to show inline error message
+function showError(field, message) {
+    let errorElement = document.getElementById(field + '-error');
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.className = "text-danger";
+        errorElement.id = field + '-error';
+        document.getElementById(field).parentNode.appendChild(errorElement);
+    }
+    errorElement.textContent = message;
+}
+
+// Function to clear inline error message
+function clearError(field) {
+    const errorElement = document.getElementById(field + '-error');
+    if (errorElement) {
+        errorElement.remove();
+    }
+}
+
+// Function to show SweetAlert errors
+function showSwalError(message) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: message,
+    });
+}
+
+
+document.getElementById('addAddressForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            if (validateAddressForm()) {
+                const formData = new FormData(this);
+                const url = this.getAttribute('action');
+
+                fetch(url, {
+                    method: 'POST',
+                    body: new URLSearchParams(formData),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Address added successfully',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = '/checkOut';
+                            });
+                        } else {
+                            throw new Error('Network response was not ok');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to add address. Please try again.',
+                            icon: 'error'
+                        });
+                    });
+            }
+        });
+// ----------------------------------------------------------------------------------
+
+//         const placeOrderButton = document.querySelector(".btn-fill-out");
+// const addressSelect = document.getElementById("addressSelect");
+// const paymentRadios = document.getElementsByName("paymentMethod");
+
+// let orderId;
+// const cartItems = JSON.parse('<%- JSON.stringify(cartItems) %>');
+// const totalAmount = '<%= cart.items.reduce((sum, item) => sum + item.productId.salesPrice * item.quantity, 0) %>';
+
+// const totalElement = document.querySelector(".product-subtotal span");
+// const originalTotal = parseFloat(totalElement.textContent.replace("₹", "").trim());
+
+// placeOrderButton.addEventListener("click", async (event) => {
+//     event.preventDefault();
+//     console.log("Place Order button clicked");
+
+//     const selectedAddressId = addressSelect.value;
+//     if (!selectedAddressId) {
+//         Swal.fire({
+//             toast: true,
+//             position: 'top-end',
+//             icon: 'warning',
+//             title: "Please select an address to proceed.",
+//             showConfirmButton: false,
+//             timer: 3000
+//         });
+//         return;
+//     }
+
+//     const selectedPaymentMethod = Array.from(paymentRadios).find(radio => radio.checked)?.value;
+//     if (!selectedPaymentMethod) {
+//         Swal.fire({
+//             toast: true,
+//             position: 'top-end',
+//             icon: 'warning',
+//             title: "Please select a payment method.",
+//             showConfirmButton: false,
+//             timer: 3000
+//         });
+//         return;
+//     }
+
+//     const orderData = {
+//         addressId: selectedAddressId,
+//         items: cartItems.map(item => ({
+//             productId: item.productId._id,
+//             quantity: item.quantity,
+//         })),
+//         totalAmount: totalAmount, 
+//         paymentMethod: selectedPaymentMethod,
+//     };
+
+//     try {
+//         const response = await fetch("/checkout/process", {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify(orderData),
+//         });
+
+//         const result = await response.json();
+//         if (response.ok) {
+//             orderId = result.orderId;
+
+//             if (selectedPaymentMethod === "COD") {
+//                 Swal.fire({
+//                     toast: true,
+//                     position: 'top-end',
+//                     icon: 'success',
+//                     title: "Order placed successfully with COD!",
+//                     showConfirmButton: false,
+//                     timer: 3000
+//                 });
+//                 window.location.href = "/payemntSuccess";
+//             } 
+//             else {
+//             throw new Error(result.message || "Failed to place order. Please try again.");
+//         }
+//     }
+//     } catch (error) {
+//         console.error("Error placing order:", error);
+//         Swal.fire({
+//             icon: 'error',
+//             title: "An error occurred while placing your order.",
+//             text: error.message,
+//             showConfirmButton: true,
+//         }).then(() => {
+//             window.location.href = "/paymentFail";
+//         });
+//     }
+// });
+
+
+
+document.getElementById("placeOrderButton").addEventListener("click", function () {
+    const selectedAddress = document.getElementById("addressSelect").value;
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+    const totalAmount = '<%= cart.items.reduce((sum, item)=> sum += item.productId.salesPrice * item.quantity, 0) %>'
+
+    // Check if address is selected
+    if (!selectedAddress) {
+        Swal.fire({
+            icon: "error",
+            title: "Address Required",
+            text: "Please select an address before placing the order.",
+        });
+        return;
+    }
+
+    // Check if payment method (COD) is selected
+    if (!paymentMethod) {
+        Swal.fire({
+            icon: "error",
+            title: "Payment Method Required",
+            text: "Please select Cash on Delivery (COD).",
+        });
+        return;
+    }
+
+    // Order Data to Send
+    const orderData = {
+        addressId: selectedAddress,
+        paymentMethod: paymentMethod.value,
+        totalAmount: totalAmount
+    };
+
+    console.log(orderData);
+    
+    
+    fetch("/checkout/process", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body:JSON.stringify({orderData})
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Order Placed!",
+                text: "Your order has been successfully placed.",
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = "/paymentSuccess";
+            });
+        } else {
+            //Order failed
+            Swal.fire({
+                icon: "error",
+                title: "Order Failed",
+                text: dat.message
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error placing order:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Unable to place the order. Please try again."
+        });
+    });
+});
+
+    </script>

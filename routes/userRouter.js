@@ -35,6 +35,8 @@ router.get('/auth/google', passport.authenticate('google', {scope: ['profile', '
 
 //shop Page
 router.get('/shop',userAuth,userController.shop)
+router.get("/search", userAuth, userController.searchProducts);
+router.get("/shops", userController.categoryfilter);
 
 
 //success and failure state handling
@@ -51,7 +53,7 @@ router.get('/forgotPassword', profileController.getForgotPassPage)
 router.post('/mailverification', profileController.forgotEmailValid)
 router.post('/verify-forgotPassOTP', profileController.verifyForgotPassOTP)
 router.get('/resetPassword', profileController.getResetPassword)
-router.post('/resendfpotp', profileController.resendOtp)
+router.post('/resendfpotp', profileController.resendOTP)
 router.post('/resetPassword', profileController.resetPassword)
 router.get('/userProfile', userAuth, profileController.profile)
 router.post('/profileImage',uploads.single('profileImage'),profileController.profileImage)
@@ -61,7 +63,7 @@ router.post('/changePassword', userAuth, profileController.changePassword);
 router.get('/editProfile', userAuth, profileController.editProfile)
 router.post('/editProfile', userAuth, profileController.postEditProfile)
 router.post('/verify-otp', userAuth, profileController.otpVerification);
-router.get('/resend-otp', userAuth, profileController.resendOTP);
+router.get('/resendOtp', userAuth, profileController.profileResendOTP);
 
 
 //Address management
@@ -79,7 +81,21 @@ router.post('/updateCart', userAuth, cartController.updateCart);
 router.post('/removeFromCart', userAuth, cartController.removeFromCart);
 
 
+//Wishlist management
+router.get("/wishlist", userAuth, cartController.loadwhishlist);
+router.post("/addTowishlist", userAuth, cartController.addToWishlist);
+router.post('/removeFromWishlist', userAuth, cartController.removeFromWishlist);
+router.post('/addToCartFromWishlist', userAuth, cartController.addToCartFromWishlist);
+router.post('/checkAddAddress', userAuth, cartController.checkAddAddress)
+
+
 //Order Management
 router.get('/checkOut', userAuth, orderController.getCheckOut)
+router.post("/checkout/process", userAuth, orderController.placeorder);
+router.get('/paymentSuccess', userAuth, orderController.success)
+router.get('/payementFail', userAuth, orderController.paymentFail)
+router.get('/orderDetaile', userAuth, orderController.getOrderList)
+router.get('/invoice', userAuth, orderController.invoice)
+router.get("/download-invoice", userAuth, orderController.generateInvoicePdf);
 
 module.exports = router

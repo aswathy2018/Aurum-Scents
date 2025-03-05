@@ -55,6 +55,7 @@ const getForgotPassPage = async (req, res) => {
 const forgotEmailValid = async (req, res) => {
     try {
         const { email } = req.body;
+        
         const findUser = await User.findOne({ email: email })
         if (findUser) {
             const otp = generateOTP();
@@ -102,7 +103,7 @@ const getResetPassword = async (req, res) => {
 }
 
 
-const resendOtp = async (req, res) => {
+const resendOTP = async (req, res) => {
     try {
         const otp = generateOTP()
         req.session.userOtp = otp
@@ -405,6 +406,7 @@ const postEditProfile = async (req, res) => {
 
         req.session.userOtp = otp;
         req.session.updatedData = data;
+        
 
 
         await sendVerificationMail(data.email, otp);
@@ -456,19 +458,21 @@ const otpVerification = async (req, res) => {
 };
 
 
-const resendOTP = async (req, res) => {
+const profileResendOTP = async (req, res) => {
     try {
-        const { email } = req.session.userData;
-        const otp = generateOTP();
+        const otp = generateOTP()
+        req.session.userOtp = otp
+        const userData = req.session.updatedData
+        
+        const email = userData.email
+        console.log("Email of the resnd OTP: ", email);
         const emailSent = await sendVerificationMail(email, otp)
-
-        if (!emailSent) {
-            return res.json("email-error")
+        if (emailSent) {
+            console.log("Resended OTP: ", otp);
+            res.status(200).json({ success: true, message: "Successfully sended resend OTP" })
         }
-        console.log("resendOtp", otp);
-        req.session.userOtp = otp;
-        res.json({ success: true })
     } catch (error) {
+        console.log(error)
         console.error(500)
         res.json("OTP issue")
     }
@@ -479,7 +483,7 @@ module.exports = {
     forgotEmailValid,
     verifyForgotPassOTP,
     getResetPassword,
-    resendOtp,
+    resendOTP,
     resetPassword,
     profile,
     profileImage,
@@ -494,5 +498,5 @@ module.exports = {
     editProfile,
     postEditProfile,
     otpVerification,
-    resendOTP,
+    profileResendOTP,
 }
