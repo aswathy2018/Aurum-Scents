@@ -82,7 +82,6 @@
         const password = document.getElementById("password").value;
         const cpassword = document.getElementById("cpassword").value;
 
-        // Name validation
         if (name === "") {
             document.getElementById("name-error").innerText = "Name is required.";
             document.getElementById("name-error").style.color = "red";
@@ -93,7 +92,6 @@
             valid = false;
         }
 
-        // Email validation
         if (email === "") {
             document.getElementById("email-error").innerText = "Email is required.";
             document.getElementById("email-error").style.color = "red";
@@ -105,7 +103,6 @@
             valid = false;
         }
 
-        // Mobile validation
         if (mobile === "") {
             document.getElementById("mobile-error").innerText = "Mobile number is required.";
             document.getElementById("mobile-error").style.color = "red";
@@ -116,7 +113,6 @@
             valid = false;
         }
 
-        // Password validation
         if (password === "") {
             document.getElementById("password-error").innerText = "Password is required.";
             document.getElementById("password-error").style.color = "red";
@@ -127,7 +123,6 @@
             valid = false;
         }
 
-        // Confirm password validation
         if (cpassword === "") {
             document.getElementById("cpassword-error").innerText = "Confirm Password is required.";
             document.getElementById("cpassword-error").style.color = "red";
@@ -138,7 +133,7 @@
             valid = false;
         }
 
-        return valid; // Prevent form submission if validation fails
+        return valid;
     }
 
     function togglePasswordVisibility(fieldId) {

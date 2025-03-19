@@ -143,6 +143,7 @@
             font-weight: bold;
         }
     </style>
+
     <main class="main">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
@@ -200,16 +201,17 @@
                                         <div class="product-price primary-color float-left">
                                             <ins><span class="text-brand">
                                                     ₹<%=product.salesPrice%>
-                                                </span></ins>
-                                            <ins><span class="old-price font-md ml-15">
-                                                    ₹<%=product.regularPrice%>
-                                                </span></ins>
-                                            <% if (product.salesPrice < product.regularPrice) { %>
-                                                <span class="save-price font-md color3 ml-15">
-                                                    <% const discount=Math.round(((product.regularPrice -
-                                                        product.salesPrice) / product.regularPrice) * 100); %>
-                                                        <%= discount %> % Off
                                                 </span>
+                                            </ins>
+                                            <ins>
+                                                <span class="old-price font-md ml-15">
+                                                    ₹<%=product.regularPrice%>
+                                                </span>
+                                            </ins>
+                                                <% if (product.salesPrice < product.regularPrice) { %>
+                                                    <span class="save-price font-md color3 ml-15">
+                                                        <%=product.productOffer%> % off
+                                                    </span>
                                                 <% } %>
                                         </div>
                                     </div>
@@ -227,7 +229,7 @@
                                                 <ul>
                                                     <li class="mb-10"><i class="fi-rs-crown mr-5"></i> 1 Year
                                                         Manufacturing Warranty</li>
-                                                    <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return
+                                                    <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 7 Day Return
                                                         Policy</li>
                                                     <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery
                                                         available

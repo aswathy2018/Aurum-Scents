@@ -1,0 +1,166 @@
+<%- include('../partials/admin/adminHeader.ejs') %>
+<link rel="stylesheet" href="/assets/css/productOffer.css">
+  
+  <div class="content-wrapper">
+    <h1>Product Offer Management</h1>
+  
+    <form id="productOfferForm">
+        <h3>Set Product Offer</h3>
+        
+        <label for="productId">Select Product:</label>
+        <select id="productId" name="productId" required>
+            <% products.forEach(product => { %>
+                <option value="<%= product._id %>"><%= product.productName %></option>
+            <% }) %>
+        </select>
+  
+        <label for="offerPercentage">Offer Percentage:</label>
+        <input type="number" id="offerPercentage" name="offerPercentage"/>
+        
+        <button type="submit">Apply Offer</button>
+    </form>
+  
+    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+  
+    <!-- List of all products with applied offer -->
+    <h3 style="text-align: center;">All Products</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Regular Price</th>
+                <th>Sale Price</th>
+                <th>Offer Percentage</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% products.forEach(product => { %>
+            <tr>
+                <td><%= product.productName %></td>
+                <td>₹<%= product.regularPrice %></td>
+                <td>₹<%= product.salesPrice %></td>
+                <td><%= product.productOffer %>%</td>
+                <% if (product.productOffer > 0) { %>
+                <td><button class="btn btn-danger remove-offer" data-id="<%= product._id %>">Remove Offer</button></td>
+                <% } else { %>
+                <td>NA</td>
+                <% } %>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <% if (totalPages > 1) { %>
+            <% if (currentPage > 1) { %>
+                <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&laquo;</a>
+            <% } %>
+            
+            <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="?page=<%= i %><%= locals.search ? '&search=' + locals.search : '' %>" 
+                   class="page-link <%= i == currentPage ? 'active' : '' %>">
+                    <%= i %>
+                </a>
+            <% } %>
+            
+            <% if (currentPage < totalPages) { %>
+                <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&raquo;</a>
+            <% } %>
+        <% } %>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#productOfferForm").on("submit", function (event) {
+            event.preventDefault();
+
+            const productId = $("#productId").val();
+            const offerPercentage = $("#offerPercentage").val();
+
+            if(!offerPercentage){
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid Input",
+                    text: "Offer percentage must be required",
+                });
+                return
+            }
+
+            if (offerPercentage < 1 || offerPercentage > 99) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid Discount",
+                    text: "Offer percentage must be between 1% and 99%.",
+                });
+                
+                return;
+            }
+
+            $.ajax({
+                url: "/admin/product-offer",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ productId, offerPercentage }),
+                success: function (response) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Offer Applied",
+                        text: response.message,
+                    }).then(() => {
+                        window.location.href="/admin/getProductOffer";
+                    });
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: xhr.responseJSON?.message || "Something went wrong.",
+                    });
+                },
+            });
+        });
+
+      
+        $(".remove-offer").on("click", function () {
+    const productId = $(this).data("id");
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to remove this offer?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, remove it!",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/admin/removeproductOffer?id=${productId}`,
+                method: "GET",
+                success: function (response) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Offer Removed",
+                        text: response.message,
+                    }).then(() => {
+                        window.location.href = "/admin/getProductOffer";
+                    });
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: xhr.responseJSON?.message || "Failed to remove offer.",
+                    });
+                },
+            });
+        }
+    });
+});
+
+    });
+</script>

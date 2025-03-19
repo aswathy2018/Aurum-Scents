@@ -156,7 +156,7 @@ const updateCart = async (req, res) => {
         if (newQuantity > 5) {
             return res.status(400).json({
                 success: false,
-                message: "Requested quantity exceeds available stock"
+                message: "You can choose up to 5 items."
             });
         }
 

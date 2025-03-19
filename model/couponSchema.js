@@ -2,21 +2,26 @@ const mongoose = require('mongoose')
 const {Schema} = mongoose
 
 const couponSchema = new Schema({
-    name: {
+
+    couponCode: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     createdOn: {
         type: Date,
         default: Date.now,
         required: true
     },
+    startingDate: {
+        type: Date,
+        required: true,
+    },
     expiryDate: {
         type: Date,
         required: true
     },
-    offerprice: {
+    offerPercentage: {
         type: Number,
         required: true
     },
@@ -28,10 +33,6 @@ const couponSchema = new Schema({
         type: Boolean,
         default: true
     },
-    userId: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    }]
 })
 
 

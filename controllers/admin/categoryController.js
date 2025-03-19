@@ -1,4 +1,6 @@
 const Category = require('../../model/categorySchema')
+const Product = require('../../model/productSchema')
+const mongoose = require('mongoose')
 
 
 const categoryInfo = async (req, res) => {
@@ -141,6 +143,98 @@ const unlistcategory = async (req, res) => {
     }
 }
 
+
+const getOffer = async (req, res) => {
+    try {
+        const id=req.query.id
+        const currcat=await Category.findById(id)
+        const categories= await Category.find({isListed:true})
+        res.render('categoryOffer',{categories,currcat})
+    } catch (error) {
+        console.log("Error in getting the category offer page");
+        res.redirect('/pageNotFound')
+    }
+}
+
+const categoryOffer = async (req, res) => {
+    try {
+        const { catid, offerValue } = req.body;
+
+        if (offerValue < 0 || offerValue > 100) {
+            return res.status(400).json({ success: false, message: "Offer is not valid" });
+        }
+
+        const category = await Category.findById(catid);
+        if (!category) {
+            return res.status(404).json({ success: false, message: "Category not found" });
+        }
+
+        category.categoryOffer = offerValue;
+        await category.save();
+
+        const products = await Product.find({ category: catid });
+
+        for (const product of products) {
+            if (!product.originalPrice) {
+                product.originalPrice = product.salesPrice;
+            }
+
+            const productOfferPrice = product.originalPrice - 
+                (product.originalPrice * (product.productOffer || 0)) / 100;
+            const categoryOfferPrice = product.originalPrice - 
+                (product.originalPrice * offerValue) / 100;
+
+            const finalPrice = Math.min(productOfferPrice, categoryOfferPrice);
+            product.salesPrice = Math.round(finalPrice);
+
+            await product.save();
+        }
+
+
+        res.json({ success: true, message: "Category offer added successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+
+const removeCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            return res.status(400).json({ success: false, message: 'Invalid category ID' });
+        }
+
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ success: false, message: 'Category not found' });
+        }
+        category.categoryOffer = 0;
+        await category.save();
+
+        const products = await Product.find({ category: categoryId });
+
+        for (const product of products) {
+            let newSalesPrice = product.originalPrice || product.salesPrice;
+            if (product.productOffer > 0) {
+                newSalesPrice = Math.round(
+                    newSalesPrice - (newSalesPrice * product.productOffer) / 100
+                );
+            }
+
+            product.salesPrice = newSalesPrice;
+            await product.save();
+        }
+        res.status(200).json({ success: true, message: 'Category offer removed successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+
 module.exports = {
     categoryInfo,
     addCategory,
@@ -148,5 +242,7 @@ module.exports = {
     editCategory,
     listcategory,
     unlistcategory,
-
+    getOffer,
+    categoryOffer,
+    removeCategoryOffer,
 }

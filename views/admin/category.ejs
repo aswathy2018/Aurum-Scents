@@ -6,6 +6,16 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
   <link rel="stylesheet" href="/assets/css/category.css">
 
+  <style>
+    .addOffer{
+      color: white;
+      text-decoration: none;
+    }
+    .addOffer:hover{
+      color: rgb(7, 50, 61);
+      text-decoration: none;
+    }
+  </style>
 
   <div class="main-content">
     <h1>Category Management</h1>
@@ -51,11 +61,14 @@
                   <%= category.description %>
                 </td>
                 <td>
-                  <%= category.offerPrice || 'NA' %>
+                  <%= category.categoryOffer || 0 %>%
                 </td>
                 <td class="offer-buttons">
-                  <button class="btn btn-add-offer" onclick="addOffer('<%= category._id %>')">Add</button>
-                  <button class="btn btn-remove" onclick="removeOffer('<%= category._id %>')">Remove</button>
+                  <% if(category.categoryOffer>0){ %>
+                    <button class="btn btn-remove" onclick="removeOffer('<%= category._id %>')">Remove</button>
+                  <%}else{%>
+                    <button class="btn btn-add-offer"><a href="/admin/getCategoryOffer?id=<%= category._id%>" class="addOffer">Add</a></button>
+                  <%}%>
                 </td>
                 <td>
                   <div class="status-buttons">
@@ -243,7 +256,6 @@
     });
 
     async function updateCategoryStatus(categoryId, shouldList) {
-  // First show a confirmation dialog
   const action = shouldList ? 'list' : 'unlist';
   const confirmResult = await Swal.fire({
     title: `Confirm ${action.charAt(0).toUpperCase() + action.slice(1)}`,
@@ -260,10 +272,8 @@
     }
   });
 
-  // If user confirmed, proceed with the action
   if (confirmResult.isConfirmed) {
     try {
-      // Show loading state
       Swal.fire({
         title: 'Processing...',
         text: 'Please wait while we update the category status',
@@ -286,7 +296,6 @@
       });
 
       if (response.ok) {
-        // Show success message
         const result = await Swal.fire({
           title: 'Success!',
           text: `Category ${shouldList ? 'listed' : 'unlisted'} successfully`,
@@ -299,12 +308,10 @@
           }
         });
         
-        // Reload page after user acknowledges the success message
         if (result.isConfirmed || result.isDismissed) {
           window.location.reload();
         }
       } else {
-        // Handle error response
         const errorData = await response.json();
         Swal.fire({
           title: 'Error',
@@ -335,4 +342,53 @@
   }
 }
 
+async function removeOffer(categoryId){
+  try {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to remove this category offer?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Remove",
+      cancelButtonText: "Cancel"
+    });
+
+    if (result.isConfirmed) {
+      const response = await fetch('/admin/removeCategoryOffer', {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          categoryId: categoryId,
+        })
+      });
+      
+      const data = await response.json();
+
+      if(response.ok && data.success === true) {
+        Swal.fire(
+          "Removed!",
+          "The offer has been removed successfully.",
+          "success"
+        ).then(() => {
+          window.location.href = "/admin/category";
+        });
+      } else {
+        Swal.fire("Failed", data.message || "Removing offer failed", "error");
+      }
+    } else {
+      window.location.href = "/admin/category";
+    }
+  } catch (error) {
+    Swal.fire(
+      "Error",
+      "An error occurred while removing the offer",
+      "error"
+    );
+    console.error("Error removing offer", error);
+  }
+}
   </script>

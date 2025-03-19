@@ -1,0 +1,124 @@
+<%- include('../partials/admin/adminHeader.ejs') %>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            height: 320px;
+            margin-top: 180px;
+            margin-left: 550px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .btn-primary {
+            background-color: #18464d;
+            border: none;
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            background-color: #166f7c;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
+
+    <div class="container">
+        <h2 class="text-center">Apply Category Offer</h2>
+        <form id="categoryOfferForm" class="p-4 border rounded">
+            <div class="mb-3">
+                <label for="category" class="form-label">Select Category</label>
+                <select name="categoryId" id="category" class="form-control" required>
+                    <option value="<%= currcat._id %>">
+                        <%= currcat.name %>
+                    </option>
+
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="offer" class="form-label">Set Offer Percentage</label>
+                <input type="number" name="offer" id="offer" class="form-control" min="1" max="99" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Apply Offer</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+
+        document.getElementById("categoryOfferForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const offerInput = document.getElementById("offer").value.trim();
+            const offerValue = parseInt(offerInput);
+            const catid = '<%=currcat._id%>'
+
+            if (isNaN(offerValue) || offerValue < 1 || offerValue > 99) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid Offer",
+                    text: "Please enter a valid offer percentage between 1 and 99.",
+                    confirmButtonColor: "#d33"
+                });
+                return;
+            }
+            fetch("/admin/categoryOffer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ offerValue, catid }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success!",
+                            text: "Offer added success",
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: "top-end",
+                        });
+                        
+                       window.location.href='/admin/category'
+
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Offer Applied Failed",
+                            text: "Offer not applied!",
+                            confirmButtonColor: "#007bff",
+                            timer: 2000,
+                            showConfirmButton: false
+                        })
+                    }
+                });
+            })
+    </script>

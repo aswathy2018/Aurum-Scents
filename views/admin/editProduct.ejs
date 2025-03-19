@@ -1,5 +1,30 @@
 <%- include('../partials/admin/adminHeader.ejs') %>
 
+<style>
+    .image-cropper {
+        margin-top: 15px;
+        display: none;
+    }
+    
+    .image-preview img {
+        max-width: 100%;
+        max-height: 300px;
+    }
+    
+    .cropped-preview img {
+        max-width: 150px;
+        max-height: 150px;
+        border: 1px solid #ddd;
+        margin-right: 10px;
+    }
+    
+    .error-message {
+        color: red;
+        display: none;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+</style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/editProduct.css">
 
@@ -57,7 +82,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label">Full description</label>
-                                <input name="descriptionData" value="<%=product.description%>"
+                                <input name="description" value="<%=product.description%>"
                                     class="form-control border" rows="4">
                                 <div id="description-error" class="error-message"></div>
                             </div>
@@ -92,7 +117,7 @@
                                 <div class="col-lg-4">
                                     <div class="mb-4">
                                         <label class="form-label">Size(ML)</label>
-                                        <input name="color" type="text" value="<%=product.size%>"
+                                        <input name="size" type="text" value="<%=product.size%>"
                                             class="form-control border">
                                         <div id="color-error" class="error-message"></div>
                                     </div>
@@ -229,58 +254,126 @@
         }
 
         function validateAndSubmit() {
-            if (validateForm()) {
-                document.forms[0].submit();
-            }
-        }
+    if (validateForm()) {
+        document.forms[0].submit();
+    }
+}
 
-        function validateForm() {
-            let imageDatas = false
-            console.log("validate form");
-            clearErrorMessages();
-            const name = document.getElementsByName('productName')[0].value;
-            const description = document.getElementsByName('descriptionData')[0].value;
-            const brand = document.getElementsByName('brand')[0].value;
-            const price = document.getElementsByName('regularPrice')[0].value;
-            const saleprice = document.getElementsByName('salePrice')[0].value;
-            const color = document.getElementsByName('color')[0].value;
-            const category = document.getElementsByName('category')[0].value;
-            const images = document.getElementById('input1')
-            const quantity = document.getElementsByName('quantity')
-            imageDatas = document.getElementById("imageDatas")?.value;
-            let isValid = true;
-            if (name.trim() === "") {
-                displayErrorMessage('productName-error', 'Please enter a product name.');
+function validateForm() {
+    console.log("validating form");
+    clearErrorMessages();
+    let isValid = true;
+    
+    const productName = document.getElementsByName('productName')[0].value;
+    const description = document.getElementsByName('description')[0].value;
+    const brand = document.getElementsByName('brand')[0].value;
+    const category = document.getElementsByName('category')[0].value;
+    const regularPrice = document.getElementsByName('regularPrice')[0].value;
+    const salePrice = document.getElementsByName('salePrice')[0].value;
+    const quantity = document.getElementsByName('quantity')[0].value;
+    const size = document.getElementsByName('size')[0].value;
+    
+    if (productName.trim() === "" || productName.startsWith(" ")) {
+        displayErrorMessage('productName-error', 'Product name is required and cannot start with a space.');
+        isValid = false;
+    }
+    
+    if (description.trim() === "" || description.startsWith(" ")) {
+        displayErrorMessage('description-error', 'Description is required and cannot start with a space.');
+        isValid = false;
+    }
+    
+    if (brand.trim() === "" || brand.startsWith(" ")) {
+        displayErrorMessage('brand-error', 'Brand is required and cannot start with a space.');
+        isValid = false;
+    }
+    
+    if (category.trim() === "" || category.startsWith(" ")) {
+        displayErrorMessage('category-error', 'Category is required and cannot start with a space.');
+        isValid = false;
+    }
+    
+    if (regularPrice.trim() === "" || regularPrice.startsWith(" ")) {
+        displayErrorMessage('regularPrice-error', 'Regular price is required and cannot start with a space.');
+        isValid = false;
+    } else if (isNaN(regularPrice) || parseFloat(regularPrice) < 0) {
+        displayErrorMessage('regularPrice-error', 'Regular price must be a non-negative number.');
+        isValid = false;
+    }
+    
+    if (salePrice.trim() === "" || salePrice.startsWith(" ")) {
+        displayErrorMessage('salePrice-error', 'Sale price is required and cannot start with a space.');
+        isValid = false;
+    } else if (isNaN(salePrice) || parseFloat(salePrice) < 0) {
+        displayErrorMessage('salePrice-error', 'Sale price must be a non-negative number.');
+        isValid = false;
+    }
+    
+    if (quantity.trim() === "" || quantity.startsWith(" ")) {
+        displayErrorMessage('quantity-error', 'Quantity is required and cannot start with a space.');
+        isValid = false;
+    } else if (isNaN(quantity) || parseInt(quantity) < 0) {
+        displayErrorMessage('quantity-error', 'Quantity must be a non-negative number.');
+        isValid = false;
+    }
+    
+    if (size.trim() === "" || size.startsWith(" ")) {
+        displayErrorMessage('color-error', 'Size is required and cannot start with a space.');
+        isValid = false;
+    } else if (isNaN(size) || parseFloat(size) < 0) {
+        displayErrorMessage('color-error', 'Size must be a non-negative number.');
+        isValid = false;
+    }
+    
+    const imageInputs = [
+        document.getElementById('input1'),
+        document.getElementById('input2'),
+        document.getElementById('input3'),
+        document.getElementById('input4')
+    ];
+    
+    let hasImage = false;
+    for (let i = 0; i < imageInputs.length; i++) {
+        if (imageInputs[i].files.length > 0) {
+            hasImage = true;
+            
+            const file = imageInputs[i].files[0];
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg') && !fileName.endsWith('.png')) {
+                displayErrorMessage('images-error', 'Only JPG, JPEG, and PNG image formats are allowed.');
                 isValid = false;
+                break;
             }
-
-            if (description === '') {
-                displayErrorMessage('description-error', 'Please enter a product description.');
-                isValid = false;
-            }
-
-
-            if (parseInt(quantity) < 0) {
-                displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-                isValid = false;
-            }
-            return isValid;
         }
+    }
+    
+    const existingImages = document.querySelectorAll('[id^="image-"]');
+    if (existingImages.length === 0 && !hasImage) {
+        displayErrorMessage('images-error', 'At least one product image is required.');
+        isValid = false;
+    }
+    
+    return isValid;
+}
 
-        function displayErrorMessage(elementId, message) {
-            var errorElement = document.getElementById(elementId);
-            errorElement.innerText = message;
-            errorElement.style.display = "block";
-        }
+function displayErrorMessage(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+        errorElement.innerText = message;
+        errorElement.style.color = 'red';
+        errorElement.style.display = "block";
+        errorElement.style.fontSize = "12px";
+        errorElement.style.marginTop = "5px";
+    }
+}
 
-
-        function clearErrorMessages() {
-            const errorElements = document.getElementsByClassName('error-message');
-            Array.from(errorElements).forEach(element => {
-                element.innerText = '';
-            });
-            const errorMessage = document.getElementById('errorMessage');
-        }
+function clearErrorMessages() {
+    const errorElements = document.getElementsByClassName('error-message');
+    Array.from(errorElements).forEach(element => {
+        element.innerText = '';
+        element.style.display = "none";
+    });
+}
 
         function viewImage1(event) {
             document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0])

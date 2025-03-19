@@ -1,0 +1,253 @@
+<%- include('../partials/admin/adminHeader.ejs') %>
+
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f9fafb;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 200px;
+      justify-content: center;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 2.5rem;
+      color: #34495e;
+    }
+
+    .filters, .pagination, .downloads {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px auto;
+      flex-wrap: wrap;
+    }
+
+    .filters form {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filters select, .filters button {
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      background-color: #fff;
+      cursor: pointer;
+    }
+
+    .filters button {
+      background-color: #000;
+      color: #fff;
+      transition: background-color 0.3s ease;
+    }
+
+    .filters button:hover {
+      background-color: #000;
+    }
+
+    p {
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 20px 0;
+      color: #2c3e50;
+    }
+
+    table {
+      width: 60%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    table thead {
+      background-color: #000;
+      color: #fff;
+    }
+
+    table thead th, table tbody td {
+      padding: 15px;
+      font-size: 1rem;
+    }
+
+    .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    gap: 8px;
+}
+
+.page-link {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    color: #000000;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: #f4f4f4;
+}
+
+.page-link.active {
+    background-color: #010c18;
+    color: white;
+    border-color: #01070e;
+}
+
+    .downloads a {
+      padding: 10px 20px;
+      font-size: 1rem;
+      text-decoration: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .downloads a[href*='pdf'] {
+      background-color: #e74c3c;
+    }
+
+    .downloads a[href*='pdf']:hover {
+      background-color: #c0392b;
+    }
+
+    .downloads a[href*='excel'] {
+      background-color: #27ae60;
+    }
+
+    .downloads a[href*='excel']:hover {
+      background-color: #1e8449;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      table {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+<h1>Sales Report</h1>
+
+<div class="filters">
+    <form action="/admin/sales-report/filter" method="GET">
+        <select name="filter" id="filter">
+            <option value=""><%= fil ? fil : "select" %></option>
+            <option value="today" <%= fil === "today" ? "selected" : "" %>>Today</option>
+            <option value="weekly" <%= fil === "weekly" ? "selected" : "" %>>Weekly</option>
+            <option value="monthly" <%= fil === "monthly" ? "selected" : "" %>>Monthly</option>
+            <option value="yearly" <%= fil === "yearly" ? "selected" : "" %>>Yearly</option>
+            <option value="specific" <%= fil === "specific" ? "selected" : "" %>>Specific Date</option>
+        </select>
+        
+        <button type="submit">Filter</button>
+    </form>
+    <a href="/admin/salesreport" class="btn btn-danger">Clear Filter</a>
+</div>
+
+<p>Total Revenue: ₹<%= totalRevenue %></p>
+<p>Total Discount: ₹<%= totalOffer %></p>
+<p>Total Orders: <%= totalOrders %></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Order ID</th>
+            <th>User Name</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Product Price</th>
+            <th>Discount</th>
+            <th>Total Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% orders.forEach(order => { %>
+            <% order.items.forEach(item => { %>
+                <tr>
+                    <td><%= order.createdAt.toDateString() %></td>
+                    <td><%= order._id %></td>
+                    <td><%= order.userName %></td>
+                    <td><%= item.productName %></td>
+                    <td><%= item.quantity %></td>
+                    <td>₹<%= item.price %></td>
+                    <td>₹<%= order.discount %></td>
+                    <td>₹<%= (item.price * item.quantity) - order.discount %></td>
+                </tr>
+            <% }); %>
+        <% }); %>
+    </tbody>
+</table>
+
+<div class="pagination">
+    <% if (totalPages > 1) { %>
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&laquo;</a>
+        <% } %>
+        
+        <% for(let i = 1; i <= totalPages; i++) { %>
+            <a href="?page=<%= i %><%= locals.search ? '&search=' + locals.search : '' %>" 
+               class="page-link <%= i == currentPage ? 'active' : '' %>">
+                <%= i %>
+            </a>
+        <% } %>
+        
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&raquo;</a>
+        <% } %>
+    <% } %>
+</div>
+
+<div class="downloads">
+    <a href="/admin/sales-report/pdf?filter=<%= fil %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>">Download PDF</a>
+    <a href="/admin/sales-report/excel?filter=<%= fil %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>">Download Excel</a>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const filterSelect = document.getElementById("filter");
+        const startDateInput = document.getElementById("startDate");
+        const endDateInput = document.getElementById("endDate");
+
+        startDateInput.disabled = filterSelect.value !== "specific";
+        endDateInput.disabled = filterSelect.value !== "specific";
+
+        const today = new Date().toISOString().split("T")[0];
+        startDateInput.setAttribute("max", today);
+        endDateInput.setAttribute("max", today);
+
+        filterSelect.addEventListener("change", function () {
+            if (this.value === "specific") {
+                startDateInput.disabled = false;
+                endDateInput.disabled = false;
+            } else {
+                startDateInput.disabled = true;
+                endDateInput.disabled = true;
+                startDateInput.value = "";
+                endDateInput.value = "";
+            }
+        });
+    });
+</script>

@@ -1,0 +1,81 @@
+<%- include('../partials/admin/adminHeader.ejs') %>
+<style>
+    .container{
+    margin-left: 19%;
+    margin-top: 60px;
+}
+h1{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 2.5rem;
+    color: #2c3e50;
+    text-align: center;
+    margin: 50px 0 50px;
+    letter-spacing: 2px;
+}
+.btn{
+    background-color: black;
+    color: white;
+}
+.btn:hover{
+    background-color: rgb(56, 58, 56);
+    color: white;
+}
+.h6{
+    text-decoration: underline;
+    font-size: 16px;
+}
+
+</style>
+
+<div class="container">
+    <div class="card shadow-sm">
+        <div class="card-header bg-black text-white">
+            <h1 class="h2 ">Order Details</h1>
+        </div>
+        <div class="card-body">
+            <!-- Order Info -->
+            <div class="mb-4">
+                
+                <p><strong>Order ID:</strong> <%= order._id %></p>
+                <p><strong>User:</strong> <%= order.userId?.name %></p>
+               
+            </div>
+
+            <!-- Order Items -->
+            <h3 class="h5 mb-3">Items</h3>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% order.orderedItems?.forEach((item)=>{ %>
+                            <tr>
+                                <td><%= item.product?.productName %></td>
+                                <td><%= item.quantity %></td>
+                                <td><%=item.status%></td>
+                                <td>&#8377;<%= item.price %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="h6 mt-4 mb-3"><b>Shipping Address</b></h3>
+            <p class="mb-3"><strong>Name: </strong> <%= order.address?.name %></p>
+            <p class="mb-3"><strong>City: </strong>  <%= order.address?.city %></p>
+            <p><strong>PinCode: </strong> <%= order.address?.pincode %></p>
+            <p><strong>Phone: </strong><%= order.address?.phone %></p>
+           
+            <h3 class="h5 mt-4"><b>Total Amount: <span class="text-success">&#8377; <%= order.totalAmount %></span></b></h3>
+
+           
+            <a href="/admin/orderListing" class="btn btn-outline-black mt-3">Back to Orders</a>
+        </div>
+    </div>
+</div>

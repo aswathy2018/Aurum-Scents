@@ -89,13 +89,24 @@ router.post('/addToCartFromWishlist', userAuth, cartController.addToCartFromWish
 router.post('/checkAddAddress', userAuth, cartController.checkAddAddress)
 
 
+//Wallet Management
+router.get("/wallet", userAuth, orderController.getWallet);
+router.post("/top-up", userAuth, orderController.topUpWallet);
+
+
 //Order Management
 router.get('/checkOut', userAuth, orderController.getCheckOut)
+router.post('/apply-coupon', userAuth, orderController.applyCoupon);
 router.post("/checkout/process", userAuth, orderController.placeorder);
 router.get('/paymentSuccess', userAuth, orderController.success)
 router.get('/payementFail', userAuth, orderController.paymentFail)
 router.get('/orderDetaile', userAuth, orderController.getOrderList)
 router.get('/invoice', userAuth, orderController.invoice)
 router.get("/download-invoice", userAuth, orderController.generateInvoicePdf);
+router.post("/orders/:orderId/products/:product/cancel", userAuth, orderController.cancelOrder);
+router.post("/orders/:orderId/products/:product/return", userAuth, orderController.returnOrder);
+router.post('/create-razorpay-order', orderController.createOrder);
+router.post('/verify-payment',orderController. verifyPayment);
+
 
 module.exports = router

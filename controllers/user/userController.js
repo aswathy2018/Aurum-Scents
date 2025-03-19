@@ -221,7 +221,6 @@ const login = async (req, res) => {
         }
 
         req.session.user = findUser._id;
-        // Redirect with query parameter to trigger SweetAlert
         res.redirect('/?login_success=true')
     } catch (error) {
         console.error("Login error", error)
@@ -305,7 +304,7 @@ const productDetails = async (req, res) => {
 const shop = async (req, res, next) => {
     try {
         const user = req.session.user;
-        const categories = await Category.find({ islisted: true }); // Renamed from 'category' to 'categories'
+        const categories = await Category.find({ islisted: true });
         const products = await Product.find({
             isBlocked: false,
             quantity: { $gt: 0 },
@@ -321,23 +320,17 @@ const shop = async (req, res, next) => {
         const limit = 9;
         const skip = (page - 1) * limit;
 
-        // 🛠️ Get Query Parameters for Filters & Sorting
         const { query, category, priceRange, sort } = req.query;
         
-
-        // ✅ Filtering Conditions
         const filters = {
             isBlocked: false,
             quantity: { $gt: 0 },
         };
 
-        // ✅ Apply Category Filter
         if (category && category !== "all") {
             filters.category = category;
         }
 
-        // ✅ Apply Price Range Filter
-        // ✅ Apply Price Range Filter
         if (priceRange) {
             const [min, max] = priceRange.split('-').map(Number);
             filters.salesPrice = {};
@@ -346,16 +339,13 @@ const shop = async (req, res, next) => {
         }
 
 
-        // ✅ Apply Search Filter
         if (query) {
             const searchRegex = new RegExp(query, "i");
             filters.$or = [{ productName: searchRegex }, { description: searchRegex }];
         }
 
-        // ✅ Find Products with Filters
         let filteredProducts = Product.find(filters).populate("category").skip(skip).limit(limit);
 
-        // ✅ Apply Sorting
         if (sort === "lowToHigh") {
             filteredProducts = filteredProducts.sort({ salesPrice: 1 });
         } else if (sort === "highToLow") {
@@ -370,11 +360,10 @@ const shop = async (req, res, next) => {
         const totalPages = Math.ceil(totalProducts / limit);
         const brands = await Brand.find({ isBlocked: false });
 
-        // ✅ Render Shop Page with Filters
         res.render("shop", {
             user: userData,
             products: await filteredProducts,
-            category: categories, // Fixed variable name
+            category: categories,
             brand: brands,
             totalProducts,
             currentPage: page,
@@ -394,12 +383,11 @@ const shop = async (req, res, next) => {
 
 const searchProducts = async (req, res) => {
     try {
-        const { query, page = 1, limit = 10 } = req.query; // Default to page 1, limit 10
-        const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
+        const { query, page = 1, limit = 10 } = req.query;
+        const searchRegex = new RegExp(query, 'i');
         const category= await Category.find({islisted:false})
         const skip = (page - 1) * limit;
 
-        // Fetch products with pagination
         const products = await Product.find({
             $or: [
                 { productName: searchRegex },
@@ -409,7 +397,6 @@ const searchProducts = async (req, res) => {
             .skip(skip)
             .limit(parseInt(limit));
 
-        // Get total product count for pagination
         const totalProducts = await Product.countDocuments({
             $or: [
                 { productName: searchRegex },
@@ -446,12 +433,10 @@ const categoryfilter = async (req, res) => {
             quantity: { $gt: 0 },
         };
 
-        // ✅ Category Filter
         if (category && mongoose.Types.ObjectId.isValid(category)) {
             filters.category = new mongoose.Types.ObjectId(category);
         }
 
-        // ✅ Price Range Filter
         if (priceRange) {
             const [min, max] = priceRange.split('-').map(Number);
             filters.salePrice = {};
@@ -459,7 +444,6 @@ const categoryfilter = async (req, res) => {
             if (!isNaN(max)) filters.salePrice.$lte = max;
         }
 
-        // ✅ Search Filter (Search by Name or Description)
         if (query) {
             const searchRegex = new RegExp(query, "i");
             filters.$or = [
@@ -470,7 +454,6 @@ const categoryfilter = async (req, res) => {
 
         let products = Product.find(filters).skip(skip).limit(limit);
 
-        // ✅ Sorting
         if (sort === "lowToHigh") {
             products = products.sort({ salePrice: 1 });
         } else if (sort === "highToLow") {

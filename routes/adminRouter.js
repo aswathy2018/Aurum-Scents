@@ -5,6 +5,8 @@ const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
 const productController = require('../controllers/admin/productController');
 const brandController = require('../controllers/admin/brandController');
+const couponController = require('../controllers/admin/couponController')
+const salesReportController = require('../controllers/admin/salesReportController')
 const {userAuth, adminAuth} = require('../middlewares/auth');
 const {uploads} = require('../helpers/multer');
 
@@ -33,6 +35,9 @@ router.get('/editCategory', adminAuth, categoryController.getEditCategory)
 router.post('/editCategory/:id', adminAuth, categoryController.editCategory)
 router.patch('/listcategory', adminAuth, categoryController.listcategory)
 router.patch('/unlistcategory', adminAuth, categoryController.unlistcategory)
+router.get('/getCategoryOffer', adminAuth, categoryController. getOffer)
+router.post('/categoryOffer', adminAuth, categoryController.categoryOffer)
+router.post('/removeCategoryOffer', adminAuth, categoryController.removeCategoryOffer)
 
 
 //Brand management
@@ -54,6 +59,28 @@ router.patch('/unblockProduct', adminAuth, productController.productunBlocked);
 router.get('/editProduct', adminAuth, productController.getEditProduct)
 router.post('/editProduct/:id',adminAuth,uploads.array("images",4),productController.updateProduct)
 router.post('/deleteImage',adminAuth,productController.deleteoneimage)
+router.get('/getProductOffer', adminAuth, productController.getAddProductOffer)
+router.post('/product-offer',adminAuth,productController.addproductoffer)
+router.get('/removeproductOffer',adminAuth,productController.removeOffer)
+
+
+//Order Management
+router.get('/orderListing', adminAuth, customerController.getAllOrders)
+router.get("/orders/:orderId",adminAuth,  customerController.getOrderDetails);
+router.post("/orders/:orderId/:product/status", adminAuth, customerController.updateOrderStatus);
+
+
+//Coupon Management
+router.get('/coupon', adminAuth, couponController.getCoupon)
+router.post('/coupons/create',adminAuth,couponController.createCoupons)
+router.post('/deleteCoupons/:id',adminAuth,couponController.deletCoupens)
+
+
+//Sales Report
+router.get('/salesreport', salesReportController.getSalesReport);
+router.get('/sales-report/filter', salesReportController.getSalesReport);
+router.get('/sales-report/pdf', salesReportController.downloadSalesReportPDF);
+router.get('/sales-report/excel', salesReportController.downloadSalesReportExcel);
 
 
 router.get('/*', adminController.errorPage)

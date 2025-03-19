@@ -1,0 +1,141 @@
+<%- include('../partials/admin/adminHeader.ejs') %>
+
+<style>
+.container{
+    margin-left: 19%;
+    
+}
+h1{     
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 2.5rem;
+    color: #2c3e50;
+    text-align: center;
+    margin: 30px 0 30px;
+    letter-spacing: 2px;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    gap: 8px;
+}
+
+.page-link {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    color: #000000;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: #f4f4f4;
+}
+
+.page-link.active {
+    background-color: #010c18;
+    color: white;
+    border-color: #01070e;
+}
+</style>
+
+<div class="container">
+    <h1 class="text-center mb-5">All Orders</h1>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User</th>
+                            <th>Product Details</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach((order)=>{ %>
+                            <tr>
+                                <td><%= order._id %></td>
+                                <td><%= order.userId?.name %></td>
+                                <td>
+                                    <ul>
+                                        <% order.orderedItems.forEach((item)=>{ %>
+                                            <li>
+                                                <strong>Product ID:</strong> <%= item.product %><br>
+                                                <strong>Quantity:</strong> <%= item.quantity %><br>
+                                                <strong>Price:</strong> ₹<%= item.price %><br>
+                                                <strong>Status:</strong>
+                                                <span class="badge 
+                                                    <%= item.status === 'Pending' ? 'bg-warning' : 
+                                                        item.status === 'Shipped' ? 'bg-info' : 
+                                                        item.status === 'Delivered' ? 'bg-success' : 
+                                                        'bg-danger' %>">
+                                                    <%= item.status %>
+                                                </span>
+                                                <% if(item.status === "Return") { %>
+                                                    <br><strong>Return Reason:</strong> <%= item.returnReason || "No reason provided" %>
+                                                <% } %>
+                                               <% if(item.status==="Delivered"){%>
+                                                    <li>Delivered</li>
+                                                    <%}else if(item.status==="Return"){%>
+                                                        <li>Returned</li>
+                                                        <%}else if(item.status==="Cancelled"){%>
+                                                    <li>Cancelled</li>
+                                                    <%}else{%>
+                                                            
+                                                <form action="/admin/orders/<%= order._id %>/<%=item.product%>/status" 
+                                                      method="POST" 
+                                                      class="d-inline mt-2">
+                                                    <select name="status" class="form-select form-select-sm d-inline w-auto">
+                                                        <%if(item.status==="Pending"){%>
+                                                        <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                                        <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                        <%}else if(item.status==="Shipped"){%>
+                                                            <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                            <%}%>
+                                                    </select>
+                                                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                                                </form>
+                                                <%}%>
+                                            </li>
+                                        <% }); %>
+                                    </ul>
+                                </td>
+                                <td>₹<%= order.totalAmount.toFixed(2) %></td>
+                                <td>
+                                    <a href="/admin/orders/<%= order._id %>" class="btn btn-outline-dark btn-sm">
+                                        View Order
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination">
+                <% if (totalPages > 1) { %>
+                    <% if (currentPage > 1) { %>
+                        <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&laquo;</a>
+                    <% } %>
+                    
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="?page=<%= i %><%= locals.search ? '&search=' + locals.search : '' %>" 
+                           class="page-link <%= i == currentPage ? 'active' : '' %>">
+                            <%= i %>
+                        </a>
+                    <% } %>
+                    
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&raquo;</a>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+

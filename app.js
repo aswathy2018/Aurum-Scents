@@ -10,6 +10,10 @@ const adminRouter = require('./routes/adminRouter')
 const nocache = require("nocache");
 const errorHandler = require('./middlewares/errorMiddleware')
 const methodOverride = require('method-override');
+const Razorpay = require('razorpay')
+const bodyParser = require('body-parser')
+const fs = require('fs')
+const { validateWebhookSignature} = require('razorpay/dist/utils/razorpay-utils')
 
 
 app.use(express.json())
@@ -42,6 +46,39 @@ db();
 const PORT = 3002 || process.env.PORT
 app.listen(PORT, ()=>{
     console.log("Server running..");
+})
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true}))
+
+
+const razorpay = new Razorpay({
+    key_id: 'rzp_test_fpueLavUtsLoKt',
+    key_secret: 'Bk8bywg3LIZxueU2ZgCPN6zV',
+})
+
+///read data from JSON file///
+const readData = () =>{
+    if(fs.existsSync('orders.json')){
+        const data = fs.readFileSync('orders.json')
+        return JSON.parse(data);
+    }
+    return [];
+}
+
+///Write data to JSON file///
+const writeData = (data) => {
+    fs.writeFileSync('orders.json', JSON.stringify(data, null, 2));
+}
+
+///initializing orders.json///
+if(!fs.existsSync('orders.JSON')){
+    writeData([]);
+}
+
+
+app.get('/payment-success', (req, res)=>{
+    res.sendFile(path.join(__dirname, '/paymentSuccess'))
 })
 
 

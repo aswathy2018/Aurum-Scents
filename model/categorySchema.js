@@ -19,6 +19,7 @@ const categorySchema = new Schema({
         type: Number,
         default: 0
     },
+    originalPrice: Number,
     createdAt: {
         type: Date,
         default: Date.now

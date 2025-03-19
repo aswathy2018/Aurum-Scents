@@ -31,6 +31,7 @@ const {Schema} = mongoose
         type: Number,
         default: 0
     },
+    originalPrice: Number,
     quantity: {
         type: Number,
         default: 0

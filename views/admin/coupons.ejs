@@ -1,0 +1,236 @@
+<%- include('../partials/admin/adminHeader.ejs') %>
+<link rel="stylesheet" href="/assets/css/coupon.css">
+<div class="content-wrapper">
+    <h1>Coupons Management</h1>
+
+    <!-- Form to create a new coupon -->
+    <form id="couponform" action="/admin/coupons/create" method="POST">
+        <h3>Create New Coupon</h3>
+        <label for="couponCode">Coupon Code:</label>
+        <input type="text" name="couponCode" required />
+    
+        <label for="offerPercentage">Discount Percentage:</label>
+        <input type="number" name="offerPercentage" required />
+    
+        <label for="minimumprice">Minimum Purchase Amount:</label>
+        <input type="number" name="minimumprice" required />
+    
+        <label for="expiryDate">End Date:</label>
+        <input type="date" name="expiryDate" required />
+    
+        <button type="submit">Create Coupon</button>
+    </form>
+    
+
+
+    <!-- List of all coupons -->
+    <h3
+    style="text-align: center;
+    margin-left: 50px;
+    font-size: 20px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin-top: 30px;"
+    >
+    All Coupons
+    </h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Discount (%)</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% coupons.forEach(coupon => { %>
+            <tr>
+                <td><%= coupon.couponCode %></td>
+                <td><%= coupon.offerPercentage %>%</td>
+                <td><%= coupon.startingDate.toDateString() %></td>
+                <td><%= coupon.expiryDate.toDateString() %></td>
+                <td>
+                    <button onclick="confirmDelete('<%= coupon._id %>')" class="delete-btn">Delete</button>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <% if (totalPages >= 1) { %>
+            <% if (currentPage >= 1) { %>
+                <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&laquo;</a>
+            <% } %>
+            
+            <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="?page=<%= i %><%= locals.search ? '&search=' + locals.search : '' %>" 
+                   class="page-link <%= i == currentPage ? 'active' : '' %>">
+                    <%= i %>
+                </a>
+            <% } %>
+            
+            <% if (currentPage < totalPages) { %>
+                <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&raquo;</a>
+            <% } %>
+        <% } %>
+    </div>
+</div>
+
+
+
+<!-- Include SweetAlert2 Library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("couponform"); 
+    const codeInput = document.querySelector("input[name='couponCode']");
+    const discountInput = document.querySelector("input[name='offerPercentage']");
+    const endDateInput = document.querySelector("input[name='expiryDate']");
+    const minPurchaseInput = document.querySelector("input[name='minimumprice']");
+
+    const today = new Date().toISOString().split("T")[0];
+    endDateInput.setAttribute("min", today);
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        let isValid = true;
+        let errorMessage = "";
+
+        // Validate Coupon Code
+        const codeValue = codeInput.value.trim();
+
+        if (!codeValue) {
+            errorMessage += "Coupon code cannot be empty or only spaces.<br>";
+            isValid = false;
+        }
+        if (/^\s|\s$/.test(codeInput.value)) {
+            errorMessage += "Coupon code cannot start or end with a space.<br>";
+            isValid = false;
+        }
+        if (/^\d+$/.test(codeValue)) {
+            errorMessage += "Coupon code cannot be only numbers.<br>";
+            isValid = false;
+        }
+        if (/^[^a-zA-Z0-9]+$/.test(codeValue)) {
+            errorMessage += "Coupon code cannot be only special characters.<br>";
+            isValid = false;
+        }
+        if (/\s{2,}/.test(codeValue)) {
+            errorMessage += "Coupon code cannot contain excessive spaces.<br>";
+            isValid = false;
+        }
+
+        const discountValue = parseInt(discountInput.value);
+        if (discountValue <= 0 || discountValue >= 100) {
+            errorMessage += "Discount percentage must be between 1 and 99.<br>";
+            isValid = false;
+        }
+
+        const minPurchaseValue = parseFloat(minPurchaseInput.value);
+        if (minPurchaseValue <= 0) {
+            errorMessage += "Minimum purchase amount must be greater than 0.<br>";
+            isValid = false;
+        }
+
+        const selectedDate = new Date(endDateInput.value);
+        const currentDate = new Date(today);
+        if (selectedDate <= currentDate) {
+            errorMessage += "End date must be a future date.<br>";
+            isValid = false;
+        }
+
+        if (!isValid) {
+            Swal.fire({
+                icon: "error",
+                title: "Validation Error",
+                html: errorMessage,
+            });
+            return;
+        }
+
+        const formData = new URLSearchParams(new FormData(form));
+
+        try {
+            const response = await fetch("/admin/coupons/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Coupon Created!",
+                    text: data.message,
+                    confirmButtonText: "OK",
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed to Create Coupon",
+                    text: data.message || "An error occurred while creating the coupon.",
+                });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Something went wrong. Please try again later.",
+            });
+        }
+    });
+});
+
+    function confirmDelete(couponId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to recover this coupon!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                fetch(`/admin/deleteCoupons/${couponId}`, {
+                    method: "POST",
+                })
+                .then((response) => {
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Deleted!",
+                            text: "The coupon has been deleted.",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "Failed to delete the coupon.",
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Delete Error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Server Error",
+                        text: "Something went wrong. Please try again later.",
+                    });
+                });
+            }
+        });
+    }
+</script>

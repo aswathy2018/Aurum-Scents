@@ -39,9 +39,16 @@ const userSchema = new Schema({
         default: false
     },
     wallet: {
-        type: Number,
-        default: 0
-    },
+        balance: { type: Number, default: 0 },
+        transactions: [
+          {
+            type: { type: String, enum: ["credit", "debit"], required: true },
+            amount: { type: Number, required: true },
+            description: { type: String, required: true },
+            date: { type: Date, default: Date.now }
+          }
+        ]
+      },
     orderHistory: [{
         type:Schema.Types.ObjectId,
         ref: "Order"

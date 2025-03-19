@@ -127,8 +127,7 @@
             text: 'You can now login with your new password',
             confirmButtonColor: '#3085d6'
         });
-        
-        // Clean up the URL (optional)
+
         if (window.history && window.history.replaceState) {
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
