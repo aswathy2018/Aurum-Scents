@@ -70,71 +70,119 @@
 
 
 <script>
-    function validateForm(event) {
+function validateForm(event) {
+    event.preventDefault();
 
-        document.querySelectorAll(".error").forEach((error) => (error.innerText = ""));
+    document.querySelectorAll(".error").forEach((error) => (error.innerText = ""));
 
-        let valid = true;
+    let valid = true;
 
-        const name = document.getElementById("name").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const mobile = document.getElementById("mobile").value.trim();
-        const password = document.getElementById("password").value;
-        const cpassword = document.getElementById("cpassword").value;
+    const nameInput = document.getElementById("name").value;
+    const name = nameInput.trim();
+    const emailInput = document.getElementById("email").value;
+    const email = emailInput.trim();
+    const mobileInput = document.getElementById("mobile").value;
+    const mobile = mobileInput.trim();
+    const password = document.getElementById("password").value;
+    const cpassword = document.getElementById("cpassword").value;
+    const submitButton = document.querySelector('button[type="submit"]');
 
-        if (name === "") {
-            document.getElementById("name-error").innerText = "Name is required.";
-            document.getElementById("name-error").style.color = "red";
-            valid = false;
-        } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-            document.getElementById("name-error").innerText = "Name can only contain letters.";
-            document.getElementById("name-error").style.color = "red";
-            valid = false;
-        }
+    if (nameInput.length === 0) {
+        document.getElementById("name-error").innerText = "Name is required.";
+        document.getElementById("name-error").style.color = "red";
+        valid = false;
+    } else if (name === "") {
+        document.getElementById("name-error").innerText = "Name cannot be only spaces.";
+        document.getElementById("name-error").style.color = "red";
+        valid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(nameInput)) {
+        document.getElementById("name-error").innerText = "Name can only contain letters and spaces.";
+        document.getElementById("name-error").style.color = "red";
+        valid = false;
+    }
 
-        if (email === "") {
-            document.getElementById("email-error").innerText = "Email is required.";
-            document.getElementById("email-error").style.color = "red";
-            valid = false;
-        } else if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(email)) {
-            document.getElementById("email-error").innerText =
-                "Email must be lowercase, include '@', and may optionally contain numbers.";
-            document.getElementById("email-error").style.color = "red";
-            valid = false;
-        }
+    if (emailInput.length === 0) {
+        document.getElementById("email-error").innerText = "Email is required.";
+        document.getElementById("email-error").style.color = "red";
+        valid = false;
+    } else if (email === "") {
+        document.getElementById("email-error").innerText = "Email cannot be only spaces.";
+        document.getElementById("email-error").style.color = "red";
+        valid = false;
+    } else if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(email)) {
+        document.getElementById("email-error").innerText =
+            "Email must be lowercase, include '@', and may optionally contain numbers.";
+        document.getElementById("email-error").style.color = "red";
+        valid = false;
+    }
 
-        if (mobile === "") {
-            document.getElementById("mobile-error").innerText = "Mobile number is required.";
-            document.getElementById("mobile-error").style.color = "red";
-            valid = false;
-        } else if (!/^\d{10}$/.test(mobile)) {
-            document.getElementById("mobile-error").innerText = "Enter a valid 10-digit mobile number.";
-            document.getElementById("mobile-error").style.color = "red";
-            valid = false;
-        }
+    if (mobileInput.length === 0) {
+        document.getElementById("mobile-error").innerText = "Mobile number is required.";
+        document.getElementById("mobile-error").style.color = "red";
+        valid = false;
+    } else if (mobile === "") {
+        document.getElementById("mobile-error").innerText = "Mobile number cannot be only spaces.";
+        document.getElementById("mobile-error").style.color = "red";
+        valid = false;
+    } else if (!/^\d{10}$/.test(mobile)) {
+        document.getElementById("mobile-error").innerText = "Enter a valid 10-digit mobile number.";
+        document.getElementById("mobile-error").style.color = "red";
+        valid = false;
+    } else if (/^0{10}$/.test(mobile)) {
+        document.getElementById("mobile-error").innerText = "Mobile number cannot be all zeros.";
+        document.getElementById("mobile-error").style.color = "red";
+        valid = false;
+    }
 
-        if (password === "") {
-            document.getElementById("password-error").innerText = "Password is required.";
-            document.getElementById("password-error").style.color = "red";
-            valid = false;
-        } else if (password.length < 6) {
+    if (password.length === 0) {
+        document.getElementById("password-error").innerText = "Password is required.";
+        document.getElementById("password-error").style.color = "red";
+        valid = false;
+    } else if (/^\s+$/.test(password)) {
+        document.getElementById("password-error").innerText = "Password cannot be only spaces.";
+        document.getElementById("password-error").style.color = "red";
+        valid = false;
+    } else {
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+        const isLongEnough = password.length >= 6;
+
+        if (!isLongEnough) {
             document.getElementById("password-error").innerText = "Password must be at least 6 characters.";
             document.getElementById("password-error").style.color = "red";
             valid = false;
-        }
-
-        if (cpassword === "") {
-            document.getElementById("cpassword-error").innerText = "Confirm Password is required.";
-            document.getElementById("cpassword-error").style.color = "red";
-            valid = false;
-        } else if (cpassword !== password) {
-            document.getElementById("cpassword-error").innerText = "Passwords do not match.";
-            document.getElementById("cpassword-error").style.color = "red";
+        } else if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+            document.getElementById("password-error").innerText = 
+                "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
+            document.getElementById("password-error").style.color = "red";
             valid = false;
         }
-
-        return valid;
     }
+
+    // Confirm password validation
+    if (cpassword.length === 0) {
+        document.getElementById("cpassword-error").innerText = "Confirm Password is required.";
+        document.getElementById("cpassword-error").style.color = "red";
+        valid = false;
+    } else if (/^\s+$/.test(cpassword)) {
+        document.getElementById("cpassword-error").innerText = "Confirm Password cannot be only spaces.";
+        document.getElementById("cpassword-error").style.color = "red";
+        valid = false;
+    } else if (cpassword !== password) {
+        document.getElementById("cpassword-error").innerText = "Passwords do not match.";
+        document.getElementById("cpassword-error").style.color = "red";
+        valid = false;
+    }
+
+    if (valid) {
+        submitButton.disabled = true;
+        document.getElementById("registration-form").submit();
+    }
+
+    return valid;
+}
 
     function togglePasswordVisibility(fieldId) {
         const field = document.getElementById(fieldId);
@@ -147,9 +195,5 @@
             icon.className = "bi bi-eye";
         }
     }
-
-    document.querySelector('form').addEventListener('submit', function() {
-        document.querySelector('button[type="submit"]').disabled = true;
-    });
 
 </script>

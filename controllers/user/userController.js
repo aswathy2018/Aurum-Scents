@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const Product = require('../../model/productSchema')
 const Category = require('../../model/categorySchema')
 const Brand = require('../../model/brandSchema')
+const Banner = require('../../model/bannerSchema')
 
 
 const pageNotFound = async (req, res) => {

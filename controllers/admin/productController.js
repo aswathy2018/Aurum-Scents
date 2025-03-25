@@ -320,24 +320,18 @@ const addproductoffer = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        // Store original price if not already set
         if (!product.originalPrice) {
             product.originalPrice = product.salesPrice;
         }
 
-        // Get category and its offer
         const categoryId = product.category;
         const category = await Category.findById(categoryId);
         const categoryOffer = category?.categoryOffer || 0;
-
-        // Calculate discounted prices based on different offers using originalPrice
         const productDiscountPrice = product.originalPrice - (product.originalPrice * offerPercentage) / 100;
         const categoryDiscountPrice = product.originalPrice - (product.originalPrice * categoryOffer) / 100;
 
-        // Set product offer
         product.productOffer = offerPercentage;
-        
-        // Apply the better discount (lower price)
+
         if (productDiscountPrice <= categoryDiscountPrice) {
             product.salesPrice = Math.round(productDiscountPrice);
         } else {
@@ -366,20 +360,14 @@ const removeOffer = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
 
-        // Get category offer (if any)
         const categoryId = product.category;
         const category = await Category.findById(categoryId);
         const categoryOffer = category?.categoryOffer || 0;
-
-        // Start with original price
-        let newSalesPrice = product.originalPrice || product.salesPrice; // Fallback to current price if originalPrice isn't set
-        
-        // Apply category offer if it exists
+        let newSalesPrice = product.originalPrice || product.salesPrice;
         if (categoryOffer > 0) {
             newSalesPrice = Math.round(newSalesPrice - (newSalesPrice * categoryOffer) / 100);
         }
 
-        // Update product: Remove product-specific offer and set correct sales price
         await Product.findByIdAndUpdate(productId, {
             $set: { 
                 productOffer: 0, 
@@ -394,93 +382,6 @@ const removeOffer = async (req, res) => {
         res.status(500).json({ success: false, message: "Offer removing failed." });
     }
 };
-
-
-// const addproductoffer = async (req, res) => {
-//     try {
-//         const { productId, offerPercentage } = req.body;
-
-//         if (offerPercentage < 0 || offerPercentage > 100) {
-//             return res.status(400).json({ success: false, message: "The offer price must be between 0-100" });
-//         }
-
-//         const product = await Product.findById(productId);
-//         if (!product) {
-//             return res.status(404).json({ success: false, message: "Product not found" });
-//         }
-
-//         // Get category and its offer
-//         const categoryId = product.category;
-//         const category = await Category.findById(categoryId);
-//         const categoryOffer = category?.categoryOffer || 0;
-
-//         // Calculate discounted prices based on different offers
-//         const productDiscountPrice = product.salesPrice - (product.salesPrice * offerPercentage) / 100;
-//         const categoryDiscountPrice = product.salesPrice - (product.salesPrice * categoryOffer) / 100;
-
-//         // Set product offer
-//         product.productOffer = offerPercentage;
-        
-//         // Apply the better discount (lower price)
-//         if (productDiscountPrice <= categoryDiscountPrice) {
-//             product.salesPrice = Math.round(productDiscountPrice);
-//         } else {
-//             product.salesPrice = Math.round(categoryDiscountPrice);
-//         }
-
-//         await product.save();
-
-//         res.status(200).json({ success: true, message: "Offer applied successfully!" });
-//     } catch (error) {
-//         console.log("Error adding product offer:", error);
-//         res.status(500).json({ success: false, message: "Internal server error." });
-//     }
-// };
-
-
-// const removeOffer = async (req, res) => {
-//     try {
-//         const productId = req.query.id;
-
-//         if (!mongoose.Types.ObjectId.isValid(productId)) {
-//             return res.status(400).json({ success: false, message: "Invalid product ID." });
-//         }
-
-//         const product = await Product.findById(productId);
-//         if (!product) {
-//             return res.status(404).json({ success: false, message: "Product not found." });
-//         }
-
-//         // Restore the original price if it was stored before applying the offer
-//         const originalPrice = product.salesPrice; // Use stored original price if available
-
-//         // Get category offer (if any)
-//         const categoryId = product.category;
-//         const category = await Category.findById(categoryId);
-//         const categoryOffer = category?.categoryOffer || 0;
-
-//         // Apply only category offer, if present
-//         let newSalesPrice = originalPrice; // Reset to original price
-//         if (categoryOffer > 0) {
-//             newSalesPrice = Math.round(originalPrice - (originalPrice * categoryOffer) / 100);
-//         }
-
-//         // Update product: Remove product-specific offer, keep correct sales price
-//         await Product.findByIdAndUpdate(productId, {
-//             $set: { 
-//                 productOffer: 0, 
-//                 salesPrice: newSalesPrice,
-//             }
-//         });
-
-//         res.status(200).json({ success: true, message: "Offer removed successfully!" });
-
-//     } catch (error) {
-//         console.error("Error removing product offer:", error);
-//         res.status(500).json({ success: false, message: "Offer removing failed." });
-//     }
-// };
-
 
 
 module.exports = {

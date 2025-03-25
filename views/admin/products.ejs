@@ -115,7 +115,6 @@
 <div class="main-content">
     <h1>Products</h1>
     
-    <!-- Search Bar -->
     <div class="search-container">
         <form action="" method="GET">
             <input type="text" name="search" placeholder="Search customers..." value="<%= locals.search %>">
@@ -123,7 +122,7 @@
         </form>
     </div>
 
-    <!-- Table -->
+
     <div class="table-container">
         <table class="table">
             <thead>
@@ -209,7 +208,6 @@
     });
 
     function updateProductStatus(productId, block) {
-    // Prevent any default form submission
     event.preventDefault();
     
     Swal.fire({

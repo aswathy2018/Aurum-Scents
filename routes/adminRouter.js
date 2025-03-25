@@ -7,6 +7,7 @@ const productController = require('../controllers/admin/productController');
 const brandController = require('../controllers/admin/brandController');
 const couponController = require('../controllers/admin/couponController')
 const salesReportController = require('../controllers/admin/salesReportController')
+const dashBoardController = require('../controllers/admin/dashBoardController')
 const {userAuth, adminAuth} = require('../middlewares/auth');
 const {uploads} = require('../helpers/multer');
 
@@ -83,7 +84,13 @@ router.get('/sales-report/pdf', salesReportController.downloadSalesReportPDF);
 router.get('/sales-report/excel', salesReportController.downloadSalesReportExcel);
 
 
-router.get('/*', adminController.errorPage)
+//Dashboard Management
+router.get('/best-selling-products',adminAuth,dashBoardController.bestproduct);
+router.get('/sales-report',adminAuth,dashBoardController.graph)
+router.get('/best-selling-brands',adminAuth,dashBoardController.bestbrand)
+router.get('/best-selling-categories',adminAuth,dashBoardController.bestcategory)
 
+
+router.get('/*', adminController.errorPage)
 
 module.exports = router;

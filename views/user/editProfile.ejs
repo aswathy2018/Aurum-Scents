@@ -15,39 +15,113 @@
     </div>
 </div>
 
-    <section class="content-main mt-80 mb-80">
-        <div class="card mx-auto card-login" style="max-width: 400px;">
-            <div class="card-body">
-                <h4 class="card-title mb-4 text-center">Edit Profile</h4>
-                <form method="post" action="/editProfile">
-                    <div class="mb-4 position-relative">
-                        <h6>Name: </h6>
-                        <input class="form-control" name="userName" id="userName" value="<%= user.name %>" type="text"
-                            style="border: 1px solid #ced4da; padding-right: 40px;">
+<section class="content-main mt-80 mb-80">
+    <div class="card mx-auto card-login" style="max-width: 400px;">
+        <div class="card-body">
+            <h4 class="card-title mb-4 text-center">Edit Profile</h4>
+            <form method="post" action="/editProfile" id="edit-profile-form" onsubmit="return validateForm(event)">
+                <div class="mb-4 position-relative">
+                    <h6>Name: </h6>
+                    <input class="form-control" name="userName" id="userName" value="<%= user.name %>" type="text"
+                        style="border: 1px solid #ced4da; padding-right: 40px;">
+                    <div id="userNameError" class="text-danger mt-1" style="font-size: 0.875rem;"></div>
+                </div>
+                <div class="mb-4 position-relative">
+                    <h6>Email: </h6>
+                    <input class="form-control" name="email" id="email" value="<%= user.email %>" type="text"
+                        style="border: 1px solid #ced4da; padding-right: 40px;">
+                    <div id="emailError" class="text-danger mt-1" style="font-size: 0.875rem;"></div>
+                </div>
+                <div class="mb-4 position-relative">
+                    <h6>Phone: </h6>
+                    <input class="form-control" name="number" id="number" value="<%= user.phone %>" type="number"
+                        style="border: 1px solid #ced4da; padding-right: 40px;">
+                    <div id="numberError" class="text-danger mt-1" style="font-size: 0.875rem;"></div>
+                </div>
+                <div class="mb-4">
+                    <button type="submit" class="btn btn-primary w-100">Verify</button>
+                </div>
+                <% if (locals.message && message.length > 0) { %>
+                    <div id="alertMessage" class="alert alert-danger text-center">
+                        <%= message %>
                     </div>
-                    <div class="mb-4 position-relative">
-                        <h6>Email: </h6>
-                        <input class="form-control" name="email" id="email" value="<%= user.email %>" type="text"
-                            style="border: 1px solid #ced4da; padding-right: 40px;">
-                    </div>
-                    <div class="mb-4 position-relative">
-                        <h6>Phone: </h6>
-                        <input class="form-control" name="number" id="number" value="<%= user.phone %>" type="number"
-                            style="border: 1px solid #ced4da; padding-right: 40px;">
-                    </div>
-                    <div class="mb-4">
-                        <button type="submit" class="btn btn-primary w-100">Verify</button>
-                    </div>
-                    <% if (locals.message && message.length> 0) { %>
-                        <div id="alertMessage" class="alert alert-danger text-center">
-                            <%= message %>
-                        </div>
-                        <% } %>
-                </form>
-            </div>
+                <% } %>
+            </form>
         </div>
-    </section>
+    </div>
+</section>
 
-    <%- include('../partials/user/footer.ejs') %>
+<%- include('../partials/user/footer.ejs') %>
 
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function validateForm(event) {
+        event.preventDefault();
+
+        document.querySelectorAll(".text-danger").forEach((error) => (error.innerText = ""));
+
+        let valid = true;
+
+        const userNameInput = document.getElementById("userName").value;
+        const userName = userNameInput.trim();
+        const emailInput = document.getElementById("email").value;
+        const email = emailInput.trim();
+        const numberInput = document.getElementById("number").value;
+        const number = numberInput.trim();
+        const submitButton = document.querySelector('button[type="submit"]');
+
+        if (userNameInput.length === 0) {
+            document.getElementById("userNameError").innerText = "Name is required.";
+            document.getElementById("userNameError").style.color = "red";
+            valid = false;
+        } else if (userName === "") {
+            document.getElementById("userNameError").innerText = "Name cannot be only spaces.";
+            document.getElementById("userNameError").style.color = "red";
+            valid = false;
+        } else if (userName.length < 3) {
+            document.getElementById("userNameError").innerText = "Name must be at least 3 characters.";
+            document.getElementById("userNameError").style.color = "red";
+            valid = false;
+        } else if (!/^[a-zA-Z\s]+$/.test(userName)) {
+            document.getElementById("userNameError").innerText = "Name must contain only letters and spaces.";
+            document.getElementById("userNameError").style.color = "red";
+            valid = false;
+        }
+
+        if (emailInput.length === 0) {
+            document.getElementById("emailError").innerText = "Email is required.";
+            document.getElementById("emailError").style.color = "red";
+            valid = false;
+        } else if (email === "") {
+            document.getElementById("emailError").innerText = "Email cannot be only spaces.";
+            document.getElementById("emailError").style.color = "red";
+            valid = false;
+        } else if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(email)) {
+            document.getElementById("emailError").innerText =
+                "Email must be lowercase, include '@', and may optionally contain numbers.";
+            document.getElementById("emailError").style.color = "red";
+            valid = false;
+        }
+
+        if (numberInput.length === 0) {
+            document.getElementById("numberError").innerText = "Phone number is required.";
+            document.getElementById("numberError").style.color = "red";
+            valid = false;
+        } else if (number === "") {
+            document.getElementById("numberError").innerText = "Phone number cannot be only spaces.";
+            document.getElementById("numberError").style.color = "red";
+            valid = false;
+        } else if (!/^\d{10}$/.test(number)) {
+            document.getElementById("numberError").innerText = "Phone number must be exactly 10 digits.";
+            document.getElementById("numberError").style.color = "red";
+            valid = false;
+        }
+
+        if (valid) {
+            submitButton.disabled = true;
+            document.getElementById("edit-profile-form").submit();
+        }
+
+        return valid;
+    }
+</script>

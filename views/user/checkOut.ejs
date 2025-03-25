@@ -489,9 +489,13 @@
                                 </div>
                                 <div class="payment_option">
                                     <div style="margin-top: 10px">
+                                        <%if(cart.items.reduce((sum, item) => sum += item.productId.salesPrice * item.quantity, 0) <10000){%>
                                         <input id="cod" type="radio" name="paymentMethod" value="COD"
                                             style="width: 15px; height: 15px; margin-right: 5px; cursor: pointer;" required/>
                                         <label for="cod" style="cursor: pointer; font-size: 14px">Cash On Delivery</label>
+                                        <%}else{%>
+                                            <div style="margin-bottom: 10px"><p class="text-danger">Cash on Delivery is only available for orders under ₹10000. </p></div>
+                                            <%}%>
                                       </div>
                                       <div style="margin-top: 10px">
                                         <input id="online" type="radio" name="paymentMethod" value="online"
@@ -676,7 +680,7 @@ document.getElementById('addAddressForm').addEventListener('submit', function (e
         });
 
 
-
+let onlineCoupon
 document.getElementById("placeOrderButton").addEventListener("click", async function () {
     const selectedAddress = document.getElementById("addressSelect").value;
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
@@ -744,6 +748,7 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
         });
 
     } else if (paymentMethod.value === "online") {
+        const couponCode = this.getAttribute('data-coupon-code');
         const response = await fetch("/create-razorpay-order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -767,7 +772,8 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_signature: response.razorpay_signature,
-                        orderData: orderData
+                        orderData: orderData,
+                        couponCode: onlineCoupon
                     })
                 });
 
@@ -847,6 +853,7 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
 document.querySelectorAll('.apply-coupon').forEach(button => {
                 button.addEventListener('click', function() {
                     const couponCode = this.getAttribute('data-coupon-code');
+                    onlineCoupon = couponCode
                     console.log('Clicked apply coupon with code:', couponCode);
                     applyCoupon(couponCode);
                 });
@@ -916,6 +923,7 @@ function updateUI(discountAmount) {
 async function payNow() {
       const amount = document.getElementById('amount').value;
 
+      // Create order by calling the server endpoint
       const response = await fetch('/checkout/process', {
         method: 'POST',
         headers: {
@@ -926,14 +934,15 @@ async function payNow() {
 
       const order = await response.json();
 
+      // Open Razorpay Checkout
       const options = {
-        key: 'rzp_test_fpueLavUtsLoKt',
-        amount: '50000',
+        key: 'rzp_test_fpueLavUtsLoKt', // Replace with your Razorpay key_id
+        amount: '50000', // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
         currency: 'INR',
         name: 'Acme Corp',
         description: 'Test Transaction',
-        order_id: 'order_IluGWxBm9U8zJ8',
-        callback_url: 'http://localhost:3002/payment-success',
+        order_id: 'order_IluGWxBm9U8zJ8', // This is the order_id created in the backend
+        callback_url: 'http://localhost:3002/payment-success', // Your success URL
         prefill: {
           name: 'Aurum Scents',
           email: 'officialaurumscents@gmail.com',
@@ -948,14 +957,16 @@ async function payNow() {
       rzp.open();
     }
 
+
+    //////////////////////callback URL/////////////////////
     var options = {
-    "key": "rzp_test_fpueLavUtsLoKt",
-    "amount": "50000",
+    "key": "rzp_test_fpueLavUtsLoKt", // Enter the Key ID generated from the Dashboard
+    "amount": "50000", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
     "currency": "INR",
     "name": "Acme Corp",
     "description": "Test Transaction",
     "image": "https://example.com/your_logo",
-    "order_id": "order_IluGWxBm9U8zJ8",
+    "order_id": "order_IluGWxBm9U8zJ8", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
     "callback_url": "https://eneqd3r9zrjok.x.pipedream.net/",
     "prefill": {
         "name": "Aswathy Sudhakaran",
@@ -975,14 +986,16 @@ document.getElementById('rzp-button1').onclick = function(e){
     e.preventDefault();
 }
 
+
+/////////////////////Handler Function/////////////////////
 var options = {
-    "key": "rzp_test_fpueLavUtsLoKt",
-    "amount": "50000",
+    "key": "rzp_test_fpueLavUtsLoKt", // Enter the Key ID generated from the Dashboard
+    "amount": "50000", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
     "currency": "INR",
     "name": "Acme Corp",
     "description": "Test Transaction",
     "image": "https://example.com/your_logo",
-    "order_id": "order_IluGWxBm9U8zJ8",
+    "order_id": "order_IluGWxBm9U8zJ8", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
     "handler": function (response){
         alert(response.razorpay_payment_id);
         alert(response.razorpay_order_id);

@@ -60,7 +60,7 @@ body {
 }
 
 #updatebtn {
-    background-color: #0d6efd;
+    background-color: #000000;
     color: #fff;
     border: none;
     padding: 8px 20px;
@@ -70,7 +70,7 @@ body {
 }
 
 #updatebtn:hover {
-    background-color: #0b5ed7;
+    background-color: #000000;
 }
 
 /* Error message styling */
@@ -101,7 +101,7 @@ body {
 
 /* Save button styling */
 .btn-sm.btn-primary {
-    background-color: #0d6efd;
+    background-color: #000000;
     color: #fff;
     border: none;
     padding: 4px 12px;
@@ -110,7 +110,7 @@ body {
 }
 
 .btn-sm.btn-primary:hover {
-    background-color: #0b5ed7;
+    background-color: #333435;
 }
 
 #croppedImg1,

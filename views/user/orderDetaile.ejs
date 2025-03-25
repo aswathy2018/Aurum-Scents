@@ -177,7 +177,7 @@
                 <tbody>
                   <% order.orderedItems.forEach(item => { %>
                     <tr>
-                      <td><%= item.product?.createdAt.toDateString() %></td>
+                      <td><%= order.createdAt.toDateString() %></td>
                       <td><%= item.product?.productName %></td>
                       <td>
                         <span>
@@ -185,7 +185,7 @@
                         </span>
                       </td>
                       <td><%= item.quantity %></td>
-                      <td>₹<%= item.price %></td>
+                      <td>₹<%= order.totalAmount %></td>
                       <td><%=order.paymentStatus%></td>
                       <td><%=order.paymentMethod%></td>
                       <td>

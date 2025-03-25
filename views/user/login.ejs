@@ -1,4 +1,3 @@
-<%- include("../partials/user/header.ejs") %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
@@ -25,87 +24,99 @@
         text-align: center;
         margin: 15px 0;
     }
-</style>
-<main class="main" style="background-color: #f1fbf2;">
-  <div class="page-header breadcrumb-wrap">
-      <div class="container">
-          <div class="breadcrumb">
-              <a href="/" rel="nofollow">Home</a>
-              <span></span> Login
-          </div>
-      </div>
-  </div>
-<div class="custom-container"  style="background-color: #ffffff; border: 1px solid #e5dcdc;  margin-left: 30%;  margin-right: 20%;margin-bottom: 8%;  margin-top: 6%; box-shadow: 3px 3px #ececec;">
-    <div >
-        <h3 class="text-center" style="color: #3C3633; font-family: 'Cinzel Decorative', serif; margin-top: 5%; margin-bottom: 5%;">User Login</h3>
-    </div>
-    <span style="color: red;"><%= locals.msg %></span>
-    <form method="post" action="/login">
-        <div class="form-group">
-            <input type="text" required name="email" placeholder="<% if(locals.email) {%><%= locals.email %><% } %> <% if(!locals.email) {%>Enter Email<% } %>" style="background-color: white;">
-        </div>
-        <div class="form-group">
-            <div class="input-group">
-                <input required type="password" name="password" id="login-password" class="form-control" placeholder="Password" style="background-color: white;">
-                <span class="input-group-text" onclick="togglePasswordVisibility('login-password')" style="cursor: pointer;">
-                    <i class="bi bi-eye" id="toggle-icon-login-password">👁</i>
-                </span>
-            </div>
-        </div> 
-        <!-- erroer message showing -->
-
-        <%if(locals.message && message.length>0){%>
-            <div class="alert alert-danger text-center">
-                <%=message%>
-            </div>
-        <%}%>
-
-        <div class="login_footer form-group">
-            <div class="chek-form">
-            </div>
-            <a style="color: #2d706d;" href="/forgotPassword">Forgot password?</a>
-        </div>
-        <div class="form-group">
-            <button type="submit" class=" btn-custom " name="login">Log in</button>
-        </div>
-    </form>
-    <ul class=" list_none text-center ">
-        <li> <p style="color: #23635f;">Dont have Account? <a href="/signup" style="color: #0abdb4;"><span>Signup here</span></a> </p></li>
-    </ul>
-    <div class="divider-text-center ">
-        <span> or</span>
-    </div>
-    <ul class="btn-login list_none text-center mb-15">
-        <li><a href="/auth/google" class="btn btn-google hover-up">Login With Google</a></li>
-    </ul>
-</div>
-                             
-<%- include("../partials/user/footer.ejs") %>
-<style>
     .input-group {
         display: flex;
         align-items: center;
     }
-    
     .input-group-text {
         background-color: white;
         border-left: none;
         border-radius: 0 4px 4px 0;
         padding: 8px 12px;
     }
-    
     .form-control {
         border-radius: 4px 0 0 4px;
         border-right: none;
     }
-    
     .input-group-text i {
         font-size: 1.2rem;
         color: #000;
     }
-    
 </style>
+<%- include('../partials/user/header.ejs') %>
+<main class="main" style="background-color: #f1fbf2;">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span></span> Login
+            </div>
+        </div>
+    </div>
+    <div class="custom-container" style="background-color: #ffffff; border: 1px solid #e5dcdc; margin-left: 30%; margin-right: 20%; margin-bottom: 8%; margin-top: 6%; box-shadow: 3px 3px #ececec;">
+        <div>
+            <h3 class="text-center" style="color: #3C3633; font-family: 'Cinzel Decorative', serif; margin-top: 5%; margin-bottom: 5%;">User Login</h3>
+        </div>
+        <span style="color: red;"><%= locals.msg %></span>
+        <form method="post" action="/login" id="login-form" onsubmit="return validateForm(event)">
+            <div class="form-group">
+                <input type="text" name="email" id="email" placeholder="<% if(locals.email) {%><%= locals.email %><% } %> <% if(!locals.email) {%>Enter Email<% } %>" style="background-color: white;">
+                <span class="error" id="email-error"></span>
+            </div>
+            <div class="form-group">
+                <div class="input-group">
+                    <input type="password" name="password" id="login-password" class="form-control" placeholder="Password" style="background-color: white;">
+                    <span class="input-group-text" onclick="togglePasswordVisibility('login-password')" style="cursor: pointer;">
+                        <i class="bi bi-eye" id="toggle-icon-login-password">👁</i>
+                    </span>
+                </div>
+                <span class="error" id="password-error"></span>
+            </div> 
+        
+            <% if(locals.message && message.length > 0) { %>
+                <div class="alert alert-danger text-center">
+                    <%= message %>
+                </div>
+            <% } %>
+        
+            <div class="login_footer form-group">
+                <div class="chek-form"></div>
+                <a style="color: #2d706d;" href="/forgotPassword">Forgot password?</a>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn-custom" name="login">Log in</button>
+            </div>
+        </form>
+        <ul class="list_none text-center">
+            <li><p style="color: #23635f;">Don't have an account? <a href="/signup" style="color: #0abdb4;"><span>Signup here</span></a></p></li>
+        </ul>
+        <div class="divider-text-center">
+            <span>or</span>
+        </div>
+        <ul class="btn-login list_none text-center mb-15">
+            <li><a href="/auth/google" class="btn btn-google hover-up">Login With Google</a></li>
+        </ul>
+    </div>
+</main>
+<%- include('../partials/user/footer.ejs') %>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('password_changed') === 'true') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Password Changed Successfully!',
+                text: 'You can now login with your new password',
+                confirmButtonColor: '#3085d6'
+            });
+
+            if (window.history && window.history.replaceState) {
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        }
+    });
+
     function togglePasswordVisibility(inputId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById('toggle-icon-' + inputId);
@@ -118,20 +129,65 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('password_changed') === 'true') {
-        Swal.fire({
-            icon: 'success',
-            title: 'Password Changed Successfully!',
-            text: 'You can now login with your new password',
-            confirmButtonColor: '#3085d6'
-        });
+    function validateForm(event) {
+        event.preventDefault();
 
-        if (window.history && window.history.replaceState) {
-            const cleanUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
+        document.querySelectorAll(".error").forEach((error) => (error.innerText = ""));
+
+        let valid = true;
+
+        const emailInput = document.getElementById("email").value;
+        const email = emailInput.trim();
+        const password = document.getElementById("login-password").value;
+        const submitButton = document.querySelector('button[type="submit"]');
+
+        if (emailInput.length === 0) {
+            document.getElementById("email-error").innerText = "Email is required.";
+            document.getElementById("email-error").style.color = "red";
+            valid = false;
+        } else if (email === "") {
+            document.getElementById("email-error").innerText = "Email cannot be only spaces.";
+            document.getElementById("email-error").style.color = "red";
+            valid = false;
+        } else if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(email)) {
+            document.getElementById("email-error").innerText =
+                "Email must be lowercase, include '@', and may optionally contain numbers.";
+            document.getElementById("email-error").style.color = "red";
+            valid = false;
         }
+
+        if (password.length === 0) {
+            document.getElementById("password-error").innerText = "Password is required.";
+            document.getElementById("password-error").style.color = "red";
+            valid = false;
+        } else if (/^\s+$/.test(password)) {
+            document.getElementById("password-error").innerText = "Password cannot be only spaces.";
+            document.getElementById("password-error").style.color = "red";
+            valid = false;
+        } else {
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            const isLongEnough = password.length >= 6;
+
+            if (!isLongEnough) {
+                document.getElementById("password-error").innerText = "Password must be at least 6 characters.";
+                document.getElementById("password-error").style.color = "red";
+                valid = false;
+            } else if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+                document.getElementById("password-error").innerText = 
+                    "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
+                document.getElementById("password-error").style.color = "red";
+                valid = false;
+            }
+        }
+
+        if (valid) {
+            submitButton.disabled = true;
+            document.getElementById("login-form").submit();
+        }
+
+        return valid;
     }
-});
 </script>

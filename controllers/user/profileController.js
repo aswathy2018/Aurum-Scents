@@ -128,11 +128,9 @@ const hashpassword = async (password) => {
         const passwordHash = await bcrypt.hash(password, 10)
         return passwordHash;
     } catch (error) {
-        console.log("password hasing is failed, the password is stored in readeable formate Please check the bcrypt module is working propperly ", error);
-
+        console.log("password hasing is failed, check the bcrypt module is working propperly ", error);
     }
 }
-
 
 const resetPassword = async (req, res) => {
     try {
@@ -159,7 +157,6 @@ const resetPassword = async (req, res) => {
         res.redirect('/pageNotFound')
     }
 }
-
 
 const profile = async (req, res) => {
     try {

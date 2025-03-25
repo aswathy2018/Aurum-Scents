@@ -196,44 +196,81 @@
             validateOTPForm();
         });
 
+function isValidOTP(otp) {
+    const numberRegex = /^[0-9]{6}$/;
+    return numberRegex.test(otp);
+}
 
+document.getElementById('otpForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const otpValue = otpInput.value;
+    
+    if (!isValidOTP(otpValue)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid OTP',
+            text: 'Please enter a 6-digit number only. No spaces, letters, or special characters allowed.',
+        });
+        return;
+    }
+    
+    validateOTPForm();
+});
 
-        function validateOTPForm() {
-            const otpValue = otpInput.value;
+otpInput.addEventListener('input', (e) => {
+    let value = e.target.value;
+    value = value.replace(/[^0-9]/g, '');
+    e.target.value = value;
+    
+    if (value.length === 6) {
+        submitBtn.focus();
+    }
+});
 
-            $.ajax({
-                type: "POST",
-                url: "/otp",
-                data: { otp: otpValue },
-                success: function (response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'OTP verified successfully.',
-                            showConfirmButton: false,
-                            timer: 2500
-                        }).then(() => {
-                            window.location.href = response.redirectUrl;
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Invalid OTP. Please try again.',
-                        });
-                    }
-                },
-                error: function () {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Something went wrong! Please try again later.',
-                    });
-                }
+function validateOTPForm() {
+    const otpValue = otpInput.value;
+
+    if (!isValidOTP(otpValue)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid OTP',
+            text: 'Please enter a 6-digit number only.',
+        });
+        return;
+    }
+
+    $.ajax({
+        type: "POST",
+        url: "/otp",
+        data: { otp: otpValue },
+        success: function (response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'OTP verified successfully.',
+                    showConfirmButton: false,
+                    timer: 2500
+                }).then(() => {
+                    window.location.href = response.redirectUrl;
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Invalid OTP. Please try again.',
+                });
+            }
+        },
+        error: function () {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong! Please try again later.',
             });
-            return false;
         }
+    });
+}
     </script>
 
 </body>

@@ -140,7 +140,6 @@ const applyCoupon = async (req, res) => {
       }
 
       const discountAmount = (totalAmount*coupon.offerPercentage)/100;
-      console.log("discountAmount",discountAmount)
   
       res.json({
         success: true,
@@ -192,7 +191,7 @@ const createOrder = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
     const userId = req.session.user
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderData } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderData,couponCode} = req.body;
     console.log("Online payment: ", req.body);
     
     const hmac = crypto.createHmac('sha256', "Bk8bywg3LIZxueU2ZgCPN6zV");
@@ -203,6 +202,15 @@ const verifyPayment = async (req, res) => {
         const { addressId, paymentMethod, totalAmount } = orderData;
 
         try {
+            let finalamount=totalAmount
+            let discount = 0
+            
+            if(couponCode){
+                const coupon=await Coupon.findOne({couponCode:couponCode});
+                discount=(totalAmount*coupon.offerPercentage)/100
+                
+                finalamount=finalamount-discount
+            }
             let foundAddress;
 
             if (!mongoose.isValidObjectId(addressId)) {
@@ -248,10 +256,13 @@ const verifyPayment = async (req, res) => {
             const order = new Order({
                 userId: req.session.user,
                 paymentMethod,
-                totalAmount,
+                totalAmount:finalamount,
                 orderedItems: orderItems,
                 address: foundAddress,
-                paymentStatus: 'Paid'
+                paymentStatus: 'Paid',
+                couponCode: couponCode,
+                couponApplied: true,
+                discount: discount
             });
 
             await order.save();
@@ -326,7 +337,7 @@ let couponCode = coupon ? coupon.code : null;
                 if (!paymentMethod || !totalAmount) {
                     return res.status(400).json({ error: "Payment method and total amount are required." });
                 }
-
+               
                 const orderItems = cart.items.map(item => {
                     if (!item.productId || !item.productId._id) {
                         throw new Error(`Invalid product data in cart: ${JSON.stringify(item)}`);
@@ -427,7 +438,6 @@ let couponCode = coupon ? coupon.code : null;
                     if (coupon && totalAmount > coupon.minimumprice) {
                         discount = Math.round((totalAmount * coupon.offerPercentage) / 100);
                         couponCodeId = coupon._id;
-                        console.log("Discount applied:", discount);
                     }
                 }
 
@@ -456,7 +466,6 @@ let couponCode = coupon ? coupon.code : null;
                     quantity: item.quantity,
                     price: item.productId.salesPrice,
                 }));
-                console.log("orderItems: ", orderItems);
         
                 const order = new Order({
                     userId: req.session.user,
@@ -466,7 +475,7 @@ let couponCode = coupon ? coupon.code : null;
                     address: foundAddress,
                     paymentStatus: "Paid",
                     discount: discount,
-                    couponCode: couponCodeId || null,
+                    couponCode: couponCodeId || 0,
                 });
         
                 console.log('Order before save: ', order);

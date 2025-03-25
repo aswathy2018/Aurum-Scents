@@ -21,7 +21,7 @@
                 </div>
             <% } %>
             
-            <form id="loginForm" action="/admin/login" method="POST" novalidate>
+            <form id="loginForm" action="/admin/login" method="POST" novalidate onsubmit="return validateForm(event)">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="email" id="username" name="username" 
@@ -45,91 +45,79 @@
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const togglePassword = document.getElementById("togglePassword");
+            togglePassword.addEventListener("click", function () {
+                const passwordInput = document.getElementById("password");
+                const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+                passwordInput.setAttribute("type", type);
+                this.classList.toggle("fa-eye");
+                this.classList.toggle("fa-eye-slash");
+            });
+        });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("loginForm")
-  const usernameInput = document.getElementById("username")
-  const passwordInput = document.getElementById("password")
-  const usernameError = document.getElementById("username-error")
-  const passwordError = document.getElementById("password-error")
+        function validateForm(event) {
+            event.preventDefault();
 
-  function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
+            document.querySelectorAll(".error-message").forEach((error) => (error.innerText = ""));
 
-  function countNumbers(str) {
-    return (str.match(/\d/g) || []).length
-  }
+            let valid = true;
 
-  function validateForm(e) {
-    e.preventDefault()
-    let isValid = true
+            const usernameInput = document.getElementById("username").value;
+            const username = usernameInput.trim();
+            const password = document.getElementById("password").value;
+            const submitButton = document.querySelector('button[type="submit"]');
 
-    usernameInput.classList.remove("error")
-    passwordInput.classList.remove("error")
-    usernameError.textContent = ""
-    passwordError.textContent = ""
+            if (usernameInput.length === 0) {
+                document.getElementById("username-error").innerText = "Email is required.";
+                document.getElementById("username-error").style.color = "red";
+                valid = false;
+            } else if (username === "") {
+                document.getElementById("username-error").innerText = "Email cannot be only spaces.";
+                document.getElementById("username-error").style.color = "red";
+                valid = false;
+            } else if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(username)) {
+                document.getElementById("username-error").innerText =
+                    "Email must be lowercase, include '@', and may optionally contain numbers.";
+                document.getElementById("username-error").style.color = "red";
+                valid = false;
+            }
 
-    if (!usernameInput.value.trim()) {
-      usernameError.textContent = "Username is required"
-      usernameInput.classList.add("error")
-      isValid = false
-    } else if (!isValidEmail(usernameInput.value.trim())) {
-      usernameError.textContent = "Please enter a valid Username"
-      usernameInput.classList.add("error")
-      isValid = false
-    }
+            if (password.length === 0) {
+                document.getElementById("password-error").innerText = "Password is required.";
+                document.getElementById("password-error").style.color = "red";
+                valid = false;
+            } else if (/^\s+$/.test(password)) {
+                document.getElementById("password-error").innerText = "Password cannot be only spaces.";
+                document.getElementById("password-error").style.color = "red";
+                valid = false;
+            } else {
+                const hasUpperCase = /[A-Z]/.test(password);
+                const hasLowerCase = /[a-z]/.test(password);
+                const hasNumber = /\d/.test(password);
+                const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+                const isLongEnough = password.length >= 6;
 
-    if (!passwordInput.value) {
-      passwordError.textContent = "Password is required"
-      passwordInput.classList.add("error")
-      isValid = false
-    } else if (countNumbers(passwordInput.value) < 5) {
-      passwordError.textContent = "Password must contain at least 5 numbers"
-      passwordInput.classList.add("error")
-      isValid = false
-    }
+                if (!isLongEnough) {
+                    document.getElementById("password-error").innerText = "Password must be at least 6 characters.";
+                    document.getElementById("password-error").style.color = "red";
+                    valid = false;
+                } else if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+                    document.getElementById("password-error").innerText = 
+                        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
+                    document.getElementById("password-error").style.color = "red";
+                    valid = false;
+                }
+            }
 
-    if (isValid) {
-      form.submit()
-    }
-  }
+            if (valid) {
+                submitButton.disabled = true;
+                document.getElementById("loginForm").submit();
+            }
 
-  usernameInput.addEventListener("input", function () {
-    usernameInput.classList.remove("error")
-    usernameError.textContent = ""
-
-    if (this.value.trim() && !isValidEmail(this.value.trim())) {
-      usernameError.textContent = "Please enter a valid Username"
-      usernameInput.classList.add("error")
-    }
-  })
-
-  passwordInput.addEventListener("input", function () {
-    passwordInput.classList.remove("error")
-    passwordError.textContent = ""
-
-    if (this.value && countNumbers(this.value) < 5) {
-      passwordError.textContent = "Password must contain at least 5 numbers"
-      passwordInput.classList.add("error")
-    }
-  })
-
-  const togglePassword = document.getElementById("togglePassword")
-  togglePassword.addEventListener("click", function () {
-    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
-    passwordInput.setAttribute("type", type)
-    this.classList.toggle("fa-eye")
-    this.classList.toggle("fa-eye-slash")
-  })
-
-  form.addEventListener("submit", validateForm)
-})
-
-
+            return valid;
+        }
     </script>
 </body>
 
 </html>
-

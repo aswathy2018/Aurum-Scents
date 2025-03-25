@@ -87,7 +87,6 @@
                             <div class="mt-3">
                                 <button type="button" id="crop-button-1" class="btn btn-primary me-2">Crop
                                     Image</button>
-                                <button type="button" id="save-button-1" class="btn btn-success">Save</button>
                             </div>
                         </div>
 
@@ -115,7 +114,6 @@
                             <div class="mt-3">
                                 <button type="button" id="crop-button-2" class="btn btn-primary me-2">Crop
                                     Image</button>
-                                <button type="button" id="save-button-2" class="btn btn-success">Save</button>
                             </div>
                         </div>
 
@@ -143,7 +141,6 @@
                             <div class="mt-3">
                                 <button type="button" id="crop-button-3" class="btn btn-primary me-2">Crop
                                     Image</button>
-                                <button type="button" id="save-button-3" class="btn btn-success">Save</button>
                             </div>
                         </div>
 
@@ -171,7 +168,6 @@
                             <div class="mt-3">
                                 <button type="button" id="crop-button-4" class="btn btn-primary me-2">Crop
                                     Image</button>
-                                <button type="button" id="save-button-4" class="btn btn-success">Save</button>
                             </div>
                         </div>
                     </div>
@@ -352,22 +348,17 @@
                 return true;
             }
 
-            // Enhanced function to validate description
             function validateDescription(field) {
                 const value = field.value;
                 const trimmedValue = value.trim();
-
-                // Check for empty value
                 if (!trimmedValue) {
                     return showError(field, "Description is required");
                 }
 
-                // Check for leading spaces
                 if (value.startsWith(' ')) {
                     return showError(field, "Description cannot start with space");
                 }
 
-                // Check for spaces only
                 if (/^\s*$/.test(value)) {
                     return showError(field, "Description cannot contain only spaces");
                 }
@@ -462,7 +453,6 @@
                 };
             }
 
-            // Add input listeners with debounce
             productName.addEventListener("input", debounce(() => validateProductName(productName), 300));
             description.addEventListener("input", debounce(() => validateDescription(description), 300));
             brand.addEventListener("change", () => validateDropdown(brand, "Brand"));
