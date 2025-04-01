@@ -510,6 +510,7 @@
                                 </div>
                             </div>
                             <button id="placeOrderButton" class="btn btn-fill-out btn-block mt-30">Place Order</button>
+                            <button id="clearCoupon" class="btn btn-fill-out btn-block mt-30">Remove Discount</button>
                         </div>
                     </div>
                 </div>
@@ -525,24 +526,25 @@
 
     <script>
 
-function copyCode(couponId) {
-            const couponCodeElement = document.getElementById(`couponCode-${couponId}`);
-            const couponCode = couponCodeElement.innerText;
+const originalTotal = '<%= cart.items.reduce((sum, item) => sum + item.productId.salesPrice * item.quantity, 0) %>';
 
-            navigator.clipboard.writeText(couponCode).then(() => {
-                Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon:  'success' ,
-                title: `Coupon code "${couponCode}" copied to clipboard!`,
-                showConfirmButton: false,
-                timer: 3000,
-                });
-               
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-        }
+function copyCode(couponId) {
+    const couponCodeElement = document.getElementById(`couponCode-${couponId}`);
+    const couponCode = couponCodeElement.innerText;
+
+    navigator.clipboard.writeText(couponCode).then(() => {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: `Coupon code "${couponCode}" copied to clipboard!`,
+            showConfirmButton: false,
+            timer: 3000,
+        });
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+    });
+}
 
 function validateAddressForm() {
     let isValid = true;
@@ -638,49 +640,76 @@ function showSwalError(message) {
     });
 }
 
-
 document.getElementById('addAddressForm').addEventListener('submit', function (event) {
-            event.preventDefault();
+    event.preventDefault();
 
-            if (validateAddressForm()) {
-                const formData = new FormData(this);
-                const url = this.getAttribute('action');
+    if (validateAddressForm()) {
+        const formData = new FormData(this);
+        const url = this.getAttribute('action');
 
-                fetch(url, {
-                    method: 'POST',
-                    body: new URLSearchParams(formData),
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    }
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'Address added successfully',
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                window.location.href = '/checkOut';
-                            });
-                        } else {
-                            throw new Error('Network response was not ok');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Failed to add address. Please try again.',
-                            icon: 'error'
-                        });
-                    });
+        fetch(url, {
+            method: 'POST',
+            body: new URLSearchParams(formData),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
             }
+        })
+        .then(response => {
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Address added successfully',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = '/checkOut';
+                });
+            } else {
+                throw new Error('Network response was not ok');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to add address. Please try again.',
+                icon: 'error'
+            });
         });
+    }
+});
 
+document.getElementById('clearCoupon').addEventListener('click', function () {
+    Swal.fire({
+        title: 'Remove Discount',
+        text: 'Do you want to remove the coupon discount?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const discountElement = document.querySelector('.discount-amount');
+            const totalElement = document.querySelector('.product-subtotal .font-xl');
 
-let onlineCoupon
+            discountElement.textContent = '₹0';
+            totalElement.textContent = `₹${Math.floor(originalTotal)}`;
+
+            localStorage.removeItem('appliedCoupon');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Discount Removed',
+                text: 'The coupon discount has been removed.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    });
+});
+
+let onlineCoupon;
 document.getElementById("placeOrderButton").addEventListener("click", async function () {
     const selectedAddress = document.getElementById("addressSelect").value;
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
@@ -712,7 +741,7 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
         addressId: selectedAddress,
         paymentMethod: paymentMethod.value,
         totalAmount: totalAmount,
-        couponCode: couponInfo ? {
+        coupon: couponInfo ? {
             code: couponInfo.code,
             discountAmount: couponInfo.discountAmount
         } : null
@@ -746,7 +775,6 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
             console.error("Error placing order:", error);
             Swal.fire({ icon: "error", title: "Error", text: "Unable to place the order. Please try again." });
         });
-
     } else if (paymentMethod.value === "online") {
         const couponCode = this.getAttribute('data-coupon-code');
         const response = await fetch("/create-razorpay-order", {
@@ -761,7 +789,7 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
             key: key,
             amount: amount.toString(),
             currency: currency,
-            name: "Your Company Name",
+            name: "Aurum Scents",
             description: "Order Payment",
             order_id: orderId,
             handler: async function (response) {
@@ -792,76 +820,76 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
                         window.location.href = "/paymentSuccess";
                     });
                 }
+                
             }
         };
 
         const rzp1 = new Razorpay(options);
         rzp1.open();
-    }
-
-    else if (paymentMethod.value === "Wallet") {
-    fetch("/checkout/process", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderData })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            localStorage.removeItem('appliedCoupon');
-            Swal.fire({
-                icon: "success",
-                title: "Order Placed!",
-                text: "Your order has been successfully placed.",
-                timer: 5000,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "/paymentsuccess";
-            });
-        } else {
-            if (data.message === "Insufficient wallet balance.") {
+    } else if (paymentMethod.value === "Wallet") {
+        const couponCode = this.getAttribute('data-coupon-code');
+        fetch("/checkout/process", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderData })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                localStorage.removeItem('appliedCoupon');
                 Swal.fire({
-                    icon: "error",
-                    title: "Insufficient Funds",
-                    text: "Your wallet does not have enough money to complete this purchase."
+                    icon: "success",
+                    title: "Order Placed!",
+                    text: "Your order has been successfully placed.",
+                    timer: 5000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "/paymentsuccess";
                 });
             } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Order Failed",
-                    text: data.message || "Unable to place the order. Please try again."
-                });
+                if (data.message === "Insufficient wallet balance.") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Insufficient Funds",
+                        text: "Your wallet does not have enough money to complete this purchase."
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Order Failed",
+                        text: data.message || "Unable to place the order. Please try again."
+                    });
+                }
             }
-        }
-    })
-    .catch(error => {
-        console.error("Error placing order:", error);
-        Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: error.message || "Unable to place the order. Please try again."
+        })
+        .catch(error => {
+            console.error("Error placing order:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.message || "Unable to place the order. Please try again."
+            });
         });
-    });
-}
+    }
 });
 
 document.querySelectorAll('.apply-coupon').forEach(button => {
-                button.addEventListener('click', function() {
-                    const couponCode = this.getAttribute('data-coupon-code');
-                    onlineCoupon = couponCode
-                    console.log('Clicked apply coupon with code:', couponCode);
-                    applyCoupon(couponCode);
-                });
-            });
+    button.addEventListener('click', function() {
+        const couponCode = this.getAttribute('data-coupon-code');
+        onlineCoupon = couponCode;
+        console.log('Clicked apply coupon with code:', couponCode);
+        applyCoupon(couponCode);
+    });
+});
 
-            async function applyCoupon(couponCode) {
+async function applyCoupon(couponCode) {
     const totalAmountElement = document.querySelector('.product-subtotal .font-xl');
-    const totalAmount = parseFloat(totalAmountElement.textContent.trim().replace('₹', '').trim()) || 0;
+    const totalAmount = parseFloat(totalAmountElement.textContent.trim().replace('₹', '').trim()) || originalTotal;
 
     try {
         const response = await fetch('/apply-coupon', {
@@ -874,10 +902,13 @@ document.querySelectorAll('.apply-coupon').forEach(button => {
 
         const data = await response.json();
         console.log("data: ", data);
-        
 
         if (data.success) {
-            updateUI(data.coupon.discountAmount); 
+            updateUI(data.coupon.discountAmount);
+            localStorage.setItem('appliedCoupon', JSON.stringify({
+                code: couponCode,
+                discountAmount: data.coupon.discountAmount
+            }));
             Swal.fire({
                 icon: 'success',
                 title: 'Coupon Applied',
@@ -902,18 +933,15 @@ document.querySelectorAll('.apply-coupon').forEach(button => {
         });
     }
 }
-            
-
 
 function updateUI(discountAmount) {
     const discountElement = document.querySelector('.discount-amount');
     const totalElement = document.querySelector('.product-subtotal .font-xl');
 
-    const originalTotal = parseFloat(totalElement.textContent.trim().replace('₹', '').trim()) || 0;
+    const currentTotal = parseFloat(totalElement.textContent.trim().replace('₹', '').trim()) || originalTotal;
     const newTotal = originalTotal - discountAmount;
 
     discountElement.textContent = `₹${Math.floor(discountAmount)}`;
-
     totalElement.textContent = `₹${Math.floor(newTotal)}`;
 }
 

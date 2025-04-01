@@ -156,7 +156,7 @@
       <div class="col-12 mb-4">
         <div class="card shadow-sm">
           <div class="card-header">
-            <h5 class="mb-0">Order Id: #<%= order._id %></h5>
+            <h5 class="mb-0">order_id: #<%= order._id %></h5>
           </div>
           <div class="card-body">
             <div class="table-responsive">
@@ -168,6 +168,7 @@
                     <th>Status</th>
                     <th>Quantity</th>
                     <th>Total</th>
+                    <th>Discount</th>
                     <th>Payment Status</th>
                     <th>payment Method</th>
                     <th>Actions</th>
@@ -185,7 +186,8 @@
                         </span>
                       </td>
                       <td><%= item.quantity %></td>
-                      <td>₹<%= order.totalAmount %></td>
+                      <td>₹<%= Math.floor(order.totalAmount) %></td>
+                      <td>₹<%= Math.floor(order.discount) %></td>
                       <td><%=order.paymentStatus%></td>
                       <td><%=order.paymentMethod%></td>
                       <td>

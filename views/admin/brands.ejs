@@ -46,7 +46,7 @@
         }
 
         .add-brand-btn {
-            background-color: #009688;
+            background-color: #000000;
             color: white;
             border: none;
             padding: 10px 25px;
@@ -57,7 +57,7 @@
         }
 
         .add-brand-btn:hover {
-            background-color: #00796b;
+            background-color: #393a3a;
         }
 
         .brands-table {
@@ -331,7 +331,7 @@
         <% if (totalPages> 1) { %>
             <% if (currentPage> 1) { %>
                 <a href="?page=<%= currentPage - 1 %>"
-                    style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">&laquo;
+                    style="padding: 8px 12px; margin: 0 5px; background-color: #000000; color: white; text-decoration: none; border-radius: 5px;">&laquo;
                     Prev</a>
                 <% } %>
 
@@ -343,7 +343,7 @@
                             </span>
                             <% } else { %>
                                 <a href="?page=<%= i %>"
-                                    style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+                                    style="padding: 8px 12px; margin: 0 5px; background-color: #000000; color: white; text-decoration: none; border-radius: 5px;">
                                     <%= i %>
                                 </a>
                                 <% } %>
@@ -351,7 +351,7 @@
 
                                         <% if (currentPage < totalPages) { %>
                                             <a href="?page=<%= currentPage + 1 %>"
-                                                style="padding: 8px 12px; margin: 0 5px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Next
+                                                style="padding: 8px 12px; margin: 0 5px; background-color: #000000; color: white; text-decoration: none; border-radius: 5px;">Next
                                                 &raquo;</a>
                                             <% } %>
                                                 <% } %>

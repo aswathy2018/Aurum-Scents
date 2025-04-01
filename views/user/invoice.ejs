@@ -117,7 +117,7 @@
             </div>
             <div class="dowlodingpdf">
             <div class="bill-details">
-                <p><span>Order ID:<%=order._id%></span></p>
+                <p><span>order_id: <%=order._id%></span></p>
                 <p><span>Date:</span> <%= order.createdAt.toDateString() %></p>
                 <p><span>Customer Name:</span> <%=order?.userId?.name%></p>
                 <p><span>Email:</span> <%=order.userId.email%></p>
@@ -140,14 +140,14 @@
                         <td><%=item.quantity%></td>
                         <td><%=item.status%></td>
                         <td><%=item.price%></td>
-                        <td><%=order.totalAmount%></td>
+                        <td><%=Math.floor(order.totalAmount)%></td>
                     </tr>
                     <%})%>
 
                 </tbody>
             </table>
             <p class="total">Discount:<%=order.discount%></p>
-            <p class="total">Total Amount:<%=order.totalAmount%></p>
+            <p class="total">Total Amount:<%=Math.floor(order.totalAmount)%></p>
             <div style="text-align: center;">
                 <a
                   class="btn"

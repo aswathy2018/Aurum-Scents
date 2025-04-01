@@ -438,14 +438,14 @@
                                                 <a aria-label="Compare" class="action-btn hover-up"
                                                     href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                             </div>
-                                        </div>
+                                        </div> 
                                         <div class="product-content-wrap">
                                             <div class="product-category">
-                                                <a href="shop-grid-right.html">
+                                                <a href="/productDetails/<%= products[i]._id %>">
                                                     <%=products[i].category.name%>
                                                 </a>
                                             </div>
-                                            <h2><a href="shop-product-right.html">
+                                            <h2><a href="/productDetails/<%= products[i]._id %>">
                                                     <%=products[i].productName%>
                                                 </a></h2>
                                             <div class="rating-result" title="90%">

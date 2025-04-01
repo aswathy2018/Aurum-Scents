@@ -60,7 +60,7 @@ const orderSchema = new Schema({
     },
     paymentStatus: {
         type: String,
-        enum: ['Pending', 'Paid'],
+        enum: ['Pending', 'Paid','Failed'],
         default: 'Pending'
     },
     invoiceDate: {

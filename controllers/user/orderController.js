@@ -184,6 +184,7 @@ const createOrder = async (req, res) => {
             key: "rzp_test_fpueLavUtsLoKt"
         });
     } catch (error) {
+        
         console.error("Error creating order:", error);
         res.status(500).json({ success: false, message: 'Failed to create Razorpay order' });
     }
@@ -202,14 +203,12 @@ const verifyPayment = async (req, res) => {
         const { addressId, paymentMethod, totalAmount } = orderData;
 
         try {
-            let finalamount=totalAmount
             let discount = 0
             
             if(couponCode){
                 const coupon=await Coupon.findOne({couponCode:couponCode});
                 discount=(totalAmount*coupon.offerPercentage)/100
-                
-                finalamount=finalamount-discount
+                console.log('discount------------: ', discount)
             }
             let foundAddress;
 
@@ -256,7 +255,7 @@ const verifyPayment = async (req, res) => {
             const order = new Order({
                 userId: req.session.user,
                 paymentMethod,
-                totalAmount:finalamount,
+                totalAmount:totalAmount,
                 orderedItems: orderItems,
                 address: foundAddress,
                 paymentStatus: 'Paid',
@@ -297,13 +296,66 @@ const verifyPayment = async (req, res) => {
     }
 };
 
+
+const paymentFail = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderData, couponCode, error } = req.body;
+        const { addressId, paymentMethod, totalAmount } = orderData;
+        
+        console.log("Payment failure reported from client:", error);
+        
+        const cart = await Cart.findOne({ userId }).populate('items.productId');
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({ error: "Cart is empty or invalid." });
+        }
+        
+        const address = await Address.findOne({
+            userId: new mongoose.Types.ObjectId(userId),
+            "address._id": new mongoose.Types.ObjectId(addressId),
+        });
+        
+        if (!address) {
+            return res.status(400).json({ error: "The selected address is not valid." });
+        }
+        
+        const foundAddress = address.address.find(addr => addr._id.toString() === addressId);
+        const orderItems = cart.items.map(item => ({
+            product: item.productId._id,
+            quantity: item.quantity,
+            price: item.productId.salesPrice,
+        }));
+        const failedOrder = new Order({
+            userId,
+            paymentMethod,
+            totalAmount,
+            orderedItems: orderItems,
+            address: foundAddress,
+            paymentStatus: 'Failed',
+            couponCode,
+            couponApplied: !!couponCode,
+            discount: 0,
+            paymentErrorMessage: error?.description || 'Payment failed'
+        });
+        
+        await failedOrder.save();
+        console.log("Failed order registered from client notification");
+        
+        return res.json({ success: true, message: "Failed payment recorded successfully" });
+    } catch (error) {
+        console.error("Error recording payment failure:", error);
+        return res.status(500).json({ success: false, error: "Failed to record payment failure" });
+    }
+};
+
 const placeorder = async (req, res) => {
     const userId = req.session.user;
     const { orderData } = req.body;
-
+    
     const { addressId, paymentMethod, totalAmount, coupon } = orderData;
-let couponCode = coupon ? coupon.code : null;
-
+    let couponCode = coupon ? coupon.code : null;
+    console.log(couponCode);
+    
     try {
         if (paymentMethod === 'COD') {
             try {
@@ -421,7 +473,6 @@ let couponCode = coupon ? coupon.code : null;
         
             try {
                 const user = await User.findById(userId);
-
                 if (!user) {
                     return res.status(400).json({ success: false, message: "User not found." });
                 }
@@ -430,21 +481,23 @@ let couponCode = coupon ? coupon.code : null;
                 }
         
                 let discount = 0;
-                let couponCodeId = null;
                 let foundAddress;
 
                 if (couponCode) {
-                    const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
-                    if (coupon && totalAmount > coupon.minimumprice) {
-                        discount = Math.round((totalAmount * coupon.offerPercentage) / 100);
-                        couponCodeId = coupon._id;
+                    const coupon = await Coupon.findOne({ couponCode: couponCode, isActive: true });
+                    
+                    if (coupon && totalAmount < coupon.minimumprice) {
+                        discount = orderData.coupon.discountAmount || Math.round((originalAmount * coupon.offerPercentage) / 100);
+                    } else {
+                        couponCode = null;
+                        discount = 0;
                     }
                 }
-
+        
                 if (!mongoose.isValidObjectId(addressId)) {
                     return res.status(400).json({ success: false, message: "Invalid address ID." });
                 }
-
+        
                 const cart = await Cart.findOne({ userId }).populate('items.productId');
                 const address = await Address.findOne({
                     userId: new mongoose.Types.ObjectId(userId),
@@ -456,35 +509,42 @@ let couponCode = coupon ? coupon.code : null;
                 }
         
                 foundAddress = address.address.find((addr) => addr._id.toString() === addressId);
-
+        
                 if (!paymentMethod || !totalAmount) {
                     return res.status(400).json({ success: false, message: "Payment method and total amount are required." });
                 }
-
+        
                 const orderItems = cart.items.map(item => ({
                     product: item.productId,
                     quantity: item.quantity,
                     price: item.productId.salesPrice,
                 }));
         
+                const originalAmount = cart.items.reduce(
+                    (sum, item) => sum + (item.productId.salesPrice * item.quantity),
+                    0
+                );
+        
                 const order = new Order({
                     userId: req.session.user,
                     paymentMethod,
-                    totalAmount: totalAmount - discount,
+                    totalAmount: parseFloat(totalAmount),
                     orderedItems: orderItems,
                     address: foundAddress,
-                    paymentStatus: "Paid",
+                    paymentStatus: 'Paid',
+                    couponCode: couponCode,
+                    couponApplied: !!couponCode,
                     discount: discount,
-                    couponCode: couponCodeId || 0,
+                    originalAmount: originalAmount
                 });
         
                 console.log('Order before save: ', order);
                 await order.save();
         
-                user.wallet.balance -= (totalAmount - discount);
+                user.wallet.balance -= parseFloat(totalAmount);
                 user.wallet.transactions.push({
                     type: "debit",
-                    amount: totalAmount - discount,
+                    amount: parseFloat(totalAmount),
                     description: `Payment for Order ${order._id}`,
                     date: Date.now()
                 });
@@ -503,6 +563,13 @@ let couponCode = coupon ? coupon.code : null;
                     await product.save();
                 }
 
+                if (couponCode) {
+                    await Coupon.findOneAndUpdate(
+                        { code: couponCode },
+                        { $inc: { usageCount: 1 } }
+                    );
+                }
+        
                 cart.items = [];
                 await cart.save();
         
@@ -547,7 +614,8 @@ const getOrderList = async (req, res) => {
         const totalPages = Math.ceil(total / limit)
         const orderDetails = await Order.find({ userId }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("orderedItems.product")
         const user = await User.findById(userId)
-
+        // console.log('----------------orderDetails: ', orderDetails);
+        
 
         res.render("orderDetaile", { orderDetails, currentPage: page, totalPages, user })
 
@@ -558,15 +626,6 @@ const getOrderList = async (req, res) => {
     }
 
 
-}
-
-const paymentFail = async (req,res)=>{
-    try {
-        res.render('paymentFail')
-    } catch (error) {
-        console.log(error);
-        res.redirect('/pageNotFound')
-    }
 }
 
 const invoice = async (req, res) => {
@@ -616,7 +675,7 @@ const generateInvoicePdf = async (req, res) => {
 
         pdfDoc
             .fontSize(12)
-            .text(`Order ID: ${order._id}`, { align: "center" })
+            .text(`order_id: ${order._id}`, { align: "center" })
             .moveDown(0.2);
         pdfDoc
             .text(`Date: ${order?.createdAt?.toDateString()}`, { align: "center" })
@@ -709,6 +768,9 @@ const cancelOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Product is already canceled." });
         }
 
+        // Calculate refund amount for this specific product
+        const refundAmount = orderedProduct.price * orderedProduct.quantity;
+
         orderedProduct.status = "Cancelled";
         const productDoc = await Product.findById(product);
         if (productDoc) {
@@ -716,7 +778,6 @@ const cancelOrder = async (req, res) => {
             await productDoc.save();
         }
 
-        const refundAmount = orderedProduct.price * orderedProduct.quantity;
         if ((order.paymentMethod === "online" || order.paymentMethod === "Wallet") && order.paymentStatus === "Paid") {
             await refundToWallet(orderId, userId, refundAmount);
         }
@@ -803,6 +864,9 @@ const returnOrder = async (req, res) => {
         });
     }
 };
+
+
+
 module.exports = {
     getWallet,
     getCheckOut,
@@ -819,4 +883,5 @@ module.exports = {
     createOrder,
     topUpWallet,
     refundToWallet,
+    
 }

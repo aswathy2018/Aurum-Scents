@@ -28,38 +28,6 @@ const createCoupons = async (req, res) => {
         return res.status(500).send("Start date must be before the end date.");
       }
   
-      if (minimumprice <= 5000) {
-        if (offerPercentage >= 6) {
-          return res.status(400).json({
-            success: false,
-            message: "For purchases up to ₹5000, the discount cannot exceed 5%.",
-          });
-        }
-      } else if (minimumprice <= 10000) {
-        if (offerPercentage >= 11) {
-          return res.status(400).json({
-            success: false,
-            message: "For purchases up to ₹10000, the discount cannot exceed 10%.",
-          });
-        }
-      } else if (minimumprice <= 15000) {
-        if (offerPercentage >= 16) {
-          return res.status(400).json({
-            success: false,
-            message:
-              "For purchases up to ₹15,000, the discount cannot exceed 15%.",
-          });
-        }
-      } else if (minimumprice <= 20000) {
-        if (offerPercentage >= 21) {
-          return res.status(400).json({
-            success: false,
-            message:
-              "For purchases up to ₹20,000, the discount cannot exceed 20%.",
-          });
-        }
-      }
-  
       const today = new Date();
   
       const newCoupon = new Coupon({

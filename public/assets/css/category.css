@@ -6,7 +6,7 @@
 
 .main-content h1 {
     font-size: 2.5rem;
-    color: #2c3e50;
+    color: #000000;
     text-align: center;
     margin: 20px 0 30px;
     letter-spacing: 2px;
@@ -60,7 +60,7 @@ textarea {
 
 .create-btn {
     width: 100%;
-    background: #007bff;
+    background: #000000;
     color: white;
     border: none;
     padding: 10px;
@@ -71,7 +71,7 @@ textarea {
 }
 
 .create-btn:hover {
-    background: #051f3a;
+    background: #2c2c2c;
 }
 
 /* Table Styling */
@@ -155,7 +155,7 @@ textarea {
 
 
 .btn-edit {
-    background: #007bff;
+    background: #384110;
     color: white;
 }
 
@@ -223,14 +223,14 @@ textarea {
 }
 
 .pagination-btn:hover {
-    background-color: #007bff;
+    background-color: #232324;
     color: white;
 }
 
 .pagination-btn.current-page {
-    background-color: #6c757d;
+    background-color: #000000;
     color: white;
-    border: 1px solid #6c757d;
+    border: 1px solid #000000;
 }
 
 .pagination-btn.disabled {
@@ -241,7 +241,7 @@ textarea {
 
 
 .current-page {
-    background-color: #343a40;
+    background-color: #000000;
     color: white;
-    border: 1px solid #343a40;
+    border: 1px solid #000000;
 }

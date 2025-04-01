@@ -7,16 +7,16 @@
     <form id="couponform" action="/admin/coupons/create" method="POST">
         <h3>Create New Coupon</h3>
         <label for="couponCode">Coupon Code:</label>
-        <input type="text" name="couponCode" required />
+        <input type="text" name="couponCode"/>
     
         <label for="offerPercentage">Discount Percentage:</label>
-        <input type="number" name="offerPercentage" required />
+        <input type="number" name="offerPercentage"/>
     
         <label for="minimumprice">Minimum Purchase Amount:</label>
-        <input type="number" name="minimumprice" required />
+        <input type="number" name="minimumprice"/>
     
         <label for="expiryDate">End Date:</label>
-        <input type="date" name="expiryDate" required />
+        <input type="date" name="expiryDate"/>
     
         <button type="submit">Create Coupon</button>
     </form>
@@ -83,7 +83,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("couponform"); 
     const codeInput = document.querySelector("input[name='couponCode']");
     const discountInput = document.querySelector("input[name='offerPercentage']");
@@ -100,7 +100,6 @@
 
         // Validate Coupon Code
         const codeValue = codeInput.value.trim();
-
         if (!codeValue) {
             errorMessage += "Coupon code cannot be empty or only spaces.<br>";
             isValid = false;
@@ -122,18 +121,35 @@
             isValid = false;
         }
 
-        const discountValue = parseInt(discountInput.value);
-        if (discountValue <= 0 || discountValue >= 100) {
-            errorMessage += "Discount percentage must be between 1 and 99.<br>";
+        // Validate Discount Percentage
+        const discountValueRaw = discountInput.value.trim();
+        const discountValue = parseInt(discountValueRaw);
+        if (!discountValueRaw || /^\s+$/.test(discountValueRaw)) {
+            errorMessage += "Discount percentage cannot be empty.<br>";
+            isValid = false;
+        } else if (/^0+$/.test(discountValueRaw)) {
+            errorMessage += "Please enter a valid number for Discount percentage.<br>";
+            isValid = false;
+        } else if (discountValue <= 0 || discountValue > 100) {
+            errorMessage += "Discount percentage must be between 1 and 100.<br>";
             isValid = false;
         }
 
-        const minPurchaseValue = parseFloat(minPurchaseInput.value);
-        if (minPurchaseValue <= 0) {
+        // Validate Minimum Purchase Amount
+        const minPurchaseValueRaw = minPurchaseInput.value.trim();
+        const minPurchaseValue = parseFloat(minPurchaseValueRaw);
+        if (!minPurchaseValueRaw || /^\s+$/.test(minPurchaseValueRaw)) {
+            errorMessage += "Minimum purchase amount cannot be empty.<br>";
+            isValid = false;
+        } else if (/^0+$/.test(minPurchaseValueRaw)) {
+            errorMessage += "Please enter a valid number for Minimum purchase amount.<br>";
+            isValid = false;
+        } else if (minPurchaseValue <= 0) {
             errorMessage += "Minimum purchase amount must be greater than 0.<br>";
             isValid = false;
         }
 
+        // Validate End Date
         const selectedDate = new Date(endDateInput.value);
         const currentDate = new Date(today);
         if (selectedDate <= currentDate) {

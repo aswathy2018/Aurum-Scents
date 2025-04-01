@@ -243,6 +243,28 @@ const updateProduct = async (req, res) => {
 
         await Product.findByIdAndUpdate(id, updateFields, { new: true });
 
+        // Handle image deletion
+        if (data.imagesToDelete) {
+            const imagesToDelete = JSON.parse(data.imagesToDelete);
+
+            for (const imageName of imagesToDelete) {
+                await Product.findByIdAndUpdate(id, {
+                    $pull: { productImage: imageName },
+                });
+
+                const imagePath = path.join(__dirname, "public", "uploads", "product-images", imageName);
+                if (fs.existsSync(imagePath)) {
+                    fs.unlink(imagePath, (err) => {
+                        if (err) {
+                            console.error("Failed to delete file:", err);
+                        } else {
+                            console.log(`Image ${imageName} deleted successfully.`);
+                        }
+                    });
+                }
+            }
+        }
+
         res.redirect("/admin/products");
     } catch (error) {
         console.error("Error updating product:", error);

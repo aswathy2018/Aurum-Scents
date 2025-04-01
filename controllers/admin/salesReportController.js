@@ -98,7 +98,7 @@ const getSalesReport = async (req, res) => {
             createdAt: order.createdAt,
             userName: order.userId ? order.userId.name : 'Unknown',
             items: order.orderedItems.map(item => ({
-                productName: item.product ? item.product.name : 'Unknown',
+                productName: item.product ? item.product.productName : 'Unknown',
                 quantity: item.quantity,
                 price: item.price
             })),
@@ -200,7 +200,7 @@ const downloadSalesReportPDF = async (req, res) => {
         };
 
         doc.strokeColor('black').lineWidth(0.5);
-        drawTableRow(yPos, ['Date', 'Order ID', 'User', 'Product', 'Qty', 'Price', 'Discount', 'Total'], true);
+        drawTableRow(yPos, ['Date', 'order_id', 'User', 'Product', 'Qty', 'Price', 'Discount', 'Total'], true);
         doc.moveTo(startX, yPos + lineHeight).lineTo(startX + colWidths.reduce((a, b) => a + b, 0), yPos + lineHeight).stroke();
         yPos += rowHeight;
 
@@ -264,7 +264,7 @@ const downloadSalesReportExcel = async (req, res) => {
 
         worksheet.columns = [
             { header: 'Date', key: 'date', width: 15 },
-            { header: 'Order ID', key: 'orderId', width: 25 },
+            { header: 'order_id', key: 'orderId', width: 25 },
             { header: 'User Name', key: 'userName', width: 20 },
             { header: 'Product Name', key: 'productName', width: 20 },
             { header: 'Quantity', key: 'quantity', width: 10 },
