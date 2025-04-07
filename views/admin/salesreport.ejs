@@ -147,27 +147,42 @@
         font-size: 0.85rem;
       }
     }
+    .hidden {
+        display: none;
+    }
   </style>
 <h1>Sales Report</h1>
 
 <div class="filters">
-    <form action="/admin/sales-report/filter" method="GET">
-        <select name="filter" id="filter">
-            <option value=""><%= fil ? fil : "select" %></option>
-            <option value="today" <%= fil === "today" ? "selected" : "" %>>Today</option>
-            <option value="weekly" <%= fil === "weekly" ? "selected" : "" %>>Weekly</option>
-            <option value="monthly" <%= fil === "monthly" ? "selected" : "" %>>Monthly</option>
-            <option value="yearly" <%= fil === "yearly" ? "selected" : "" %>>Yearly</option>
-            <option value="specific" <%= fil === "specific" ? "selected" : "" %>>Specific Date</option>
-        </select>
-        
-        <button type="submit">Filter</button>
-    </form>
-    <a href="/admin/salesreport" class="btn btn-danger">Clear Filter</a>
+  <form action="/admin/sales-report/filter" method="GET">
+      <select name="filter" id="filter">
+          <option value=""><%= fil ? fil : "select" %></option>
+          <option value="today" <%= fil === "today" ? "selected" : "" %>>Today</option>
+          <option value="weekly" <%= fil === "weekly" ? "selected" : "" %>>Weekly</option>
+          <option value="monthly" <%= fil === "monthly" ? "selected" : "" %>>Monthly</option>
+          <option value="yearly" <%= fil === "yearly" ? "selected" : "" %>>Yearly</option>
+          <option value="specific" <%= fil === "specific" ? "selected" : "" %>>Specific Date</option>
+      </select>
+      
+      <div id="dateRange" class="<%= fil === 'specific' ? '' : 'hidden' %>">
+          <label for="startDate">Start Date:</label>
+          <input type="date" name="startDate" id="startDate" 
+                 value="<%= startDate || '' %>"
+                 <%= fil !== "specific" ? "disabled" : "" %>>
+          
+          <label for="endDate">End Date:</label>
+          <input type="date" name="endDate" id="endDate" 
+                 value="<%= endDate || '' %>"
+                 <%= fil !== "specific" ? "disabled" : "" %>>
+      </div>
+      
+      <button type="submit">Filter</button>
+  </form>
+  <a href="/admin/salesreport" class="btn btn-danger">Clear Filter</a>
 </div>
 
 <p>Total Revenue: ₹<%= totalRevenue %></p>
-<p>Total Discount: ₹<%= totalOffer %></p>
+<p>Total Discount: ₹<%= Math.floor(totalOffer) %></p>
 <p>Total Orders: <%= totalOrders %></p>
 
 <table>
@@ -204,18 +219,20 @@
 <div class="pagination">
     <% if (totalPages > 1) { %>
         <% if (currentPage > 1) { %>
-            <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&laquo;</a>
+            <a href="?page=<%= currentPage - 1 %>&filter=<%= fil %>&startDate=<%= startDate %>&endDate=<%= endDate %>" 
+               class="page-link">&laquo;</a>
         <% } %>
-        
+
         <% for(let i = 1; i <= totalPages; i++) { %>
-            <a href="?page=<%= i %><%= locals.search ? '&search=' + locals.search : '' %>" 
+            <a href="?page=<%= i %>&filter=<%= fil %>&startDate=<%= startDate %>&endDate=<%= endDate %>" 
                class="page-link <%= i == currentPage ? 'active' : '' %>">
                 <%= i %>
             </a>
         <% } %>
-        
+
         <% if (currentPage < totalPages) { %>
-            <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&raquo;</a>
+            <a href="?page=<%= currentPage + 1 %>&filter=<%= fil %>&startDate=<%= startDate %>&endDate=<%= endDate %>" 
+               class="page-link">&raquo;</a>
         <% } %>
     <% } %>
 </div>
@@ -228,25 +245,41 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const filterSelect = document.getElementById("filter");
+        const dateRangeDiv = document.getElementById("dateRange");
         const startDateInput = document.getElementById("startDate");
         const endDateInput = document.getElementById("endDate");
 
-        startDateInput.disabled = filterSelect.value !== "specific";
-        endDateInput.disabled = filterSelect.value !== "specific";
-
+        // Set max date to today and prevent future dates
         const today = new Date().toISOString().split("T")[0];
         startDateInput.setAttribute("max", today);
         endDateInput.setAttribute("max", today);
 
+        // Show/hide date inputs based on filter selection
         filterSelect.addEventListener("change", function () {
             if (this.value === "specific") {
+                dateRangeDiv.style.display = "block";
                 startDateInput.disabled = false;
                 endDateInput.disabled = false;
             } else {
+                dateRangeDiv.style.display = "none";
                 startDateInput.disabled = true;
                 endDateInput.disabled = true;
                 startDateInput.value = "";
                 endDateInput.value = "";
+            }
+        });
+
+        // Validate end date is not before start date
+        startDateInput.addEventListener("change", function() {
+            endDateInput.setAttribute("min", this.value);
+            if (endDateInput.value && endDateInput.value < this.value) {
+                endDateInput.value = this.value;
+            }
+        });
+
+        endDateInput.addEventListener("change", function() {
+            if (this.value < startDateInput.value) {
+                this.value = startDateInput.value;
             }
         });
     });

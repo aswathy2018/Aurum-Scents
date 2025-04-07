@@ -74,6 +74,11 @@
   }
 }
 
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
 
 </style>
 
@@ -327,6 +332,8 @@
             </div>
         </div>
         </div>
+        <button id="clearCoupon" class="btn btn-fill-out btn-block mt-30">Remove Discount</button>
+
                     </div>
                 </div>
                 <div class="row">
@@ -365,59 +372,50 @@
                         </div>
                     </div>
 
-                    <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel"
-                        aria-hidden="true">
+                    <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <form id="addAddressForm" action="/checkAddAddress" method = 'post'>
+                                <form id="addAddressForm" action="/checkAddAddress" method="post">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="addAddressModalLabel">Add Address</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <div class="form-group">
                                             <label for="addType">Address Type</label>
-                                            <input type="text" class="form-control" id="addType" name="addressType"
-                                                required />
+                                            <input type="text" class="form-control" id="addType" name="addressType"/>
                                         </div>
                                         <div class="form-group">
                                             <label for="addName">Name</label>
-                                            <input type="text" class="form-control" id="addName" name="name" required />
+                                            <input type="text" class="form-control" id="addName" name="name"/>
                                         </div>
                                         <div class="form-group">
                                             <label for="addCity">City</label>
-                                            <input type="text" class="form-control" id="addCity" name="city" required />
+                                            <input type="text" class="form-control" id="addCity" name="city"/>
                                         </div>
                                         <div class="form-group">
                                             <label for="addState">State</label>
-                                            <input type="text" class="form-control" id="addState" name="state"
-                                                required />
+                                            <input type="text" class="form-control" id="addState" name="state"/>
                                         </div>
                                         <div class="form-group">
                                             <label for="addPincode">Pincode</label>
-                                            <input type="text" class="form-control" id="addPincode" name="pincode"
-                                                required />
+                                            <input type="text" class="form-control" id="addPincode" name="pincode"/>
                                         </div>
                                         <div class="form-group">
                                             <label for="addLandmark">Landmark</label>
-                                            <input type="text" class="form-control" id="addLandmark" name="landMark" />
+                                            <input type="text" class="form-control" id="addLandmark" name="landMark"/>
                                         </div>
                                         <div class="form-group">
                                             <label for="addPhone">Phone</label>
-                                            <input type="text" class="form-control" id="addPhone" name="phone"
-                                                required />
+                                            <input type="text" class="form-control" id="addPhone" name="phone"/>
                                         </div>
                                         <div class="form-group">
                                             <label for="addAltPhone">Alternate Phone</label>
-                                            <input type="text" class="form-control" id="addAltPhone" name="alternativePhone" />
+                                            <input type="text" class="form-control" id="addAltPhone" name="alternativePhone"/>
                                         </div>
-                                        
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                            Close
-                                        </button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                         <button type="submit" id="submitButton" class="btn btn-primary">Add address</button>
                                     </div>
                                 </form>
@@ -510,7 +508,6 @@
                                 </div>
                             </div>
                             <button id="placeOrderButton" class="btn btn-fill-out btn-block mt-30">Place Order</button>
-                            <button id="clearCoupon" class="btn btn-fill-out btn-block mt-30">Remove Discount</button>
                         </div>
                     </div>
                 </div>
@@ -548,66 +545,75 @@ function copyCode(couponId) {
 
 function validateAddressForm() {
     let isValid = true;
-    const requiredFields = ["addType", "addName", "addCity", "addLandmark", "addState", "addPincode", "addPhone", "addAltPhone"];
+    const allFields = ["addType", "addName", "addCity", "addState", "addPincode", "addLandmark", "addPhone", "addAltPhone"];
+    
+    // Patterns
+    const letterPattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
+    const pincodePattern = /^(?!(\d)\1{5})\d{6}$/;  // 6 digits, no repeating numbers
+    const phonePattern = /^(?!(\d)\1{9})[6-9]\d{9}$/;  // 10 digits, starting 6-9, no repeating numbers
 
-    const namePattern = /^[A-Za-z\s]+$/;
-    const pincodePattern = /^\d{6}$/;
-    const phonePattern = /^[6-9]\d{9}$/;
+    // Function to check space rules
+    function isValidSpaceFormat(value) {
+        return !(/^\s|\s$/.test(value) || /^\s+$/.test(value) || /\s\s+/.test(value));
+    }
 
-    requiredFields.forEach(function(field) {
+    // Clear all previous errors first
+    allFields.forEach(field => clearError(field));
+
+    // Validate all fields
+    allFields.forEach(function(field) {
         const input = document.getElementById(field);
-        let inputValue = input.value.trim();
-        const errorElement = document.getElementById(field + '-error');
+        const value = input.value.trim();
 
-        if (inputValue === "") {
-            showError(field, "This field is required.");
+        // Check if field is empty
+        if (value === "") {
+            showError(field, "This field is required");
             isValid = false;
-        } else {
-            clearError(field);
+            return;
+        }
+
+        // Check space rules
+        if (!isValidSpaceFormat(input.value)) {
+            showError(field, "Cannot start/end with spaces or have consecutive spaces");
+            isValid = false;
+            return;
+        }
+
+        // Specific field validations
+        switch(field) {
+            case "addType":
+            case "addName":
+            case "addCity":
+            case "addState":
+            case "addLandmark":
+                if (!letterPattern.test(value) || /\d/.test(value) || /[^A-Za-z\s]/.test(value)) {
+                    showError(field, "Only letters and spaces allowed");
+                    isValid = false;
+                }
+                break;
+
+            case "addPincode":
+                if (!pincodePattern.test(value) || /\s/.test(value)) {
+                    showError(field, "Must be 6 unique digits");
+                    isValid = false;
+                }
+                break;
+
+            case "addPhone":
+            case "addAltPhone":
+                if (!phonePattern.test(value) || /\s/.test(value)) {
+                    showError(field, "Must be 10 unique digits starting with 6-9");
+                    isValid = false;
+                }
+                break;
         }
     });
 
-    const name = document.getElementById('addName').value.trim();
-    const city = document.getElementById('addCity').value.trim();
-    const landMark = document.getElementById('addLandmark').value.trim();
-    const state = document.getElementById('addState').value.trim();
-    const pincode = document.getElementById('addPincode').value.trim();
+    // Check for phone number duplication
     const phone = document.getElementById('addPhone').value.trim();
-    const alternativePhone = document.getElementById('addAltPhone').value.trim();
-
-    if (!namePattern.test(name)) {
-        showSwalError("Name should contain only letters.");
-        isValid = false;
-    }
-    if (!namePattern.test(city)) {
-        showSwalError("City should contain only letters.");
-        isValid = false;
-    }
-    if (landMark && !namePattern.test(landMark)) {
-        showSwalError("Landmark should contain only letters.");
-        isValid = false;
-    }
-    if (!namePattern.test(state)) {
-        showSwalError("State should contain only letters.");
-        isValid = false;
-    }
-
-    if (!pincodePattern.test(pincode)) {
-        showSwalError("Pincode must be exactly 6 digits.");
-        isValid = false;
-    }
-
-    if (!phonePattern.test(phone)) {
-        showSwalError("Phone number must be a valid 10-digit number starting with 6-9.");
-        isValid = false;
-    }
-    if (alternativePhone && !phonePattern.test(alternativePhone)) {
-        showSwalError("Alternate phone number must be a valid 10-digit number starting with 6-9.");
-        isValid = false;
-    }
-
-    if (phone === alternativePhone) {
-        showSwalError("Phone number and alternate phone number must be different.");
+    const altPhone = document.getElementById('addAltPhone').value.trim();
+    if (phone === altPhone) {
+        showError('addAltPhone', "Must be different from Phone");
         isValid = false;
     }
 
@@ -615,14 +621,13 @@ function validateAddressForm() {
 }
 
 function showError(field, message) {
-    let errorElement = document.getElementById(field + '-error');
-    if (!errorElement) {
-        errorElement = document.createElement('div');
-        errorElement.className = "text-danger";
-        errorElement.id = field + '-error';
-        document.getElementById(field).parentNode.appendChild(errorElement);
-    }
+    clearError(field); // Clear existing error first
+    const input = document.getElementById(field);
+    const errorElement = document.createElement('div');
+    errorElement.className = "text-danger error-message";
+    errorElement.id = field + '-error';
     errorElement.textContent = message;
+    input.parentNode.insertBefore(errorElement, input);
 }
 
 function clearError(field) {
@@ -630,14 +635,6 @@ function clearError(field) {
     if (errorElement) {
         errorElement.remove();
     }
-}
-
-function showSwalError(message) {
-    Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: message,
-    });
 }
 
 document.getElementById('addAddressForm').addEventListener('submit', function (event) {
@@ -775,23 +772,26 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
             console.error("Error placing order:", error);
             Swal.fire({ icon: "error", title: "Error", text: "Unable to place the order. Please try again." });
         });
-    } else if (paymentMethod.value === "online") {
-        const couponCode = this.getAttribute('data-coupon-code');
+    } if (paymentMethod.value === "online") {
         const response = await fetch("/create-razorpay-order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ orderData })
         });
 
-        const { orderId, amount, currency, key } = await response.json();
+        const result = await response.json();
+        if (!result.success) {
+            Swal.fire({ icon: "error", title: "Error", text: result.message });
+            return;
+        }
 
         const options = {
-            key: key,
-            amount: amount.toString(),
-            currency: currency,
+            key: result.key,
+            amount: result.amount.toString(),
+            currency: result.currency,
             name: "Aurum Scents",
             description: "Order Payment",
-            order_id: orderId,
+            order_id: result.orderId,
             handler: async function (response) {
                 const verifyResponse = await fetch("/verify-payment", {
                     method: "POST",
@@ -800,16 +800,14 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_signature: response.razorpay_signature,
-                        orderData: orderData,
+                        dbOrderId: result.dbOrderId,
                         couponCode: onlineCoupon
                     })
                 });
 
-                const result = await verifyResponse.json();
-
-                if (result.success) {
+                const verifyResult = await verifyResponse.json();
+                if (verifyResult.success) {
                     localStorage.removeItem('appliedCoupon');
-                    
                     Swal.fire({
                         icon: "success",
                         title: "Payment Successful",
@@ -820,62 +818,62 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
                         window.location.href = "/paymentSuccess";
                     });
                 }
-                
+            },
+            modal: {
+                ondismiss: async function () {
+                    // Handle payment cancellation or failure
+                    window.location.href = "/getPaymentFail"
+                }
+            },
+            notes: {
+                dbOrderId: result.dbOrderId
             }
         };
 
         const rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function (response) {
+            window.location.href = "/getPaymentFail"
+        });
         rzp1.open();
+
     } else if (paymentMethod.value === "Wallet") {
-        const couponCode = this.getAttribute('data-coupon-code');
-        fetch("/checkout/process", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ orderData })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                localStorage.removeItem('appliedCoupon');
-                Swal.fire({
-                    icon: "success",
-                    title: "Order Placed!",
-                    text: "Your order has been successfully placed.",
-                    timer: 5000,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.href = "/paymentsuccess";
-                });
-            } else {
-                if (data.message === "Insufficient wallet balance.") {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Insufficient Funds",
-                        text: "Your wallet does not have enough money to complete this purchase."
-                    });
-                } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Order Failed",
-                        text: data.message || "Unable to place the order. Please try again."
-                    });
-                }
-            }
-        })
-        .catch(error => {
-            console.error("Error placing order:", error);
+    const couponCode = this.getAttribute('data-coupon-code');
+    fetch("/checkout/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderData })
+    })
+    .then(response => response.json()) // Always parse JSON, regardless of status
+    .then(data => {
+        if (data.success) {
+            localStorage.removeItem('appliedCoupon');
+            Swal.fire({
+                icon: "success",
+                title: "Order Placed!",
+                text: "Your order has been successfully placed.",
+                timer: 5000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = "/paymentsuccess";
+            });
+        } else {
+            // Handle specific error messages
             Swal.fire({
                 icon: "error",
-                title: "Error",
-                text: error.message || "Unable to place the order. Please try again."
+                title: "Order Failed",
+                text: data.message || "Unable to place the order. Please try again."
             });
+        }
+    })
+    .catch(error => {
+        console.error("Error placing order:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "An unexpected error occurred. Please try again."
         });
-    }
+    });
+}
 });
 
 document.querySelectorAll('.apply-coupon').forEach(button => {

@@ -152,7 +152,7 @@
 <div class="container my-5">
   <h2 class="text-center mb-4">Your Orders</h2>
   <div class="row">
-    <% orderDetails.forEach(order => { %>
+    <% orderDetails.forEach(order => { %> 
       <div class="col-12 mb-4">
         <div class="card shadow-sm">
           <div class="card-header">
@@ -170,7 +170,7 @@
                     <th>Total</th>
                     <th>Discount</th>
                     <th>Payment Status</th>
-                    <th>payment Method</th>
+                    <th>Payment Method</th>
                     <th>Actions</th>
                     <th>More Details</th>
                   </tr>
@@ -181,15 +181,19 @@
                       <td><%= order.createdAt.toDateString() %></td>
                       <td><%= item.product?.productName %></td>
                       <td>
-                        <span>
-                          <%= item.status %>
-                        </span>
+                        <span><%= item.status %></span>
                       </td>
                       <td><%= item.quantity %></td>
                       <td>₹<%= Math.floor(order.totalAmount) %></td>
-                      <td>₹<%= Math.floor(order.discount) %></td>
-                      <td><%=order.paymentStatus%></td>
-                      <td><%=order.paymentMethod%></td>
+                      <td>₹<%= Math.floor(order.discount || 0) %></td>
+                      <td>
+                        <% if(order.paymentStatus === 'Pending' && item.status !== 'Cancelled' && item.status !== 'Delivered' && item.status !== 'Return') { %>
+                          <a href="#" class="btn retry-payment-btn" data-order-id="<%= order._id %>">Pay Now</a>
+                        <% } else { %>
+                          <%= order.paymentStatus %>
+                        <% } %>
+                      </td>
+                      <td><%= order.paymentMethod %></td>
                       <td>
                         <% if (item.status === 'Pending' || item.status === 'Shipped') { %>
                           <button type="button" class="btn btn-danger btn-sm" onclick="confirmCancel('<%= order._id %>', '<%= item.product._id %>')">
@@ -198,28 +202,33 @@
                         <% } else if (item.status === 'Cancelled') { %>
                           <span class="text-danger">Cancelled</span>
                         <% } else if (item.status === 'Delivered') { %>
-
                           <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal<%= item.product._id %>">
                             Return
                           </button>
-
-                          <div class="modal fade" id="returnModal<%= item.product._id %>" tabindex="-1" aria-labelledby="returnModalLabel<%= item.product._id %>" aria-hidden="true">
+                          
+                          <!-- Return Modal -->
+                          <div class="modal fade" id="returnModal<%= item.product._id %>" tabindex="-1"
+                            aria-labelledby="returnModalLabel<%= item.product._id %>" aria-hidden="true">
                             <div class="modal-dialog">
                               <div class="modal-content">
                                 <div class="modal-header">
-                                  <h5 class="modal-title" id="returnModalLabel<%= item.product._id %>">Return Product</h5>
+                                  <h5 class="modal-title" id="returnModalLabel<%= item.product._id %>">Reason for return</h5>
                                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <form id="form-returnModal<%= item.product._id %>" action="/orders/<%= order._id %>/products/<%= item.product._id %>/return" method="POST" onsubmit="submitReturn('form-returnModal<%= item.product._id %>'); return false;">
+                                <form id="form-returnModal<%= item.product._id %>"
+                                  action="/orders/<%= order._id %>/products/<%= item.product._id %>/return" method="POST"
+                                  onsubmit="submitReturn('form-returnModal<%= item.product._id %>'); return false;">
                                   <div class="modal-body">
                                     <div class="mb-3">
-                                      <label for="returnReason<%= item.product._id %>" class="form-label">Reason for Return</label>
-                                      <textarea class="form-control" id="returnReason<%= item.product._id %>" name="returnReason" rows="3" required></textarea>
+                                      <label for="returnReason<%= item.product._id %>" class="form-label">Please provide the reason for your
+                                        return</label>
+                                      <textarea class="form-control" id="returnReason<%= item.product._id %>" name="reason" rows="3"
+                                        required></textarea>
                                     </div>
                                   </div>
                                   <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-danger">Submit Return</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Submit Return</button>
                                   </div>
                                 </form>
                               </div>
@@ -257,6 +266,8 @@
 <%- include("../partials/user/footer.ejs") %>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 <script>
 function confirmCancel(orderId, product) {
@@ -369,5 +380,134 @@ function submitReturn(formId) {
         });
     });
 }
+
+// document.getElementById('retryPaymentBtn')?.addEventListener('click', async function () {
+//     const orderId = this.getAttribute('data-order-id');
+//     const response = await fetch(`/retry-payment/${orderId}`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//     });
+
+//     const result = await response.json();
+//     if (!result.success) {
+//         Swal.fire({ icon: 'error', title: 'Error', text: result.message });
+//         return;
+//     }
+
+//     const options = {
+//         key: result.key,
+//         amount: result.amount.toString(),
+//         currency: result.currency,
+//         name: "Aurum Scents",
+//         description: "Retry Payment",
+//         order_id: result.orderId,
+//         handler: async function (response) {
+//             const verifyResponse = await fetch('/verify-payment', {
+//                 method: 'POST',
+//                 headers: { 'Content-Type': 'application/json' },
+//                 body: JSON.stringify({
+//                     razorpay_payment_id: response.razorpay_payment_id,
+//                     razorpay_order_id: response.razorpay_order_id,
+//                     razorpay_signature: response.razorpay_signature,
+//                     dbOrderId: result.dbOrderId
+//                 })
+//             });
+
+//             const verifyResult = await verifyResponse.json();
+//             if (verifyResult.success) {
+//                 Swal.fire({
+//                     icon: 'success',
+//                     title: 'Payment Successful',
+//                     text: 'Your payment was successful!',
+//                     timer: 2000,
+//                     showConfirmButton: false
+//                 }).then(() => {
+//                     window.location.reload();
+//                 });
+//             }
+//         },
+//         modal: {
+//             ondismiss: function () {
+//                 Swal.fire({icon: 'info', title: 'Payment Cancelled', text: 'Payment was not completed.' });
+//             }
+//         }
+//     };
+
+//     const rzp1 = new Razorpay(options);
+//     rzp1.on('payment.failed', function () {
+//         Swal.fire({ icon: 'error', title: 'Payment Failed', text: 'Please try again.' });
+//     });
+//     rzp1.open();
+// })
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.retry-payment-btn').forEach(button => {
+        button.addEventListener('click', async function (event) {
+            event.preventDefault(); // Prevent default link behavior
+            const orderId = this.getAttribute('data-order-id');
+            
+            if (!orderId) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Order ID is missing!' });
+                return;
+            }
+
+            const response = await fetch(`/retry-payment/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            const result = await response.json();
+            if (!result.success) {
+                Swal.fire({ icon: 'error', title: 'Error', text: result.message });
+                return;
+            }
+
+            const options = {
+                key: result.key,
+                amount: result.amount.toString(),
+                currency: result.currency,
+                name: "Aurum Scents",
+                description: "Retry Payment",
+                order_id: result.orderId,
+                handler: async function (response) {
+                    const verifyResponse = await fetch('/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                            dbOrderId: result.dbOrderId
+                        })
+                    });
+
+                    const verifyResult = await verifyResponse.json();
+                    if (verifyResult.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Payment Successful',
+                            text: 'Your payment was successful!',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                },
+                modal: {
+                    ondismiss: function () {
+                        Swal.fire({icon: 'info', title: 'Payment Cancelled', text: 'Payment was not completed.' });
+                    }
+                }
+            };
+
+            const rzp1 = new Razorpay(options);
+            rzp1.on('payment.failed', function () {
+                Swal.fire({ icon: 'error', title: 'Payment Failed', text: 'Please try again.' });
+            });
+            rzp1.open();
+        });
+    });
+});
+
 
 </script>

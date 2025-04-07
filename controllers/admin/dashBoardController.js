@@ -6,8 +6,6 @@ const Order = require('../../model/orderSchema');
 
 const graph = async (req, res) => {
     try {
-        console.log(req.query);
-        
         const { filter, startDate, endDate } = req.query;
         let dateFrom = new Date();
         let dateTo = new Date();

@@ -15,7 +15,6 @@ const getWallet = async (req, res) => {
     try {
         const userId = req.session.user;
         const userData = await User.findById(userId);
-        console.log(userData)
 
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
@@ -71,8 +70,6 @@ const topUpWallet = async (req, res) => {
 
 const refundToWallet = async (orderId, userId, amount) => {
     try {
-        console.log('Refund to wallet - OrderId:', orderId, 'UserId:', userId, 'Amount:', amount);
-
         const user = await User.findById(userId);
         if (!user) {
             throw new Error("User not found.");
@@ -105,8 +102,24 @@ const getCheckOut = async (req, res) => {
         const userData = await User.findById(user)
         const address = await Address.findOne({userId: user})
         const cart = await Cart.findOne({ userId: user }).populate('items.productId');
-
         const coupons = await Coupon.find({isActive: true})
+
+        cart.items = cart.items.filter(item => {
+
+            if (!item.productId || item.productId.isBlocked === true) {
+                return false;
+            }
+
+            if (!item.productId.category || item.productId.category.islisted === false) {
+                return false;
+            }
+
+            if (item.productId.brand && item.productId.brand.isBlocked === true) {
+                return false;
+            }
+
+            return true;
+        });
         
         res.render('checkOut', {user: userData, address, cart, cartItems:cart, coupons})
     } catch (error) {
@@ -119,7 +132,6 @@ const applyCoupon = async (req, res) => {
     try {
       const { couponCode, totalAmount } = req.body;
       const userId = req.session.user;
-      console.log("couponcode",req.body)
   
       const coupon = await Coupon.findOne({
         couponCode: couponCode,
@@ -165,137 +177,336 @@ const razorpayInstance = new Razorpay({
     key_secret: "Bk8bywg3LIZxueU2ZgCPN6zV"
 });
 
-const createOrder = async (req, res) => {
-    const { totalAmount } = req.body.orderData;
+// const createOrder = async (req, res) => {
+//     const userId = req.session.user;
+//     const { orderData } = req.body;
+//     const { addressId, paymentMethod, totalAmount } = orderData;
 
-    const options = {
-        amount: totalAmount * 100,
-        currency: 'INR',
-        receipt: `order_rcptid_${Math.random()}`
-    };
+//     try {
+//         const cart = await Cart.findOne({ userId }).populate({
+//             path: 'items.productId',
+//             populate: [
+//                 { path: 'category' },
+//                 { path: 'brand' }
+//             ]
+//         });
+
+//         if (!cart || cart.items.length === 0) {
+//             return res.status(400).json({ success: false, message: "Cart is empty or invalid." });
+//         }
+
+//         // Check for blocked conditions
+//         const blockedConditions = {
+//             blockedProduct: false,
+//             blockedCategory: false,
+//             blockedBrand: false
+//         };
+
+//         for (const item of cart.items) {
+//             if (!item.productId) continue;
+            
+//             if (item.productId.isBlocked === true) {
+//                 blockedConditions.blockedProduct = true;
+//                 break;
+//             }
+//             if (item.productId.category && item.productId.category.islisted === false) {
+//                 blockedConditions.blockedCategory = true;
+//                 break;
+//             }
+//             if (item.productId.brand && item.productId.brand.isBlocked === true) {
+//                 blockedConditions.blockedBrand = true;
+//                 break;
+//             }
+//         }
+
+//         // If any condition is true, return error
+//         if (blockedConditions.blockedProduct || blockedConditions.blockedCategory || blockedConditions.blockedBrand) {
+//             let errorMessage = "Cannot proceed with order: ";
+//             if (blockedConditions.blockedProduct) errorMessage += "Product is blocked";
+//             else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
+//             else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
+//             errorMessage += " by the admin.";
+            
+//             return res.status(403).json({ 
+//                 success: false, 
+//                 message: errorMessage 
+//             });
+//         }
+
+//         const address = await Address.findOne({
+//             userId: new mongoose.Types.ObjectId(userId),
+//             "address._id": new mongoose.Types.ObjectId(addressId),
+//         });
+//         if (!address) {
+//             return res.status(400).json({ success: false, message: "Invalid address." });
+//         }
+
+//         const foundAddress = address.address.find(addr => addr._id.toString() === addressId);
+//         if (!foundAddress) {
+//             return res.status(400).json({ success: false, message: "Address not found." });
+//         }
+
+//         const orderItems = cart.items.map(item => ({
+//             product: item.productId._id,
+//             quantity: item.quantity,
+//             price: item.productId.salesPrice,
+//         }));
+        
+//         cart.items = [];
+//         await cart.save();
+
+//         const order = new Order({
+//             userId,
+//             paymentMethod,
+//             totalAmount,
+//             orderedItems: orderItems,
+//             address: foundAddress,
+//             paymentStatus: paymentMethod === 'online' ? 'Pending' : 'Pending',
+//         });
+
+//         await order.save();
+
+//         if (paymentMethod === 'online') {
+//             const options = {
+//                 amount: totalAmount * 100,
+//                 currency: 'INR',
+//                 receipt: `order_${order._id}`,
+//             };
+
+//             const razorpayOrder = await razorpayInstance.orders.create(options);
+//             res.json({
+//                 success: true,
+//                 orderId: razorpayOrder.id,
+//                 amount: razorpayOrder.amount,
+//                 currency: razorpayOrder.currency,
+//                 key: "rzp_test_fpueLavUtsLoKt",
+//                 dbOrderId: order._id,
+//             });
+//         } else {
+//             res.json({ success: true, message: "Order placed successfully", orderId: order._id });
+//         }
+//     } catch (error) {
+//         console.error("Error creating order:", error);
+//         res.status(500).json({ success: false, message: 'Failed to create order' });
+//     }
+// };
+
+const createOrder = async (req, res) => {
+    const userId = req.session.user;
+    const { orderData } = req.body;
+    const { addressId, paymentMethod, totalAmount } = orderData;
 
     try {
-        const order = await razorpayInstance.orders.create(options);
-        res.json({
-            success: true,
-            orderId: order.id,
-            amount: order.amount,
-            currency: order.currency,
-            key: "rzp_test_fpueLavUtsLoKt"
+        const cart = await Cart.findOne({ userId }).populate({
+            path: 'items.productId',
+            populate: [
+                { path: 'category' },
+                { path: 'brand' }
+            ]
         });
+
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({ success: false, message: "Cart is empty or invalid." });
+        }
+
+        // Check for blocked conditions and stock availability
+        const blockedConditions = {
+            blockedProduct: false,
+            blockedCategory: false,
+            blockedBrand: false,
+            insufficientStock: false
+        };
+        let insufficientStockProduct = null;
+
+        for (const item of cart.items) {
+            if (!item.productId) continue;
+
+            if (item.productId.isBlocked === true) {
+                blockedConditions.blockedProduct = true;
+                break;
+            }
+            if (item.productId.category && item.productId.category.islisted === false) {
+                blockedConditions.blockedCategory = true;
+                break;
+            }
+            if (item.productId.brand && item.productId.brand.isBlocked === true) {
+                blockedConditions.blockedBrand = true;
+                break;
+            }
+            if (item.productId.quantity < item.quantity) {
+                blockedConditions.insufficientStock = true;
+                insufficientStockProduct = item.productId.productName;
+                break;
+            }
+        }
+
+        // If any condition is true, return error
+        if (blockedConditions.blockedProduct || blockedConditions.blockedCategory || blockedConditions.blockedBrand) {
+            let errorMessage = "Cannot proceed with order: ";
+            if (blockedConditions.blockedProduct) errorMessage += "Product is blocked";
+            else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
+            else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
+            errorMessage += " by the admin.";
+            return res.status(403).json({ success: false, message: errorMessage });
+        }
+        if (blockedConditions.insufficientStock) {
+            return res.status(400).json({
+                success: false,
+                message: `Quantity is not available for the product: ${insufficientStockProduct}.`
+            });
+        }
+
+        const address = await Address.findOne({
+            userId: new mongoose.Types.ObjectId(userId),
+            "address._id": new mongoose.Types.ObjectId(addressId),
+        });
+        if (!address) {
+            return res.status(400).json({ success: false, message: "Invalid address." });
+        }
+
+        const foundAddress = address.address.find(addr => addr._id.toString() === addressId);
+        if (!foundAddress) {
+            return res.status(400).json({ success: false, message: "Address not found." });
+        }
+
+        const orderItems = cart.items.map(item => ({
+            product: item.productId._id,
+            quantity: item.quantity,
+            price: item.productId.salesPrice,
+        }));
+
+        cart.items = [];
+        await cart.save();
+
+        const order = new Order({
+            userId,
+            paymentMethod,
+            totalAmount,
+            orderedItems: orderItems,
+            address: foundAddress,
+            paymentStatus: paymentMethod === 'online' ? 'Pending' : 'Pending',
+        });
+
+        await order.save();
+
+        if (paymentMethod === 'online') {
+            const options = {
+                amount: totalAmount * 100,
+                currency: 'INR',
+                receipt: `order_${order._id}`,
+            };
+
+            const razorpayOrder = await razorpayInstance.orders.create(options);
+            res.json({
+                success: true,
+                orderId: razorpayOrder.id,
+                amount: razorpayOrder.amount,
+                currency: razorpayOrder.currency,
+                key: "rzp_test_fpueLavUtsLoKt",
+                dbOrderId: order._id,
+            });
+        } else {
+            res.json({ success: true, message: "Order placed successfully", orderId: order._id });
+        }
     } catch (error) {
-        
         console.error("Error creating order:", error);
-        res.status(500).json({ success: false, message: 'Failed to create Razorpay order' });
+        res.status(500).json({ success: false, message: 'Failed to create order' });
     }
 };
 
 const verifyPayment = async (req, res) => {
-    const userId = req.session.user
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderData,couponCode} = req.body;
-    console.log("Online payment: ", req.body);
-    
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, dbOrderId, couponCode } = req.body;
+
     const hmac = crypto.createHmac('sha256', "Bk8bywg3LIZxueU2ZgCPN6zV");
     hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
     const generatedSignature = hmac.digest('hex');
 
     if (generatedSignature === razorpay_signature) {
-        const { addressId, paymentMethod, totalAmount } = orderData;
-
         try {
-            let discount = 0
-            
-            if(couponCode){
-                const coupon=await Coupon.findOne({couponCode:couponCode});
-                discount=(totalAmount*coupon.offerPercentage)/100
-                console.log('discount------------: ', discount)
-            }
-            let foundAddress;
-
-            if (!mongoose.isValidObjectId(addressId)) {
-                return res.status(400).json({ error: "Invalid address ID." });
+            const order = await Order.findById(dbOrderId);
+            if (!order) {
+                return res.status(404).json({ success: false, message: "Order not found." });
             }
 
-            const cart = await Cart.findOne({ userId }).populate('items.productId');
-
-            if (!cart || cart.items.length === 0) {
-                return res.status(400).json({ error: "Cart is empty or invalid." });
+            order.paymentStatus = 'Paid';
+            if (couponCode) {
+                const coupon = await Coupon.findOne({ couponCode });
+                order.discount = (order.totalAmount * coupon.offerPercentage) / 100;
+                order.couponCode = couponCode;
+                order.couponApplied = true;
             }
 
-            const address = await Address.findOne({
-                userId: new mongoose.Types.ObjectId(userId),
-                "address._id": new mongoose.Types.ObjectId(addressId),
-            });
-
-            if (!address) {
-                return res.status(400).json({ error: "The selected address is not valid." });
-            }
-
-            foundAddress = address.address.find(addr => addr._id.toString() === addressId);
-
-            if (!foundAddress) {
-                return res.status(400).json({ error: "Address not found in user data." });
-            }
-
-            if (!paymentMethod || !totalAmount) {
-                return res.status(400).json({ error: "Payment method and total amount are required." });
-            }
-
-            const orderItems = cart.items.map(item => {
-                if (!item.productId || !item.productId._id) {
-                    throw new Error(`Invalid product data in cart: ${JSON.stringify(item)}`);
+            for (const item of order.orderedItems) {
+                const product = await Product.findById(item.product);
+                if (product && product.quantity >= item.quantity) {
+                    product.quantity -= item.quantity;
+                    await product.save();
+                } else {
+                    return res.status(400).json({ success: false, message: `Insufficient stock for ${product.productName}.` });
                 }
-                return {
-                    product: item.productId._id,
-                    quantity: item.quantity,
-                    price: item.productId.salesPrice,
-                };
-            });
-
-            const order = new Order({
-                userId: req.session.user,
-                paymentMethod,
-                totalAmount:totalAmount,
-                orderedItems: orderItems,
-                address: foundAddress,
-                paymentStatus: 'Paid',
-                couponCode: couponCode,
-                couponApplied: true,
-                discount: discount
-            });
+            }
 
             await order.save();
 
-            for (let i = 0; i < cart.items.length; i++) {
-                const product = await Product.findById(cart.items[i].productId._id);
-                if (product) {
-                    if (product.quantity >= cart.items[i].quantity) {
-                        product.quantity -= cart.items[i].quantity;
-                        await product.save();
-                    } else {
-                        return res.status(400).json({ success: false, message: `Insufficient stock for product: ${product.productName}.` });
-                    }
-                } else {
-                    return res.status(400).json({ success: false, message: "Product not found." });
-                }
+            const cart = await Cart.findOne({ userId: req.session.user });
+            if (cart) {
+                cart.items = [];
+                await cart.save();
             }
 
-            cart.items = [];
-            await cart.save();
-
-            console.log("Order Placed Successfully");
-            return res.json({success:true, message: "Order placed successfully." });
-
+            res.json({ success: true, message: "Payment verified and order processed successfully." });
         } catch (error) {
-            console.error("Error processing order:", error.message,error);
-            return res.status(500).json({ success:false, error: "Failed to place order. Please try again later." });
+            console.error("Error verifying payment:", error);
+            res.status(500).json({ success: false, message: "Failed to verify payment." });
         }
-
     } else {
+        const order = await Order.findById(dbOrderId);
+        if (order) {
+            order.paymentStatus = 'Failed';
+            await order.save();
+        }
         res.status(400).json({ success: false, message: 'Payment verification failed' });
     }
 };
 
+
+const retryPayment =  async (req, res) => {
+    const { orderId } = req.params;
+
+    try {
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        const razorpay = new Razorpay({
+            key_id: "rzp_test_fpueLavUtsLoKt",
+            key_secret: "Bk8bywg3LIZxueU2ZgCPN6zV"
+        });
+
+        const options = {
+            amount: order.totalAmount * 100,
+            currency: "INR",
+            receipt: `retry_${orderId}`,
+        };
+
+        const razorpayOrder = await razorpay.orders.create(options);
+
+        res.json({
+            success: true,
+            key: "rzp_test_fpueLavUtsLoKt",
+            amount: options.amount,
+            currency: options.currency,
+            orderId: razorpayOrder.id,
+            dbOrderId: order._id,
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
 
 const paymentFail = async (req, res) => {
     try {
@@ -348,185 +559,524 @@ const paymentFail = async (req, res) => {
     }
 };
 
+// const placeorder = async (req, res) => {
+//     const userId = req.session.user;
+//     const { orderData } = req.body;
+    
+//     const { addressId, paymentMethod, totalAmount, coupon } = orderData;
+//     let couponCode = coupon ? coupon.code : null;
+//     console.log(couponCode);
+    
+//     try {
+//         if (paymentMethod === 'COD') {
+//             try {
+//                 let foundAddress;
+
+
+//                 if (!mongoose.isValidObjectId(addressId)) {
+//                     return res.status(400).json({ error: "Invalid address ID." });
+//                 }
+
+//                 const cart = await Cart.findOne({ userId }).populate('items.productId');
+
+//                 if (!cart || cart.items.length === 0) {
+//                     return res.status(400).json({ error: "Cart is empty or invalid." });
+//                 }
+
+//                 // Check for blocked conditions
+//         const blockedConditions = {
+//             blockedProduct: false,
+//             blockedCategory: false,
+//             blockedBrand: false
+//         };
+
+//         for (const item of cart.items) {
+//             if (!item.productId) continue;
+            
+//             if (item.productId.isBlocked === true) {
+//                 blockedConditions.blockedProduct = true;
+//                 break;
+//             }
+//             if (item.productId.category && item.productId.category.islisted === false) {
+//                 blockedConditions.blockedCategory = true;
+//                 break;
+//             }
+//             if (item.productId.brand && item.productId.brand.isBlocked === true) {
+//                 blockedConditions.blockedBrand = true;
+//                 break;
+//             }
+//         }
+
+//         // If any condition is true, return error
+//         if (blockedConditions.blockedProduct || blockedConditions.blockedCategory || blockedConditions.blockedBrand) {
+//             let errorMessage = "Cannot proceed with order: ";
+//             if (blockedConditions.blockedProduct) errorMessage += "Product is blocked";
+//             else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
+//             else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
+//             errorMessage += " by the admin.";
+            
+//             return res.status(403).json({ 
+//                 success: false, 
+//                 message: errorMessage 
+//             });
+//         }
+
+//                 const address = await Address.findOne({
+//                     userId: new mongoose.Types.ObjectId(userId),
+//                     "address._id": new mongoose.Types.ObjectId(addressId),
+//                 });
+
+//                 if (!address) {
+//                     return res.status(400).json({ error: "The selected address is not valid." });
+//                 }
+
+//                 foundAddress = address.address.find(addr => addr._id.toString() === addressId);
+
+//                 if (!foundAddress) {
+//                     return res.status(400).json({ error: "Address not found in user data." });
+//                 }
+
+//                 if (!paymentMethod || !totalAmount) {
+//                     return res.status(400).json({ error: "Payment method and total amount are required." });
+//                 }
+               
+//                 const orderItems = cart.items.map(item => {
+//                     if (!item.productId || !item.productId._id) {
+//                         throw new Error(`Invalid product data in cart: ${JSON.stringify(item)}`);
+//                     }
+//                     return {
+//                         product: item.productId._id,
+//                         quantity: item.quantity,
+//                         price: item.productId.salesPrice,
+//                     };
+//                 });
+
+//                 const originalAmount = cart.items.reduce(
+//                     (sum, item) => sum + (item.productId.salesPrice * item.quantity), 
+//                     0
+//                 );
+
+//                 const order = new Order({
+//                     userId: req.session.user,
+//                     paymentMethod,
+//                     totalAmount: parseFloat(totalAmount),
+//                     orderedItems: orderItems,
+//                     address: foundAddress,
+//                     coupon: coupon ? {
+//                         code: coupon.code,
+//                         discountAmount: coupon.discountAmount,
+//                         originalAmount: originalAmount
+//                     } : null
+//                 });
+
+//                 await order.save();
+
+//                 for (let i = 0; i < cart.items.length; i++) {
+//                     const product = await Product.findById(cart.items[i].productId._id);
+//                     if (product) {
+//                         if (product.quantity >= cart.items[i].quantity) {
+//                             product.quantity -= cart.items[i].quantity;
+//                             await product.save();
+//                         } else {
+//                             return res.status(400).json({ 
+//                                 success: false, 
+//                                 message: `Insufficient stock for product: ${product.productName}.` 
+//                             });
+//                         }
+//                     } else {
+//                         return res.status(400).json({ 
+//                             success: false, 
+//                             message: "Product not found." 
+//                         });
+//                     }
+//                 }
+
+//                 if (coupon && coupon.code) {
+//                     await Coupon.findOneAndUpdate(
+//                         { couponCode: coupon.code },
+//                         { $inc: { usageCount: 1 } }
+//                     );
+//                 }
+
+//                 cart.items = [];
+//                 await cart.save();
+
+//                 if (req.session.appliedCoupon) {
+//                     delete req.session.appliedCoupon;
+//                 }
+
+//                 console.log("Order Placed Successfully");
+//                 return res.json({
+//                     success: true, 
+//                     message: "Order placed successfully."
+//                 });
+
+//             } catch (error) {
+//                 console.error("Error processing order:", error.message);
+//                 return res.status(500).json({ 
+//                     success: false, 
+//                     error: "Failed to place order. Please try again later." 
+//                 });
+//             }
+//         } else if (paymentMethod === "Wallet") {
+//             console.log('Processing Wallet Payment: ', orderData);
+        
+//             try {
+//                 const user = await User.findById(userId);
+//                 if (!user) {
+//                     return res.status(400).json({ success: false, message: "User not found." });
+//                 }
+//                 if (user.wallet.balance < totalAmount) {
+//                     return res.status(400).json({ success: false, message: "Insufficient wallet balance." });
+//                 }
+        
+//                 let discount = 0;
+//                 let foundAddress;
+
+//                 if (couponCode) {
+//                     const coupon = await Coupon.findOne({ couponCode: couponCode, isActive: true });
+                    
+//                     if (coupon && totalAmount < coupon.minimumprice) {
+//                         discount = orderData.coupon.discountAmount || Math.round((originalAmount * coupon.offerPercentage) / 100);
+//                     } else {
+//                         couponCode = null;
+//                         discount = 0;
+//                     }
+//                 }
+        
+//                 if (!mongoose.isValidObjectId(addressId)) {
+//                     return res.status(400).json({ success: false, message: "Invalid address ID." });
+//                 }
+        
+//                 const cart = await Cart.findOne({ userId }).populate('items.productId');
+
+//                 // Check for blocked conditions
+//         const blockedConditions = {
+//             blockedProduct: false,
+//             blockedCategory: false,
+//             blockedBrand: false
+//         };
+
+//         for (const item of cart.items) {
+//             if (!item.productId) continue;
+            
+//             if (item.productId.isBlocked === true) {
+//                 blockedConditions.blockedProduct = true;
+//                 break;
+//             }
+//             if (item.productId.category && item.productId.category.islisted === false) {
+//                 blockedConditions.blockedCategory = true;
+//                 break;
+//             }
+//             if (item.productId.brand && item.productId.brand.isBlocked === true) {
+//                 blockedConditions.blockedBrand = true;
+//                 break;
+//             }
+//         }
+
+//         // If any condition is true, return error
+//         if (blockedConditions.blockedProduct || blockedConditions.blockedCategory || blockedConditions.blockedBrand) {
+//             let errorMessage = "Cannot proceed with order: ";
+//             if (blockedConditions.blockedProduct) errorMessage += "Product is blocked";
+//             else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
+//             else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
+//             errorMessage += " by the admin.";
+            
+//             return res.status(403).json({ 
+//                 success: false, 
+//                 message: errorMessage 
+//             });
+//         }
+//                 const address = await Address.findOne({
+//                     userId: new mongoose.Types.ObjectId(userId),
+//                     "address._id": new mongoose.Types.ObjectId(addressId),
+//                 });
+        
+//                 if (!address) {
+//                     return res.status(400).json({ success: false, message: "Address not selected." });
+//                 }
+        
+//                 foundAddress = address.address.find((addr) => addr._id.toString() === addressId);
+        
+//                 if (!paymentMethod || !totalAmount) {
+//                     return res.status(400).json({ success: false, message: "Payment method and total amount are required." });
+//                 }
+        
+//                 const orderItems = cart.items.map(item => ({
+//                     product: item.productId,
+//                     quantity: item.quantity,
+//                     price: item.productId.salesPrice,
+//                 }));
+        
+//                 const originalAmount = cart.items.reduce(
+//                     (sum, item) => sum + (item.productId.salesPrice * item.quantity),
+//                     0
+//                 );
+        
+//                 const order = new Order({
+//                     userId: req.session.user,
+//                     paymentMethod,
+//                     totalAmount: parseFloat(totalAmount),
+//                     orderedItems: orderItems,
+//                     address: foundAddress,
+//                     paymentStatus: 'Paid',
+//                     couponCode: couponCode,
+//                     couponApplied: !!couponCode,
+//                     discount: discount,
+//                     originalAmount: originalAmount
+//                 });
+        
+//                 console.log('Order before save: ', order);
+//                 await order.save();
+        
+//                 user.wallet.balance -= parseFloat(totalAmount);
+//                 user.wallet.transactions.push({
+//                     type: "debit",
+//                     amount: parseFloat(totalAmount),
+//                     description: `Payment for Order ${order._id}`,
+//                     date: Date.now()
+//                 });
+//                 user.orderHistory.push(order._id);
+//                 await user.save();
+        
+//                 for (let item of cart.items) {
+//                     const product = await Product.findById(item.productId._id);
+//                     if (!product) {
+//                         return res.status(400).json({ success: false, message: `Product not found: ${item.productId.productName}` });
+//                     }
+//                     if (product.quantity < item.quantity) {
+//                         return res.status(400).json({ success: false, message: `Insufficient stock for product: ${product.productName}` });
+//                     }
+//                     product.quantity -= item.quantity;
+//                     await product.save();
+//                 }
+
+//                 if (couponCode) {
+//                     await Coupon.findOneAndUpdate(
+//                         { code: couponCode },
+//                         { $inc: { usageCount: 1 } }
+//                     );
+//                 }
+        
+//                 cart.items = [];
+//                 await cart.save();
+        
+//                 return res.status(200).json({ success: true, message: "Order placed successfully with Wallet." });
+        
+//             } catch (error) {
+//                 console.error("Error processing wallet payment:", error.stack);
+//                 return res.status(500).json({ success: false, message: "Failed to place order. Please try again later.", error: error.message });
+//             }
+//         }else {
+//             return res.status(400).json({ 
+//                 success: false, 
+//                 message: 'Invalid payment method' 
+//             });
+//         }
+//     } catch (error) {
+//         console.error("Unexpected Error:", error);
+//         res.status(500).json({ 
+//             success: false, 
+//             message: 'Unable to process order' 
+//         });
+//     }
+// };
+
 const placeorder = async (req, res) => {
     const userId = req.session.user;
     const { orderData } = req.body;
-    
     const { addressId, paymentMethod, totalAmount, coupon } = orderData;
     let couponCode = coupon ? coupon.code : null;
-    console.log(couponCode);
-    
+
     try {
-        if (paymentMethod === 'COD') {
-            try {
-                let foundAddress;
+        const cart = await Cart.findOne({ userId }).populate({
+            path: 'items.productId',
+            populate: [
+                { path: 'category' },
+                { path: 'brand' }
+            ]
+        });
 
-                if (!mongoose.isValidObjectId(addressId)) {
-                    return res.status(400).json({ error: "Invalid address ID." });
-                }
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({ success: false, message: "Cart is empty or invalid." });
+        }
 
-                const cart = await Cart.findOne({ userId }).populate('items.productId');
+        // Check for blocked conditions and stock availability
+        const blockedConditions = {
+            blockedProduct: false,
+            blockedCategory: false,
+            blockedBrand: false,
+            insufficientStock: false
+        };
+        let insufficientStockProduct = null;
 
-                if (!cart || cart.items.length === 0) {
-                    return res.status(400).json({ error: "Cart is empty or invalid." });
-                }
+        for (const item of cart.items) {
+            if (!item.productId) continue;
 
-                const address = await Address.findOne({
-                    userId: new mongoose.Types.ObjectId(userId),
-                    "address._id": new mongoose.Types.ObjectId(addressId),
-                });
-
-                if (!address) {
-                    return res.status(400).json({ error: "The selected address is not valid." });
-                }
-
-                foundAddress = address.address.find(addr => addr._id.toString() === addressId);
-
-                if (!foundAddress) {
-                    return res.status(400).json({ error: "Address not found in user data." });
-                }
-
-                if (!paymentMethod || !totalAmount) {
-                    return res.status(400).json({ error: "Payment method and total amount are required." });
-                }
-               
-                const orderItems = cart.items.map(item => {
-                    if (!item.productId || !item.productId._id) {
-                        throw new Error(`Invalid product data in cart: ${JSON.stringify(item)}`);
-                    }
-                    return {
-                        product: item.productId._id,
-                        quantity: item.quantity,
-                        price: item.productId.salesPrice,
-                    };
-                });
-
-                const originalAmount = cart.items.reduce(
-                    (sum, item) => sum + (item.productId.salesPrice * item.quantity), 
-                    0
-                );
-
-                const order = new Order({
-                    userId: req.session.user,
-                    paymentMethod,
-                    totalAmount: parseFloat(totalAmount),
-                    orderedItems: orderItems,
-                    address: foundAddress,
-                    coupon: coupon ? {
-                        code: coupon.code,
-                        discountAmount: coupon.discountAmount,
-                        originalAmount: originalAmount
-                    } : null
-                });
-
-                await order.save();
-
-                for (let i = 0; i < cart.items.length; i++) {
-                    const product = await Product.findById(cart.items[i].productId._id);
-                    if (product) {
-                        if (product.quantity >= cart.items[i].quantity) {
-                            product.quantity -= cart.items[i].quantity;
-                            await product.save();
-                        } else {
-                            return res.status(400).json({ 
-                                success: false, 
-                                message: `Insufficient stock for product: ${product.productName}.` 
-                            });
-                        }
-                    } else {
-                        return res.status(400).json({ 
-                            success: false, 
-                            message: "Product not found." 
-                        });
-                    }
-                }
-
-                if (coupon && coupon.code) {
-                    await Coupon.findOneAndUpdate(
-                        { couponCode: coupon.code },
-                        { $inc: { usageCount: 1 } }
-                    );
-                }
-
-                cart.items = [];
-                await cart.save();
-
-                if (req.session.appliedCoupon) {
-                    delete req.session.appliedCoupon;
-                }
-
-                console.log("Order Placed Successfully");
-                return res.json({
-                    success: true, 
-                    message: "Order placed successfully."
-                });
-
-            } catch (error) {
-                console.error("Error processing order:", error.message);
-                return res.status(500).json({ 
-                    success: false, 
-                    error: "Failed to place order. Please try again later." 
-                });
+            if (item.productId.isBlocked === true) {
+                blockedConditions.blockedProduct = true;
+                break;
             }
+            if (item.productId.category && item.productId.category.islisted === false) {
+                blockedConditions.blockedCategory = true;
+                break;
+            }
+            if (item.productId.brand && item.productId.brand.isBlocked === true) {
+                blockedConditions.blockedBrand = true;
+                break;
+            }
+            if (item.productId.quantity < item.quantity) {
+                blockedConditions.insufficientStock = true;
+                insufficientStockProduct = item.productId.productName;
+                break;
+            }
+        }
+
+        // If any condition is true, return error
+        if (blockedConditions.blockedProduct || blockedConditions.blockedCategory || blockedConditions.blockedBrand) {
+            let errorMessage = "Cannot proceed with order: ";
+            if (blockedConditions.blockedProduct) errorMessage += "Product is blocked";
+            else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
+            else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
+            errorMessage += " by the admin.";
+            return res.status(403).json({ success: false, message: errorMessage });
+        }
+        if (blockedConditions.insufficientStock) {
+            return res.status(400).json({
+                success: false,
+                message: `Quantity is not available for the product: ${insufficientStockProduct}.`
+            });
+        }
+
+        const address = await Address.findOne({
+            userId: new mongoose.Types.ObjectId(userId),
+            "address._id": new mongoose.Types.ObjectId(addressId),
+        });
+        if (!address) {
+            return res.status(400).json({ success: false, message: "Invalid address." });
+        }
+
+        const foundAddress = address.address.find(addr => addr._id.toString() === addressId);
+        if (!foundAddress) {
+            return res.status(400).json({ success: false, message: "Address not found." });
+        }
+
+        const orderItems = cart.items.map(item => ({
+            product: item.productId._id,
+            quantity: item.quantity,
+            price: item.productId.salesPrice,
+        }));
+
+        if (paymentMethod === 'COD') {
+            const order = new Order({
+                userId,
+                paymentMethod,
+                totalAmount: parseFloat(totalAmount),
+                orderedItems: orderItems,
+                address: foundAddress,
+                coupon: coupon ? {
+                    code: coupon.code,
+                    discountAmount: coupon.discountAmount,
+                    originalAmount: cart.items.reduce((sum, item) => sum + (item.productId.salesPrice * item.quantity), 0)
+                } : null
+            });
+
+            await order.save();
+
+            for (let item of cart.items) {
+                const product = await Product.findById(item.productId._id);
+                product.quantity -= item.quantity;
+                await product.save();
+            }
+
+            if (coupon && coupon.code) {
+                await Coupon.findOneAndUpdate(
+                    { couponCode: coupon.code },
+                    { $inc: { usageCount: 1 } }
+                );
+            }
+
+            cart.items = [];
+            await cart.save();
+
+            if (req.session.appliedCoupon) {
+                delete req.session.appliedCoupon;
+            }
+
+            return res.json({ success: true, message: "Order placed successfully." });
         } else if (paymentMethod === "Wallet") {
-            console.log('Processing Wallet Payment: ', orderData);
-        
             try {
                 const user = await User.findById(userId);
                 if (!user) {
                     return res.status(400).json({ success: false, message: "User not found." });
                 }
-                if (user.wallet.balance < totalAmount) {
+                if (user.wallet.balance < parseFloat(totalAmount)) {
                     return res.status(400).json({ success: false, message: "Insufficient wallet balance." });
                 }
         
+                // Check for blocked conditions and stock availability (already present earlier in the code)
+                const blockedConditions = {
+                    blockedProduct: false,
+                    blockedCategory: false,
+                    blockedBrand: false,
+                    insufficientStock: false
+                };
+                let insufficientStockProduct = null;
+        
+                for (const item of cart.items) {
+                    if (!item.productId) continue;
+        
+                    if (item.productId.isBlocked === true) {
+                        blockedConditions.blockedProduct = true;
+                        break;
+                    }
+                    if (item.productId.category && item.productId.category.islisted === false) {
+                        blockedConditions.blockedCategory = true;
+                        break;
+                    }
+                    if (item.productId.brand && item.productId.brand.isBlocked === true) {
+                        blockedConditions.blockedBrand = true;
+                        break;
+                    }
+                    if (item.productId.quantity < item.quantity) {
+                        blockedConditions.insufficientStock = true;
+                        insufficientStockProduct = item.productId.productName;
+                        break;
+                    }
+                }
+        
+                if (blockedConditions.blockedProduct || blockedConditions.blockedCategory || blockedConditions.blockedBrand) {
+                    let errorMessage = "Cannot proceed with order: ";
+                    if (blockedConditions.blockedProduct) errorMessage += "Product is blocked";
+                    else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
+                    else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
+                    errorMessage += " by the admin.";
+                    return res.status(403).json({ success: false, message: errorMessage });
+                }
+                if (blockedConditions.insufficientStock) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Quantity is not available for the product: ${insufficientStockProduct}.`
+                    });
+                }
+        
                 let discount = 0;
-                let foundAddress;
-
                 if (couponCode) {
                     const coupon = await Coupon.findOne({ couponCode: couponCode, isActive: true });
-                    
-                    if (coupon && totalAmount < coupon.minimumprice) {
-                        discount = orderData.coupon.discountAmount || Math.round((originalAmount * coupon.offerPercentage) / 100);
+                    const originalAmount = cart.items.reduce((sum, item) => sum + (item.productId.salesPrice * item.quantity), 0);
+                    if (coupon) {
+                        if (parseFloat(totalAmount) < coupon.minimumprice) {
+                            return res.status(400).json({ success: false, message: "Total amount is less than the minimum required for this coupon." });
+                        }
+                        discount = orderData.coupon?.discountAmount || Math.round((originalAmount * coupon.offerPercentage) / 100);
                     } else {
                         couponCode = null;
                         discount = 0;
                     }
                 }
         
-                if (!mongoose.isValidObjectId(addressId)) {
-                    return res.status(400).json({ success: false, message: "Invalid address ID." });
-                }
-        
-                const cart = await Cart.findOne({ userId }).populate('items.productId');
-                const address = await Address.findOne({
-                    userId: new mongoose.Types.ObjectId(userId),
-                    "address._id": new mongoose.Types.ObjectId(addressId),
-                });
-        
-                if (!address) {
-                    return res.status(400).json({ success: false, message: "Address not selected." });
-                }
-        
-                foundAddress = address.address.find((addr) => addr._id.toString() === addressId);
-        
-                if (!paymentMethod || !totalAmount) {
-                    return res.status(400).json({ success: false, message: "Payment method and total amount are required." });
-                }
-        
-                const orderItems = cart.items.map(item => ({
-                    product: item.productId,
-                    quantity: item.quantity,
-                    price: item.productId.salesPrice,
-                }));
-        
-                const originalAmount = cart.items.reduce(
-                    (sum, item) => sum + (item.productId.salesPrice * item.quantity),
-                    0
-                );
-        
                 const order = new Order({
-                    userId: req.session.user,
+                    userId,
                     paymentMethod,
                     totalAmount: parseFloat(totalAmount),
                     orderedItems: orderItems,
@@ -535,10 +1085,9 @@ const placeorder = async (req, res) => {
                     couponCode: couponCode,
                     couponApplied: !!couponCode,
                     discount: discount,
-                    originalAmount: originalAmount
+                    originalAmount: cart.items.reduce((sum, item) => sum + (item.productId.salesPrice * item.quantity), 0)
                 });
         
-                console.log('Order before save: ', order);
                 await order.save();
         
                 user.wallet.balance -= parseFloat(totalAmount);
@@ -553,19 +1102,13 @@ const placeorder = async (req, res) => {
         
                 for (let item of cart.items) {
                     const product = await Product.findById(item.productId._id);
-                    if (!product) {
-                        return res.status(400).json({ success: false, message: `Product not found: ${item.productId.productName}` });
-                    }
-                    if (product.quantity < item.quantity) {
-                        return res.status(400).json({ success: false, message: `Insufficient stock for product: ${product.productName}` });
-                    }
                     product.quantity -= item.quantity;
                     await product.save();
                 }
-
+        
                 if (couponCode) {
                     await Coupon.findOneAndUpdate(
-                        { code: couponCode },
+                        { couponCode: couponCode },
                         { $inc: { usageCount: 1 } }
                     );
                 }
@@ -574,23 +1117,16 @@ const placeorder = async (req, res) => {
                 await cart.save();
         
                 return res.status(200).json({ success: true, message: "Order placed successfully with Wallet." });
-        
             } catch (error) {
-                console.error("Error processing wallet payment:", error.stack);
-                return res.status(500).json({ success: false, message: "Failed to place order. Please try again later.", error: error.message });
+                console.error("Error in Wallet payment:", error);
+                return res.status(500).json({ success: false, message: "Failed to process Wallet payment. Please try again." });
             }
-        }else {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Invalid payment method' 
-            });
+        } else {
+            return res.status(400).json({ success: false, message: 'Invalid payment method' });
         }
     } catch (error) {
         console.error("Unexpected Error:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Unable to process order' 
-        });
+        res.status(500).json({ success: false, message: 'Unable to process order' });
     }
 };
 
@@ -604,7 +1140,6 @@ const success = async (req,res)=>{
 }
 
 const getOrderList = async (req, res) => {
-
     try {
         const userId = req.session.user;
         const page = parseInt(req.query.page) || 1;
@@ -614,18 +1149,13 @@ const getOrderList = async (req, res) => {
         const totalPages = Math.ceil(total / limit)
         const orderDetails = await Order.find({ userId }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("orderedItems.product")
         const user = await User.findById(userId)
-        // console.log('----------------orderDetails: ', orderDetails);
-        
 
         res.render("orderDetaile", { orderDetails, currentPage: page, totalPages, user })
-
 
     } catch (error) {
         console.log("Error geting the order listing page:", error);
         res.redirect('/pagenotfound')
     }
-
-
 }
 
 const invoice = async (req, res) => {
@@ -738,6 +1268,63 @@ const generateInvoicePdf = async (req, res) => {
     }
 };
 
+// const cancelOrder = async (req, res) => {
+//     try {
+//         const { orderId, product } = req.params;
+//         const userId = req.session.user;
+
+//         const order = await Order.findOne({ _id: orderId, userId }).populate('orderedItems.product');
+
+//         if (!order) {
+//             return res.status(404).json({ success: false, message: "Order not found." });
+//         }
+
+//         let orderedProduct = order.orderedItems.find((item) =>
+//             item.product._id.toString() === product.toString()
+//         );
+
+//         if (!orderedProduct) {
+//             return res.status(404).json({ success: false, message: "Product not found in order." });
+//         }
+
+//         if (orderedProduct.status === "Delivered" || orderedProduct.status === "Return") {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Product has already been delivered or returned and cannot be canceled."
+//             });
+//         }
+
+//         if (orderedProduct.status === "Cancelled") {
+//             return res.status(400).json({ success: false, message: "Product is already canceled." });
+//         }
+
+//         // Calculate refund amount for this specific product
+//         const refundAmount = orderedProduct.price * orderedProduct.quantity;
+
+//         orderedProduct.status = "Cancelled";
+//         const productDoc = await Product.findById(product);
+//         if (productDoc) {
+//             productDoc.quantity += orderedProduct.quantity;
+//             await productDoc.save();
+//         }
+
+//         if ((order.paymentMethod === "online" || order.paymentMethod === "Wallet") && order.paymentStatus === "Paid") {
+//             await refundToWallet(orderId, userId, refundAmount);
+//         }
+
+//         await order.save();
+
+//         res.status(200).json({ success: true, message: "Order cancelled successfully" });
+//     } catch (error) {
+//         console.error("Error canceling product:", error);
+//         res.status(500).json({
+//             success: false,
+//             message: "Failed to cancel the product. Please try again later."
+//         });
+//     }
+// };
+
+
 const cancelOrder = async (req, res) => {
     try {
         const { orderId, product } = req.params;
@@ -769,16 +1356,27 @@ const cancelOrder = async (req, res) => {
         }
 
         // Calculate refund amount for this specific product
-        const refundAmount = orderedProduct.price * orderedProduct.quantity;
+        const refundAmount = order.totalAmount
 
         orderedProduct.status = "Cancelled";
+        
+        // Update payment status if all items are cancelled
+        const allItemsCancelled = order.orderedItems.every(item => 
+            item.status === "Cancelled" || item._id.toString() === orderedProduct._id.toString()
+        );
+        
+        if (allItemsCancelled && order.paymentStatus === "Pending") {
+            order.paymentStatus = "Failed";
+        }
+
         const productDoc = await Product.findById(product);
         if (productDoc) {
             productDoc.quantity += orderedProduct.quantity;
             await productDoc.save();
         }
 
-        if ((order.paymentMethod === "online" || order.paymentMethod === "Wallet") && order.paymentStatus === "Paid") {
+        if ((order.paymentMethod === "online" || order.paymentMethod === "Wallet") && 
+            order.paymentStatus === "Paid") {
             await refundToWallet(orderId, userId, refundAmount);
         }
 
@@ -793,6 +1391,7 @@ const cancelOrder = async (req, res) => {
         });
     }
 };
+
 
 const returnOrder = async (req, res) => {
     try {
@@ -883,5 +1482,5 @@ module.exports = {
     createOrder,
     topUpWallet,
     refundToWallet,
-    
+    retryPayment,
 }

@@ -231,6 +231,24 @@ const loadwhishlist = async (req, res) => {
                 products: [],
             };
         }
+
+        wishlist.products = wishlist.products.filter(item =>{
+
+            if(!item.productId || item.productId.isBlocked === true){
+                return false;
+            }
+
+            if(!item.productId.category || item.productId.category.isListed === false){
+                return false;
+            }
+
+            if(item.productId.brand && item.productId.brand.isBlocked === true){
+                return false;
+            }
+
+            return true;
+            
+        })
         return res.render('wishlist', { wishlist, user });
 
     } catch (error) {
@@ -247,7 +265,6 @@ const addToWishlist = async (req, res) => {
         console.log("userId:", userId, "productId:", productId);
 
         let wishlist = await Wishlist.findOne({ userId });
-        console.log(wishlist)
 
         if (!wishlist) {
             wishlist = new Wishlist({ userId, products: [] });

@@ -106,7 +106,11 @@ router.get("/download-invoice", userAuth, orderController.generateInvoicePdf);
 router.post("/orders/:orderId/products/:product/cancel", userAuth, orderController.cancelOrder);
 router.post("/orders/:orderId/products/:product/return", userAuth, orderController.returnOrder);
 router.post('/create-razorpay-order', orderController.createOrder);
-router.post('/verify-payment',orderController. verifyPayment);
+router.post('/verify-payment',orderController.verifyPayment);
+router.post('/retry-payment/:orderId', userAuth, orderController.retryPayment);
+router.get('/getPaymentFail', (req,res)=>{
+    res.render('paymentFail')
+})
 
 
 module.exports = router

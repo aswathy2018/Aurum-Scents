@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const Product = require('../../model/productSchema')
 const Category = require('../../model/categorySchema')
 const Brand = require('../../model/brandSchema')
+const { populate } = require('../../model/orderSchema')
 
 
 const pageNotFound = async (req, res) => {
@@ -229,15 +230,23 @@ const login = async (req, res) => {
 }
 
 
-const loadShop = async (req, res) => {
-    try {
-        return res.render('shop')
-    }
-    catch (error) {
-        console.log("Page not loading..", error);
-        res.status(500).send("Internal server error..")
-    }
-}
+// const loadShop = async (req, res) => {
+//     try {
+//         const user = req.session.user;
+//         const categories = await Category.find({ islisted: false });
+//         const products = await Product.find({
+//             isBlocked: false,
+//             quantity: { $gt: 0 },
+//             category: { $in: categories.map(cat => cat._id) },
+//         })
+//         return res.render('shop', 
+//             {categories, products})
+//     }
+//     catch (error) {
+//         console.log("Page not loading..", error);
+//         res.status(500).send("Internal server error..")
+//     }
+// }
 
 
 const resendOtp = async (req, res) => {
@@ -304,12 +313,12 @@ const productDetails = async (req, res) => {
 const shop = async (req, res, next) => {
     try {
         const user = req.session.user;
-        const categories = await Category.find({ islisted: true });
+        const categories = await Category.find({ islisted:true });
         const products = await Product.find({
             isBlocked: false,
             quantity: { $gt: 0 },
             category: { $in: categories.map(cat => cat._id) },
-        });
+        }).populate('category')
 
         products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -321,15 +330,19 @@ const shop = async (req, res, next) => {
         const skip = (page - 1) * limit;
 
         const { query, category, priceRange, sort } = req.query;
-        
+
         const filters = {
             isBlocked: false,
             quantity: { $gt: 0 },
         };
+        
 
         if (category && category !== "all") {
             filters.category = category;
+        } else {
+            filters.category = { $in: categories.map(cat => cat._id) };
         }
+        
 
         if (priceRange) {
             const [min, max] = priceRange.split('-').map(Number);
@@ -385,7 +398,7 @@ const searchProducts = async (req, res) => {
     try {
         const { query, page = 1, limit = 10 } = req.query;
         const searchRegex = new RegExp(query, 'i');
-        const category= await Category.find({islisted:false})
+        const category= await Category.find({islisted:true})
         const skip = (page - 1) * limit;
 
         const products = await Product.find({
@@ -421,7 +434,7 @@ const searchProducts = async (req, res) => {
 };
 
 
-const categoryfilter = async (req, res) => {
+const  categoryfilter = async (req, res) => {
     try {
         const { category, sort, priceRange, query } = req.query;
         const page = parseInt(req.query.page) || 1;
@@ -431,6 +444,7 @@ const categoryfilter = async (req, res) => {
         const filters = {
             isBlocked: false,
             quantity: { $gt: 0 },
+            category: { $in: categories.map(cat => cat._id) },
         };
 
         if (category && mongoose.Types.ObjectId.isValid(category)) {
@@ -439,9 +453,9 @@ const categoryfilter = async (req, res) => {
 
         if (priceRange) {
             const [min, max] = priceRange.split('-').map(Number);
-            filters.salePrice = {};
-            if (!isNaN(min)) filters.salePrice.$gte = min;
-            if (!isNaN(max)) filters.salePrice.$lte = max;
+            filters.salesPrice = {};
+            if (!isNaN(min)) filters.salesPrice.$gte = min;
+            if (!isNaN(max)) filters.salesPrice.$lte = max;
         }
 
         if (query) {
@@ -455,9 +469,9 @@ const categoryfilter = async (req, res) => {
         let products = Product.find(filters).skip(skip).limit(limit);
 
         if (sort === "lowToHigh") {
-            products = products.sort({ salePrice: 1 });
+            products = products.sort({ salesPrice: 1 });
         } else if (sort === "highToLow") {
-            products = products.sort({ salePrice: -1 });
+            products = products.sort({ salesPrice: -1 });
         } else if (sort === "aToZ") {
             products = products.sort({ productName: 1 });
         } else if (sort === "zToA") {
@@ -467,10 +481,10 @@ const categoryfilter = async (req, res) => {
         const totalProducts = await Product.countDocuments(filters);
         const totalPages = Math.ceil(totalProducts / limit);
 
-        res.render("shope", {
+        res.render("shop", {
             user: req.session.user,
             products: await products,
-            category: await Category.find({ isListed: true }),
+            category: await Category.find({ islisted: true }),
             totalProducts,
             totalPages,
             currentPage: page,
@@ -525,7 +539,7 @@ module.exports = {
     signup,
     loadLogin,
     login,
-    loadShop,
+    // loadShop,
     otp,
     getOtp,
     resendOtp,

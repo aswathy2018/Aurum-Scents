@@ -53,6 +53,15 @@ const getSalesReport = async (req, res) => {
                 if (!startDate || !endDate) {
                     return res.status(400).send("Start and end dates are required for specific filter.");
                 }
+                // Validate dates are not in future
+                const currentDate = moment().startOf('day');
+                if (moment(startDate).isAfter(currentDate) || moment(endDate).isAfter(currentDate)) {
+                    return res.status(400).send("Future dates are not allowed.");
+                }
+                // Validate end date is not before start date
+                if (moment(endDate).isBefore(moment(startDate))) {
+                    return res.status(400).send("End date cannot be before start date.");
+                }
                 dateFilter = {
                     createdAt: {
                         $gte: moment(startDate).startOf('day').toDate(),
@@ -93,7 +102,7 @@ const getSalesReport = async (req, res) => {
             totalOffer += order.discount || 0;
         });
 
-        const formattedOrders = allOrders.map(order => ({
+        const formattedOrders = orders.map(order => ({
             _id: order._id,
             createdAt: order.createdAt,
             userName: order.userId ? order.userId.name : 'Unknown',
@@ -104,13 +113,13 @@ const getSalesReport = async (req, res) => {
             })),
             discount: order.discount || 0
         }));
-
+        
         res.render('salesreport', {
-            orders: formattedOrders.slice(skip, skip + limit),
+            orders: formattedOrders,  // Do not slice again, as `orders` is already paginated
             totalRevenue,
             totalOffer,
             totalOrders,
-            currentPage: page,
+            currentPage: Number(page), // Ensure it's a number
             totalPages,
             fil: filter,
             startDate,
