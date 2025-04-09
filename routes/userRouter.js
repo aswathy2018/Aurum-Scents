@@ -99,7 +99,7 @@ router.get('/checkOut', userAuth, orderController.getCheckOut)
 router.post('/apply-coupon', userAuth, orderController.applyCoupon);
 router.post("/checkout/process", userAuth, orderController.placeorder);
 router.get('/paymentSuccess', userAuth, orderController.success)
-router.get('/payementFail', userAuth, orderController.paymentFail)
+// router.get('/payementFail', userAuth, orderController.paymentFail)
 router.get('/orderDetaile', userAuth, orderController.getOrderList)
 router.get('/invoice', userAuth, orderController.invoice)
 router.get("/download-invoice", userAuth, orderController.generateInvoicePdf);

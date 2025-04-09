@@ -104,7 +104,7 @@
         <h1>OTP Verification</h1>
         <p>Please enter the 6-digit code sent to your device</p>
         <div id="timer" class="timer">Time remaining: 01:00</div>
-        <form id="otpForm" action="/otp" method="post">
+        <form id="otpForm"  method="post">
             <div class="otp-container">
                 <input type="text" class="otp-input" maxlength="6" id="otp-form">
             </div>
@@ -191,10 +191,10 @@
             }
         });
 
-        document.getElementById('otpForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            validateOTPForm();
-        });
+        // document.getElementById('otpForm').addEventListener('submit', (e) => {
+        //     e.preventDefault();
+        //     validateOTPForm();
+        // });
 
 function isValidOTP(otp) {
     const numberRegex = /^[0-9]{6}$/;

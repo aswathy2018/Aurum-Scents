@@ -291,7 +291,7 @@ const downloadSalesReportExcel = async (req, res) => {
                 totalOffer += order.discount || 0;
                 worksheet.addRow({
                     date: order.createdAt.toDateString(),
-                    orderId: order._id,
+                    orderId: order._id.toString().slice(-6),
                     userName: order.userId ? order.userId.name : 'Unknown',
                     productName: item.product ? item.product.productName : 'Unknown',
                     quantity: item.quantity,

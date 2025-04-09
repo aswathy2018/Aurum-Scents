@@ -1,55 +1,3 @@
-// const passport = require('passport');
-// const GoogleStrategy = require('passport-google-oauth20').Strategy;
-// const User = require('../model/userSchema');
-// const env = require('dotenv').config()
-
-
-
-// passport.use(new GoogleStrategy({
-//     clientID: process.env.GOOGLE_CLIENT_ID,
-//     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//     callbackURL: 'http://localhost:3002/google/callback'
-// },
-// async(accessToken, refreshToken, profile, done)=>{
-//     try {
-//         let user = await User.findOne({googleId: profile.id});
-        
-//         if(user){
-//             return done(null, user);
-//         }else{
-//             user = new User({
-//                 name: profile.displayName,
-//                 email: profile.emails[0].value,
-//                 googleId: profile.id
-//             });
-//             await user.save();
-//             return done(null, user)
-//         }
-
-        
-//     } catch (error) {
-//         return done(err, null)
-//     }
-// }
-// ))
-
-
-// passport.serializeUser((user, done)=>{
-//     done(null, user._id)
-// });
-
-// passport.deserializeUser((id, done)=>{
-//     User.findById(id)
-//     .then(user=>{
-        
-        
-//         done(null,user)
-//     })
-//     .catch(err=>{
-//         done(err, null)
-//     })
-// })
-
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../model/userSchema');
@@ -92,7 +40,6 @@ passport.deserializeUser(async (id, done) => {
     try {
         const user = await User.findById(id);
         
-        // Check blocked status during session validation
         if(user && user.isBlocked) {
             return done(null, false);
         }

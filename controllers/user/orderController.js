@@ -180,7 +180,8 @@ const razorpayInstance = new Razorpay({
 // const createOrder = async (req, res) => {
 //     const userId = req.session.user;
 //     const { orderData } = req.body;
-//     const { addressId, paymentMethod, totalAmount } = orderData;
+//     const { addressId, paymentMethod, totalAmount, couponCode } = orderData;
+//     console.log('rrrrrrrrrrr: ', orderData)
 
 //     try {
 //         const cart = await Cart.findOne({ userId }).populate({
@@ -195,16 +196,18 @@ const razorpayInstance = new Razorpay({
 //             return res.status(400).json({ success: false, message: "Cart is empty or invalid." });
 //         }
 
-//         // Check for blocked conditions
+
 //         const blockedConditions = {
 //             blockedProduct: false,
 //             blockedCategory: false,
-//             blockedBrand: false
+//             blockedBrand: false,
+//             insufficientStock: false
 //         };
+//         let insufficientStockProduct = null;
 
 //         for (const item of cart.items) {
 //             if (!item.productId) continue;
-            
+
 //             if (item.productId.isBlocked === true) {
 //                 blockedConditions.blockedProduct = true;
 //                 break;
@@ -217,6 +220,11 @@ const razorpayInstance = new Razorpay({
 //                 blockedConditions.blockedBrand = true;
 //                 break;
 //             }
+//             if (item.productId.quantity < item.quantity) {
+//                 blockedConditions.insufficientStock = true;
+//                 insufficientStockProduct = item.productId.productName;
+//                 break;
+//             }
 //         }
 
 //         // If any condition is true, return error
@@ -226,10 +234,12 @@ const razorpayInstance = new Razorpay({
 //             else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
 //             else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
 //             errorMessage += " by the admin.";
-            
-//             return res.status(403).json({ 
-//                 success: false, 
-//                 message: errorMessage 
+//             return res.status(403).json({ success: false, message: errorMessage });
+//         }
+//         if (blockedConditions.insufficientStock) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: `Quantity is not available for the product: ${insufficientStockProduct}.`
 //             });
 //         }
 
@@ -251,7 +261,7 @@ const razorpayInstance = new Razorpay({
 //             quantity: item.quantity,
 //             price: item.productId.salesPrice,
 //         }));
-        
+
 //         cart.items = [];
 //         await cart.save();
 
@@ -290,11 +300,11 @@ const razorpayInstance = new Razorpay({
 //         res.status(500).json({ success: false, message: 'Failed to create order' });
 //     }
 // };
-
 const createOrder = async (req, res) => {
     const userId = req.session.user;
     const { orderData } = req.body;
-    const { addressId, paymentMethod, totalAmount } = orderData;
+    const { addressId, paymentMethod, totalAmount, coupon } = orderData;
+    console.log('rrrrrrrrrrr: ', orderData);
 
     try {
         const cart = await Cart.findOne({ userId }).populate({
@@ -309,7 +319,6 @@ const createOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Cart is empty or invalid." });
         }
 
-        // Check for blocked conditions and stock availability
         const blockedConditions = {
             blockedProduct: false,
             blockedCategory: false,
@@ -378,6 +387,15 @@ const createOrder = async (req, res) => {
         cart.items = [];
         await cart.save();
 
+        // Added: Fetch coupon and calculate discount if couponCode is provided
+        let discount = 0;
+        if (coupon) {
+            const coupons = await Coupon.findOne({ couponCode:coupon.code });
+            if (coupons) {
+                discount = (totalAmount * coupons.offerPercentage) / 100; // Calculate discount based on offer percentage
+            }
+        }
+
         const order = new Order({
             userId,
             paymentMethod,
@@ -385,6 +403,10 @@ const createOrder = async (req, res) => {
             orderedItems: orderItems,
             address: foundAddress,
             paymentStatus: paymentMethod === 'online' ? 'Pending' : 'Pending',
+            // Added: Include coupon-related fields in the order
+            couponCode: coupon.code || null, // Store the coupon code if provided
+            couponApplied: !!coupon.code,    // Set to true if couponCode exists
+            discount: discount,            // Store the calculated discount
         });
 
         await order.save();
@@ -413,6 +435,7 @@ const createOrder = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to create order' });
     }
 };
+
 
 const verifyPayment = async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, dbOrderId, couponCode } = req.body;
@@ -508,377 +531,54 @@ const retryPayment =  async (req, res) => {
     }
 };
 
-const paymentFail = async (req, res) => {
-    try {
-        const userId = req.session.user;
-        const { orderData, couponCode, error } = req.body;
-        const { addressId, paymentMethod, totalAmount } = orderData;
-        
-        console.log("Payment failure reported from client:", error);
-        
-        const cart = await Cart.findOne({ userId }).populate('items.productId');
-        if (!cart || cart.items.length === 0) {
-            return res.status(400).json({ error: "Cart is empty or invalid." });
-        }
-        
-        const address = await Address.findOne({
-            userId: new mongoose.Types.ObjectId(userId),
-            "address._id": new mongoose.Types.ObjectId(addressId),
-        });
-        
-        if (!address) {
-            return res.status(400).json({ error: "The selected address is not valid." });
-        }
-        
-        const foundAddress = address.address.find(addr => addr._id.toString() === addressId);
-        const orderItems = cart.items.map(item => ({
-            product: item.productId._id,
-            quantity: item.quantity,
-            price: item.productId.salesPrice,
-        }));
-        const failedOrder = new Order({
-            userId,
-            paymentMethod,
-            totalAmount,
-            orderedItems: orderItems,
-            address: foundAddress,
-            paymentStatus: 'Failed',
-            couponCode,
-            couponApplied: !!couponCode,
-            discount: 0,
-            paymentErrorMessage: error?.description || 'Payment failed'
-        });
-        
-        await failedOrder.save();
-        console.log("Failed order registered from client notification");
-        
-        return res.json({ success: true, message: "Failed payment recorded successfully" });
-    } catch (error) {
-        console.error("Error recording payment failure:", error);
-        return res.status(500).json({ success: false, error: "Failed to record payment failure" });
-    }
-};
-
-// const placeorder = async (req, res) => {
-//     const userId = req.session.user;
-//     const { orderData } = req.body;
-    
-//     const { addressId, paymentMethod, totalAmount, coupon } = orderData;
-//     let couponCode = coupon ? coupon.code : null;
-//     console.log(couponCode);
-    
+// const paymentFail = async (req, res) => {
 //     try {
-//         if (paymentMethod === 'COD') {
-//             try {
-//                 let foundAddress;
-
-
-//                 if (!mongoose.isValidObjectId(addressId)) {
-//                     return res.status(400).json({ error: "Invalid address ID." });
-//                 }
-
-//                 const cart = await Cart.findOne({ userId }).populate('items.productId');
-
-//                 if (!cart || cart.items.length === 0) {
-//                     return res.status(400).json({ error: "Cart is empty or invalid." });
-//                 }
-
-//                 // Check for blocked conditions
-//         const blockedConditions = {
-//             blockedProduct: false,
-//             blockedCategory: false,
-//             blockedBrand: false
-//         };
-
-//         for (const item of cart.items) {
-//             if (!item.productId) continue;
-            
-//             if (item.productId.isBlocked === true) {
-//                 blockedConditions.blockedProduct = true;
-//                 break;
-//             }
-//             if (item.productId.category && item.productId.category.islisted === false) {
-//                 blockedConditions.blockedCategory = true;
-//                 break;
-//             }
-//             if (item.productId.brand && item.productId.brand.isBlocked === true) {
-//                 blockedConditions.blockedBrand = true;
-//                 break;
-//             }
+//         const userId = req.session.user;
+//         const { orderData, couponCode, error } = req.body;
+//         const { addressId, paymentMethod, totalAmount } = orderData;
+        
+//         console.log("Payment failure reported from client:", error);
+        
+//         const cart = await Cart.findOne({ userId }).populate('items.productId');
+//         if (!cart || cart.items.length === 0) {
+//             return res.status(400).json({ error: "Cart is empty or invalid." });
 //         }
-
-//         // If any condition is true, return error
-//         if (blockedConditions.blockedProduct || blockedConditions.blockedCategory || blockedConditions.blockedBrand) {
-//             let errorMessage = "Cannot proceed with order: ";
-//             if (blockedConditions.blockedProduct) errorMessage += "Product is blocked";
-//             else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
-//             else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
-//             errorMessage += " by the admin.";
-            
-//             return res.status(403).json({ 
-//                 success: false, 
-//                 message: errorMessage 
-//             });
-//         }
-
-//                 const address = await Address.findOne({
-//                     userId: new mongoose.Types.ObjectId(userId),
-//                     "address._id": new mongoose.Types.ObjectId(addressId),
-//                 });
-
-//                 if (!address) {
-//                     return res.status(400).json({ error: "The selected address is not valid." });
-//                 }
-
-//                 foundAddress = address.address.find(addr => addr._id.toString() === addressId);
-
-//                 if (!foundAddress) {
-//                     return res.status(400).json({ error: "Address not found in user data." });
-//                 }
-
-//                 if (!paymentMethod || !totalAmount) {
-//                     return res.status(400).json({ error: "Payment method and total amount are required." });
-//                 }
-               
-//                 const orderItems = cart.items.map(item => {
-//                     if (!item.productId || !item.productId._id) {
-//                         throw new Error(`Invalid product data in cart: ${JSON.stringify(item)}`);
-//                     }
-//                     return {
-//                         product: item.productId._id,
-//                         quantity: item.quantity,
-//                         price: item.productId.salesPrice,
-//                     };
-//                 });
-
-//                 const originalAmount = cart.items.reduce(
-//                     (sum, item) => sum + (item.productId.salesPrice * item.quantity), 
-//                     0
-//                 );
-
-//                 const order = new Order({
-//                     userId: req.session.user,
-//                     paymentMethod,
-//                     totalAmount: parseFloat(totalAmount),
-//                     orderedItems: orderItems,
-//                     address: foundAddress,
-//                     coupon: coupon ? {
-//                         code: coupon.code,
-//                         discountAmount: coupon.discountAmount,
-//                         originalAmount: originalAmount
-//                     } : null
-//                 });
-
-//                 await order.save();
-
-//                 for (let i = 0; i < cart.items.length; i++) {
-//                     const product = await Product.findById(cart.items[i].productId._id);
-//                     if (product) {
-//                         if (product.quantity >= cart.items[i].quantity) {
-//                             product.quantity -= cart.items[i].quantity;
-//                             await product.save();
-//                         } else {
-//                             return res.status(400).json({ 
-//                                 success: false, 
-//                                 message: `Insufficient stock for product: ${product.productName}.` 
-//                             });
-//                         }
-//                     } else {
-//                         return res.status(400).json({ 
-//                             success: false, 
-//                             message: "Product not found." 
-//                         });
-//                     }
-//                 }
-
-//                 if (coupon && coupon.code) {
-//                     await Coupon.findOneAndUpdate(
-//                         { couponCode: coupon.code },
-//                         { $inc: { usageCount: 1 } }
-//                     );
-//                 }
-
-//                 cart.items = [];
-//                 await cart.save();
-
-//                 if (req.session.appliedCoupon) {
-//                     delete req.session.appliedCoupon;
-//                 }
-
-//                 console.log("Order Placed Successfully");
-//                 return res.json({
-//                     success: true, 
-//                     message: "Order placed successfully."
-//                 });
-
-//             } catch (error) {
-//                 console.error("Error processing order:", error.message);
-//                 return res.status(500).json({ 
-//                     success: false, 
-//                     error: "Failed to place order. Please try again later." 
-//                 });
-//             }
-//         } else if (paymentMethod === "Wallet") {
-//             console.log('Processing Wallet Payment: ', orderData);
         
-//             try {
-//                 const user = await User.findById(userId);
-//                 if (!user) {
-//                     return res.status(400).json({ success: false, message: "User not found." });
-//                 }
-//                 if (user.wallet.balance < totalAmount) {
-//                     return res.status(400).json({ success: false, message: "Insufficient wallet balance." });
-//                 }
-        
-//                 let discount = 0;
-//                 let foundAddress;
-
-//                 if (couponCode) {
-//                     const coupon = await Coupon.findOne({ couponCode: couponCode, isActive: true });
-                    
-//                     if (coupon && totalAmount < coupon.minimumprice) {
-//                         discount = orderData.coupon.discountAmount || Math.round((originalAmount * coupon.offerPercentage) / 100);
-//                     } else {
-//                         couponCode = null;
-//                         discount = 0;
-//                     }
-//                 }
-        
-//                 if (!mongoose.isValidObjectId(addressId)) {
-//                     return res.status(400).json({ success: false, message: "Invalid address ID." });
-//                 }
-        
-//                 const cart = await Cart.findOne({ userId }).populate('items.productId');
-
-//                 // Check for blocked conditions
-//         const blockedConditions = {
-//             blockedProduct: false,
-//             blockedCategory: false,
-//             blockedBrand: false
-//         };
-
-//         for (const item of cart.items) {
-//             if (!item.productId) continue;
-            
-//             if (item.productId.isBlocked === true) {
-//                 blockedConditions.blockedProduct = true;
-//                 break;
-//             }
-//             if (item.productId.category && item.productId.category.islisted === false) {
-//                 blockedConditions.blockedCategory = true;
-//                 break;
-//             }
-//             if (item.productId.brand && item.productId.brand.isBlocked === true) {
-//                 blockedConditions.blockedBrand = true;
-//                 break;
-//             }
-//         }
-
-//         // If any condition is true, return error
-//         if (blockedConditions.blockedProduct || blockedConditions.blockedCategory || blockedConditions.blockedBrand) {
-//             let errorMessage = "Cannot proceed with order: ";
-//             if (blockedConditions.blockedProduct) errorMessage += "Product is blocked";
-//             else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
-//             else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
-//             errorMessage += " by the admin.";
-            
-//             return res.status(403).json({ 
-//                 success: false, 
-//                 message: errorMessage 
-//             });
-//         }
-//                 const address = await Address.findOne({
-//                     userId: new mongoose.Types.ObjectId(userId),
-//                     "address._id": new mongoose.Types.ObjectId(addressId),
-//                 });
-        
-//                 if (!address) {
-//                     return res.status(400).json({ success: false, message: "Address not selected." });
-//                 }
-        
-//                 foundAddress = address.address.find((addr) => addr._id.toString() === addressId);
-        
-//                 if (!paymentMethod || !totalAmount) {
-//                     return res.status(400).json({ success: false, message: "Payment method and total amount are required." });
-//                 }
-        
-//                 const orderItems = cart.items.map(item => ({
-//                     product: item.productId,
-//                     quantity: item.quantity,
-//                     price: item.productId.salesPrice,
-//                 }));
-        
-//                 const originalAmount = cart.items.reduce(
-//                     (sum, item) => sum + (item.productId.salesPrice * item.quantity),
-//                     0
-//                 );
-        
-//                 const order = new Order({
-//                     userId: req.session.user,
-//                     paymentMethod,
-//                     totalAmount: parseFloat(totalAmount),
-//                     orderedItems: orderItems,
-//                     address: foundAddress,
-//                     paymentStatus: 'Paid',
-//                     couponCode: couponCode,
-//                     couponApplied: !!couponCode,
-//                     discount: discount,
-//                     originalAmount: originalAmount
-//                 });
-        
-//                 console.log('Order before save: ', order);
-//                 await order.save();
-        
-//                 user.wallet.balance -= parseFloat(totalAmount);
-//                 user.wallet.transactions.push({
-//                     type: "debit",
-//                     amount: parseFloat(totalAmount),
-//                     description: `Payment for Order ${order._id}`,
-//                     date: Date.now()
-//                 });
-//                 user.orderHistory.push(order._id);
-//                 await user.save();
-        
-//                 for (let item of cart.items) {
-//                     const product = await Product.findById(item.productId._id);
-//                     if (!product) {
-//                         return res.status(400).json({ success: false, message: `Product not found: ${item.productId.productName}` });
-//                     }
-//                     if (product.quantity < item.quantity) {
-//                         return res.status(400).json({ success: false, message: `Insufficient stock for product: ${product.productName}` });
-//                     }
-//                     product.quantity -= item.quantity;
-//                     await product.save();
-//                 }
-
-//                 if (couponCode) {
-//                     await Coupon.findOneAndUpdate(
-//                         { code: couponCode },
-//                         { $inc: { usageCount: 1 } }
-//                     );
-//                 }
-        
-//                 cart.items = [];
-//                 await cart.save();
-        
-//                 return res.status(200).json({ success: true, message: "Order placed successfully with Wallet." });
-        
-//             } catch (error) {
-//                 console.error("Error processing wallet payment:", error.stack);
-//                 return res.status(500).json({ success: false, message: "Failed to place order. Please try again later.", error: error.message });
-//             }
-//         }else {
-//             return res.status(400).json({ 
-//                 success: false, 
-//                 message: 'Invalid payment method' 
-//             });
-//         }
-//     } catch (error) {
-//         console.error("Unexpected Error:", error);
-//         res.status(500).json({ 
-//             success: false, 
-//             message: 'Unable to process order' 
+//         const address = await Address.findOne({
+//             userId: new mongoose.Types.ObjectId(userId),
+//             "address._id": new mongoose.Types.ObjectId(addressId),
 //         });
+        
+//         if (!address) {
+//             return res.status(400).json({ error: "The selected address is not valid." });
+//         }
+        
+//         const foundAddress = address.address.find(addr => addr._id.toString() === addressId);
+//         const orderItems = cart.items.map(item => ({
+//             product: item.productId._id,
+//             quantity: item.quantity,
+//             price: item.productId.salesPrice,
+//         }));
+//         const failedOrder = new Order({
+//             userId,
+//             paymentMethod,
+//             totalAmount,
+//             orderedItems: orderItems,
+//             address: foundAddress,
+//             paymentStatus: 'Failed',
+//             couponCode,
+//             couponApplied: !!couponCode,
+//             discount: 0,
+//             paymentErrorMessage: error?.description || 'Payment failed'
+//         });
+        
+//         await failedOrder.save();
+//         console.log("Failed order registered from client notification");
+        
+//         return res.json({ success: true, message: "Failed payment recorded successfully" });
+//     } catch (error) {
+//         console.error("Error recording payment failure:", error);
+//         return res.status(500).json({ success: false, error: "Failed to record payment failure" });
 //     }
 // };
 
@@ -1205,7 +905,7 @@ const generateInvoicePdf = async (req, res) => {
 
         pdfDoc
             .fontSize(12)
-            .text(`order_id: ${order._id}`, { align: "center" })
+            .text(`order_id: ${order._id.toString().slice(-6)}`, { align: "center" })
             .moveDown(0.2);
         pdfDoc
             .text(`Date: ${order?.createdAt?.toDateString()}`, { align: "center" })
@@ -1473,7 +1173,6 @@ module.exports = {
     placeorder,
     success,
     getOrderList,
-    paymentFail,
     invoice,
     generateInvoicePdf,
     cancelOrder,

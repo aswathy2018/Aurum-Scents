@@ -203,7 +203,7 @@
             <% order.items.forEach(item => { %>
                 <tr>
                     <td><%= order.createdAt.toDateString() %></td>
-                    <td><%= order._id %></td>
+                    <td><%= order._id.toString().slice(-6) %></td>
                     <td><%= order.userName %></td>
                     <td><%= item.productName %></td>
                     <td><%= item.quantity %></td>

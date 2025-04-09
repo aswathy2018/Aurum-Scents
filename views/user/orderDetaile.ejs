@@ -77,43 +77,33 @@
   .btn-primary:hover {
     background-color: #088178;
   }
-  .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    list-style: none;
-    padding: 0;
-  }
-
-  .pagination a {
+  .pagination-buttons .page-link {
+    margin-bottom: 14px;
+    padding: 3px 7px;
+    border: 1px solid #ddd;
+    color: #0a3b38;
     text-decoration: none;
-    color: #088178;
-    background-color: #f1f1f1;
-    padding: 0.5rem 0.75rem;
-    border-radius: 5px;
-    margin: 0 0.25rem;
+    border-radius: 4px;
     transition: all 0.3s ease;
-    font-weight: 500;
-  }
+}
 
-  .pagination a:hover {
-    background-color: #088178;
-    color: #ffffff;
-    transform: scale(1.05);
-  }
+.pagination-buttons .page-link:hover {
+    background-color: #f4f4f4;
+}
 
-  .pagination a.active {
-    background-color: #088178;
-    color: #ffffff;
-    font-weight: bold;
-  }
-
-  .pagination a:disabled {
+.pagination-buttons .page-link.disabled {
+    color: #ccc;
+    cursor: not-allowed;
     pointer-events: none;
-    opacity: 0.5;
-  }
+}
+
+.pagination-buttons .current-page {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    background-color: #096e68; /* Matches your active page style */
+    color: white;
+    border-radius: 4px;
+}
   .modal {
   transition: none;
 }
@@ -156,7 +146,7 @@
       <div class="col-12 mb-4">
         <div class="card shadow-sm">
           <div class="card-header">
-            <h5 class="mb-0">order_id: #<%= order._id %></h5>
+            <h5 class="mb-0">order_id: #<%= order._id.toString().slice(-6) %></h5>
           </div>
           <div class="card-body">
             <div class="table-responsive">
@@ -251,15 +241,19 @@
   </div>
 </div>
 
-<div class="pagination">
+<div class="pagination-buttons" style="display: flex; justify-content: center; align-items: center; margin-top: 15px; gap: 10px;">
   <% if (currentPage > 1) { %>
-    <a href="?page=<%= currentPage - 1 %>"><</a>
+      <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">Previous</a>
+  <% } else { %>
+      <span class="page-link disabled">Previous</span>
   <% } %>
-  <% for (let i = 1; i <= totalPages; i++) { %>
-    <a href="?page=<%= i %>" <%= currentPage === i ? "class='active'" : "" %>><%= i %></a>
-  <% } %>
+  <span class="page-link current-page"><%= currentPage %></span>
   <% if (currentPage < totalPages) { %>
-    <a href="?page=<%= currentPage + 1 %>">></a>
+      <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link"><%= currentPage + 1 %></a>
+      <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">Next</a>
+  <% } else { %>
+      <span class="page-link"><%= currentPage %></span>
+      <span class="page-link disabled">Next</span>
   <% } %>
 </div>
 

@@ -772,6 +772,7 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
             console.error("Error placing order:", error);
             Swal.fire({ icon: "error", title: "Error", text: "Unable to place the order. Please try again." });
         });
+        
     } if (paymentMethod.value === "online") {
         const response = await fetch("/create-razorpay-order", {
             method: "POST",
@@ -1054,5 +1055,3 @@ document.getElementById('rzp-button1').onclick = function(e){
     e.preventDefault();
 }
     </script>
-
-

@@ -37,11 +37,14 @@ const getOtp = async (req, res) => {
 }
 
 const otp = async (req, res) => {
+    console.log("firest")
     try {
         const { otp } = req.body
-
         if (otp === req.session.userOtp) {
             const user = req.session.userData
+            req.session.userOtp = null;
+            req.session.userData = null;
+ 
             const passwordHash = await securePassword(user.password)
 
             const existingUser = await User.findOne({ email: user.email });
@@ -49,18 +52,16 @@ const otp = async (req, res) => {
                 res.json({ success: false, message: "User already exists. Please log in." });
                 return;
             }
-
-
-            const newUser = await User.create({
+            const newUser = new User({
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
                 password: passwordHash
             })
-            req.session.userOtp = null;
-            req.session.userData = null;
+            await newUser.save()
             req.session.user = newUser._id
-            res.json({ success: true, redirectUrl: '/' })
+           return  res.json({ success: true, redirectUrl: '/' })
+                
         }
         else {
             res.status(400).json({ success: false, message: "Invalid OTP, Please try again.." })
@@ -228,26 +229,6 @@ const login = async (req, res) => {
         res.render('login', { message: "Login failed. Please try again" })
     }
 }
-
-
-// const loadShop = async (req, res) => {
-//     try {
-//         const user = req.session.user;
-//         const categories = await Category.find({ islisted: false });
-//         const products = await Product.find({
-//             isBlocked: false,
-//             quantity: { $gt: 0 },
-//             category: { $in: categories.map(cat => cat._id) },
-//         })
-//         return res.render('shop', 
-//             {categories, products})
-//     }
-//     catch (error) {
-//         console.log("Page not loading..", error);
-//         res.status(500).send("Internal server error..")
-//     }
-// }
-
 
 const resendOtp = async (req, res) => {
     try {
@@ -539,7 +520,6 @@ module.exports = {
     signup,
     loadLogin,
     login,
-    // loadShop,
     otp,
     getOtp,
     resendOtp,

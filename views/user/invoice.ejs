@@ -117,7 +117,7 @@
             </div>
             <div class="dowlodingpdf">
             <div class="bill-details">
-                <p><span>order_id: <%=order._id%></span></p>
+                <p><span>order_id: <%=order._id.toString().slice(-6)%></span></p>
                 <p><span>Date:</span> <%= order.createdAt.toDateString() %></p>
                 <p><span>Customer Name:</span> <%=order?.userId?.name%></p>
                 <p><span>Email:</span> <%=order.userId.email%></p>

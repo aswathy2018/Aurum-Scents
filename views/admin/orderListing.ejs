@@ -34,10 +34,18 @@ h1{
     background-color: #f4f4f4;
 }
 
-.page-link.active {
-    background-color: #010c18;
+.page-link.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.current-page {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    background-color: #010c18; /* Matches your active page style */
     color: white;
-    border-color: #01070e;
+    border-radius: 4px;
 }
 </style>
 
@@ -60,13 +68,13 @@ h1{
                     <tbody>
                         <% orders.forEach((order)=>{ %>
                             <tr>
-                                <td><%= order._id %></td>
+                                <td><%= order._id.toString().slice(-6) %></td>
                                 <td><%= order.userId?.name %></td>
                                 <td>
                                     <ul>
                                         <% order.orderedItems.forEach((item)=>{ %>
                                             <li>
-                                                <strong>Product ID:</strong> <%= item.product %><br>
+                                                <strong>Product ID:</strong> <%= item.product.toString().slice(-6) %><br>
                                                 <strong>Quantity:</strong> <%= item.quantity %><br>
                                                 <strong>Price:</strong> ₹<%= item.price %><br>
                                                 <strong>Status:</strong>
@@ -88,19 +96,23 @@ h1{
                                                     <li>Cancelled</li>
                                                     <%}else{%>
                                                             
-                                                <form action="/admin/orders/<%= order._id %>/<%=item.product%>/status" 
-                                                      method="POST" 
-                                                      class="d-inline mt-2">
-                                                    <select name="status" class="form-select form-select-sm d-inline w-auto">
-                                                        <%if(item.status==="Pending"){%>
-                                                        <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                                        <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                                        <%}else if(item.status==="Shipped"){%>
-                                                            <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                                            <%}%>
-                                                    </select>
-                                                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                                                </form>
+                                                        <% if (order.paymentStatus === "Pending" && order.paymentMethod === "online") { %>
+                                                            <p>Payment failed</p>
+                                                            <%}else{%>
+                                                        <form action="/admin/orders/<%= order._id %>/<%= item.product %>/status" 
+                                                              method="POST" 
+                                                              class="d-inline mt-2">
+                                                            <select name="status" class="form-select form-select-sm d-inline w-auto">
+                                                                <% if (item.status === "Pending") { %>
+                                                                    <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                                                    <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                                <% } else if (item.status === "Shipped") { %>
+                                                                    <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                                <% } %>
+                                                            </select>
+                                                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                                                        </form>
+                                                    <%}%>
                                                 <%}%>
                                             </li>
                                         <% }); %>
@@ -120,18 +132,18 @@ h1{
             <div class="pagination">
                 <% if (totalPages > 1) { %>
                     <% if (currentPage > 1) { %>
-                        <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&laquo;</a>
+                        <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">Previous</a>
+                    <% } else { %>
+                        <span class="page-link disabled">Previous</span>
                     <% } %>
-                    
-                    <% for(let i = 1; i <= totalPages; i++) { %>
-                        <a href="?page=<%= i %><%= locals.search ? '&search=' + locals.search : '' %>" 
-                           class="page-link <%= i == currentPage ? 'active' : '' %>">
-                            <%= i %>
-                        </a>
-                    <% } %>
-                    
+                    <span class="page-link current-page"><%= currentPage %></span>
                     <% if (currentPage < totalPages) { %>
-                        <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">&raquo;</a>
+                        <% const nextPage = Math.min(currentPage + 1, totalPages); %>
+                        <a href="?page=<%= nextPage %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link"><%= nextPage %></a>
+                        <a href="?page=<%= nextPage %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">Next</a>
+                    <% } else { %>
+                        <span class="page-link"><%= currentPage %></span>
+                        <span class="page-link disabled">Next</span>
                     <% } %>
                 <% } %>
             </div>
@@ -139,3 +151,11 @@ h1{
     </div>
 </div>
 
+<script>
+    document.querySelectorAll('.page-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const page = new URL(link.href).searchParams.get('page');
+        console.log('Navigating to page:', page);
+    });
+});
+</script>

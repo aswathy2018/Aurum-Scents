@@ -36,7 +36,7 @@ h1{
             <!-- Order Info -->
             <div class="mb-4">
                 
-                <p><strong>Order ID:</strong> <%= order._id %></p>
+                <p><strong>Order ID:</strong> <%= order._id.toString().slice(-6) %></p>
                 <p><strong>User:</strong> <%= order.userId?.name %></p>
                
             </div>

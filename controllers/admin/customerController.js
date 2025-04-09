@@ -62,23 +62,23 @@ const customerunBlocked = async (req, res) => {
 };
 
 
-const getAllOrders = async (req,res) =>{
-    try {
-      const page = req.query.page || 1;
+const getAllOrders = async (req, res) => {
+  try {
+      const page = parseInt(req.query.page) || 1;
       const limit = 5;
-        const totalOrders = await Order.find().countDocuments();
-        const orders = await Order.find({})
+      const totalOrders = await Order.find().countDocuments();
+      const orders = await Order.find({})
           .populate("userId")
           .sort({ createdAt: -1 })
           .limit(limit * 1)
-            .skip((page - 1) * limit)
-        const totalPages = Math.ceil(totalOrders / limit);
-        res.render("orderListing", { orders, currentPage: page, totalPages });
-      } catch (error) {
-        console.error(error);
-        res.redirect("/pageNotFound");
-      }
-}
+          .skip((page - 1) * limit);
+      const totalPages = Math.ceil(totalOrders / limit);
+      res.render("orderListing", { orders, currentPage: page, totalPages });
+  } catch (error) {
+      console.error(error);
+      res.redirect("/pageNotFound");
+  }
+};
 
 
 const getOrderDetails = async (req, res) => {
