@@ -85,9 +85,6 @@ h1{
                                                         'bg-danger' %>">
                                                     <%= item.status %>
                                                 </span>
-                                                <% if (item.status === "Return") { %>
-                                                    <br><strong>Return Reason:</strong> <%= item.returnReason || "No reason provided" %>
-                                                <% } %>
                                                <% if(item.status==="Delivered"){%>
                                                     <li>Delivered</li>
                                                     <%}else if(item.status==="Return"){%>
