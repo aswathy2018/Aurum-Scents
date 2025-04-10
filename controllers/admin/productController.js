@@ -349,8 +349,8 @@ const addproductoffer = async (req, res) => {
         const categoryId = product.category;
         const category = await Category.findById(categoryId);
         const categoryOffer = category?.categoryOffer || 0;
-        const productDiscountPrice = product.originalPrice - (product.originalPrice * offerPercentage) / 100;
-        const categoryDiscountPrice = product.originalPrice - (product.originalPrice * categoryOffer) / 100;
+        const productDiscountPrice = product.salesPrice - (product.salesPrice * offerPercentage) / 100;
+        const categoryDiscountPrice = product.salesPrice - (product.salesPrice * categoryOffer) / 100;
 
         product.productOffer = offerPercentage;
 

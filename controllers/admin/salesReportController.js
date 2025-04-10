@@ -62,12 +62,22 @@ const getSalesReport = async (req, res) => {
                 if (moment(endDate).isBefore(moment(startDate))) {
                     return res.status(400).send("End date cannot be before start date.");
                 }
-                dateFilter = {
-                    createdAt: {
-                        $gte: moment(startDate).startOf('day').toDate(),
-                        $lte: moment(endDate).endOf('day').toDate()
-                    }
-                };
+                // Handle single-day range
+                if (moment(startDate).isSame(moment(endDate), 'day')) {
+                    dateFilter = {
+                        createdAt: {
+                            $gte: moment(startDate).startOf('day').toDate(),
+                            $lte: moment(startDate).endOf('day').toDate()
+                        }
+                    };
+                } else {
+                    dateFilter = {
+                        createdAt: {
+                            $gte: moment(startDate).startOf('day').toDate(),
+                            $lte: moment(endDate).endOf('day').toDate()
+                        }
+                    };
+                }
                 break;
             default:
                 filter = 'today';
@@ -115,11 +125,11 @@ const getSalesReport = async (req, res) => {
         }));
         
         res.render('salesreport', {
-            orders: formattedOrders,  // Do not slice again, as `orders` is already paginated
+            orders: formattedOrders,
             totalRevenue,
             totalOffer,
             totalOrders,
-            currentPage: Number(page), // Ensure it's a number
+            currentPage: Number(page),
             totalPages,
             fil: filter,
             startDate,

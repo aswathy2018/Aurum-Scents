@@ -212,8 +212,7 @@
                                     <div class="mb-3">
                                       <label for="returnReason<%= item.product._id %>" class="form-label">Please provide the reason for your
                                         return</label>
-                                      <textarea class="form-control" id="returnReason<%= item.product._id %>" name="reason" rows="3"
-                                        required></textarea>
+                                      <textarea class="form-control" id="returnReason<%= item.product._id %>" name="reason" rows="3"></textarea>
                                     </div>
                                   </div>
                                   <div class="modal-footer">
@@ -325,6 +324,54 @@ function submitReturn(formId) {
     event.preventDefault();
 
     const form = document.getElementById(formId);
+    const reasonId = formId.replace('form-', '').replace('Modal', 'Reason');
+    const reasonTextarea = document.getElementById(reasonId);
+    const reasonValue = reasonTextarea.value;
+    
+    // Validation checks
+    // 1. Check if field is empty or contains only spaces
+    if (!reasonValue || reasonValue.trim() === '') {
+        Swal.fire({
+            title: 'Validation Error',
+            text: 'Please provide a return reason. This field is required.',
+            icon: 'warning'
+        });
+        reasonTextarea.focus();
+        return false;
+    }
+    
+    // 2. Check for leading or trailing spaces
+    if (reasonValue !== reasonValue.trim()) {
+        Swal.fire({
+            title: 'Validation Error',
+            text: 'Please remove any leading or trailing spaces from your return reason.',
+            icon: 'warning'
+        });
+        reasonTextarea.focus();
+        return false;
+    }
+    
+    // 3. Check if input contains only numbers (this is allowed)
+    if (/^\d+$/.test(reasonValue)) {
+        // Valid number-only input, allow it to continue
+    } else if (/\d/.test(reasonValue) && /[^\d\s]/.test(reasonValue)) {
+        // Contains both numbers and non-number characters (excluding spaces)
+        // This is valid mixed content
+    } else if (!/\d/.test(reasonValue)) {
+        // Contains no numbers at all (just text/spaces)
+        // This is valid text-only content
+    } else {
+        // Invalid format - contains some numbers but not in a valid pattern
+        Swal.fire({
+            title: 'Validation Error',
+            text: 'If providing only numbers, please ensure there are no letters mixed in.',
+            icon: 'warning'
+        });
+        reasonTextarea.focus();
+        return false;
+    }
+
+    // If validation passes, continue with form submission
     const formData = new FormData(form);
     const url = form.getAttribute('action');
 

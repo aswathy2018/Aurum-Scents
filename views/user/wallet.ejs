@@ -44,14 +44,15 @@
                     </tbody>
                 </table>
             </div>
-
-           <!-- Pagination -->
+        </div>
+    </div>
+               <!-- Pagination -->
 <div class="flex justify-center mt-6">
     <% if (totalPages > 1) { %>
         <div class="flex space-x-2">
             <% if (currentPage > 1) { %>
                 <a href="?page=<%= currentPage - 1 %>" 
-                    class="flex items-center justify-center w-10 h-10 bg-gray-200 text-teal-600 font-semibold rounded-md hover:bg-gray-300 transition">
+                    class="flex items-center justify-center w-10 h-10 bg-gray-200 text-teal-600 font-semibold rounded-md hover:bg-gray-300 transition mb-12">
                     &lt;
                 </a>
             <% } %>
@@ -72,9 +73,6 @@
         </div>
     <% } %>
 </div>
-
-        </div>
-    </div>
 </body>
 
 <%- include('../partials/user/footer.ejs') %>

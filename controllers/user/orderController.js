@@ -177,11 +177,12 @@ const razorpayInstance = new Razorpay({
     key_secret: "Bk8bywg3LIZxueU2ZgCPN6zV"
 });
 
+
 // const createOrder = async (req, res) => {
 //     const userId = req.session.user;
 //     const { orderData } = req.body;
-//     const { addressId, paymentMethod, totalAmount, couponCode } = orderData;
-//     console.log('rrrrrrrrrrr: ', orderData)
+//     const { addressId, paymentMethod, totalAmount, coupon } = orderData;
+//     console.log('rrrrrrrrrrr: ', orderData);
 
 //     try {
 //         const cart = await Cart.findOne({ userId }).populate({
@@ -195,7 +196,6 @@ const razorpayInstance = new Razorpay({
 //         if (!cart || cart.items.length === 0) {
 //             return res.status(400).json({ success: false, message: "Cart is empty or invalid." });
 //         }
-
 
 //         const blockedConditions = {
 //             blockedProduct: false,
@@ -265,6 +265,21 @@ const razorpayInstance = new Razorpay({
 //         cart.items = [];
 //         await cart.save();
 
+//         // Added: Fetch coupon and calculate discount if couponCode is provided
+//         let discount = 0;
+//         let couponCode = null;
+//         let couponApplied = false;
+        
+//         if (coupon) {
+//             const coupons = await Coupon.findOne({ couponCode: coupon.code });
+//             if (coupons) {
+//                 discount = (totalAmount * coupons.offerPercentage) / 100; // Calculate discount based on offer percentage
+//                 console.log("Discount: @@@@@@@@@@@@@@@@@@@@ ", discount)
+//                 couponCode = coupon.code;
+//                 couponApplied = true;
+//             }
+//         }
+
 //         const order = new Order({
 //             userId,
 //             paymentMethod,
@@ -272,6 +287,9 @@ const razorpayInstance = new Razorpay({
 //             orderedItems: orderItems,
 //             address: foundAddress,
 //             paymentStatus: paymentMethod === 'online' ? 'Pending' : 'Pending',
+//             couponCode: couponCode,
+//             couponApplied: couponApplied,
+//             discount: discount,
 //         });
 
 //         await order.save();
@@ -384,15 +402,28 @@ const createOrder = async (req, res) => {
             price: item.productId.salesPrice,
         }));
 
+        // Calculate original total amount from cart
+        const originalTotal = cart.items.reduce((sum, item) => sum + (item.quantity * item.productId.salesPrice), 0);
+
         cart.items = [];
         await cart.save();
 
-        // Added: Fetch coupon and calculate discount if couponCode is provided
+        // Use client-provided discount if available, otherwise calculate based on original total
         let discount = 0;
-        if (coupon) {
-            const coupons = await Coupon.findOne({ couponCode:coupon.code });
+        let couponCode = null;
+        let couponApplied = false;
+        if (coupon && coupon.discountAmount) {
+            discount = coupon.discountAmount; // Use the discount calculated on the client side
+            console.log("Discount from client: @@@@@@@@@@@@@@@@@@@@ ", discount);
+            couponCode = coupon.code;
+            couponApplied = true;
+        } else if (coupon) {
+            const coupons = await Coupon.findOne({ couponCode: coupon.code });
             if (coupons) {
-                discount = (totalAmount * coupons.offerPercentage) / 100; // Calculate discount based on offer percentage
+                discount = (originalTotal * coupons.offerPercentage) / 100; // Calculate based on original total
+                console.log("Discount calculated: @@@@@@@@@@@@@@@@@@@@ ", discount);
+                couponCode = coupon.code;
+                couponApplied = true;
             }
         }
 
@@ -403,10 +434,10 @@ const createOrder = async (req, res) => {
             orderedItems: orderItems,
             address: foundAddress,
             paymentStatus: paymentMethod === 'online' ? 'Pending' : 'Pending',
-            // Added: Include coupon-related fields in the order
-            couponCode: coupon.code || null, // Store the coupon code if provided
-            couponApplied: !!coupon.code,    // Set to true if couponCode exists
-            discount: discount,            // Store the calculated discount
+            couponCode: couponCode,
+            couponApplied: couponApplied,
+            discount: discount,
+            originalAmount: originalTotal // Store original amount
         });
 
         await order.save();
@@ -447,17 +478,14 @@ const verifyPayment = async (req, res) => {
     if (generatedSignature === razorpay_signature) {
         try {
             const order = await Order.findById(dbOrderId);
+            console.log("order ", order)
             if (!order) {
                 return res.status(404).json({ success: false, message: "Order not found." });
             }
 
             order.paymentStatus = 'Paid';
-            if (couponCode) {
-                const coupon = await Coupon.findOne({ couponCode });
-                order.discount = (order.totalAmount * coupon.offerPercentage) / 100;
-                order.couponCode = couponCode;
-                order.couponApplied = true;
-            }
+            
+            
 
             for (const item of order.orderedItems) {
                 const product = await Product.findById(item.product);
@@ -765,9 +793,9 @@ const placeorder = async (req, res) => {
                     const coupon = await Coupon.findOne({ couponCode: couponCode, isActive: true });
                     const originalAmount = cart.items.reduce((sum, item) => sum + (item.productId.salesPrice * item.quantity), 0);
                     if (coupon) {
-                        if (parseFloat(totalAmount) < coupon.minimumprice) {
-                            return res.status(400).json({ success: false, message: "Total amount is less than the minimum required for this coupon." });
-                        }
+                        // if (parseFloat(totalAmount) < coupon.minimumprice) {
+                        //     return res.status(400).json({ success: false, message: "Total amount is less than the minimum required for this coupon." });
+                        // }
                         discount = orderData.coupon?.discountAmount || Math.round((originalAmount * coupon.offerPercentage) / 100);
                     } else {
                         couponCode = null;
@@ -1142,10 +1170,10 @@ const returnOrder = async (req, res) => {
             await productDoc.save();
         }
 
-        const refundAmount = orderedProduct.price * orderedProduct.quantity;
+        const refundAmount = order.totalAmount;
         if ((order.paymentMethod === "online" || order.paymentMethod === "Wallet") && order.paymentStatus === "Paid") {
             await refundToWallet(orderId, userId, refundAmount);
-        } else if (order.paymentMethod === "COD" && orderedProduct.status === "Delivered") {
+        } else if (order.paymentMethod === "COD" && orderedProduct.status === "Delivered")  {
             await refundToWallet(orderId, userId, refundAmount);
         }
 
