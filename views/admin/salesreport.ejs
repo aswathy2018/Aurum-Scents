@@ -249,12 +249,10 @@
         const startDateInput = document.getElementById("startDate");
         const endDateInput = document.getElementById("endDate");
 
-        // Set max date to today and prevent future dates
         const today = new Date().toISOString().split("T")[0];
         startDateInput.setAttribute("max", today);
         endDateInput.setAttribute("max", today);
 
-        // Show/hide date inputs based on filter selection
         filterSelect.addEventListener("change", function () {
             if (this.value === "specific") {
                 dateRangeDiv.style.display = "block";
@@ -268,8 +266,6 @@
                 endDateInput.value = "";
             }
         });
-
-        // Validate end date is not before start date
         startDateInput.addEventListener("change", function() {
             endDateInput.setAttribute("min", this.value);
             if (endDateInput.value && endDateInput.value < this.value) {

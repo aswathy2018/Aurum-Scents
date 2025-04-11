@@ -6,57 +6,13 @@ const Order = require('../../model/orderSchema');
 const moment = require('moment');
 
 
-// const graph = async (req, res) => {
-//     try {
-//         const { filter, startDate, endDate } = req.query;
-//         let dateFrom = new Date();
-//         let dateTo = new Date();
-
-//         if (filter === 'yearly') {
-//             dateFrom.setFullYear(dateFrom.getFullYear() - 1);
-//         } else if (filter === 'monthly') {
-//             dateFrom.setMonth(dateFrom.getMonth() - 1);
-//         } else if (filter === 'weekly') {
-//             dateFrom.setDate(dateFrom.getDate() - 7);
-//         } else if (filter === 'today') {
-//             dateFrom.setHours(0, 0, 0, 0);
-//             dateTo.setHours(23, 59, 59, 999);
-//         } else if (filter === 'custom' && startDate && endDate) {
-//             dateFrom = new Date(startDate);
-//             dateTo = new Date(endDate);
-//         } else {
-//             return res.status(400).json({ message: 'Invalid filter' });
-//         }
-
-//         const sales = await Order.aggregate([
-//             { $match: { createdAt: { $gte: dateFrom, $lte: dateTo }, paymentStatus: 'Paid' } },
-//             { $unwind: '$orderedItems' },
-//             {
-//                 $group: {
-//                     _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-//                     totalSales: { $sum: { $multiply: ['$orderedItems.price', '$orderedItems.quantity'] } }
-//                 }
-//             },
-//             { $sort: { _id: 1 } }
-//         ]);
-
-//         res.json(sales);
-//     } catch (error) {
-//         console.error('Error in sales report:', error);
-//         res.status(500).json({ error: error.message });
-//     }
-// };
-
-
 const graph = async (req, res) => {
     try {
         const { filter, startDate, endDate } = req.query;
         
-        // Use moment for date handling like in getSalesReport
         const today = moment().startOf('day');
         let dateFilter = {};
         
-        // Match date filtering logic with getSalesReport
         switch (filter) {
             case 'today':
                 dateFilter = {

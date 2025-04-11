@@ -21,9 +21,6 @@
         <button type="submit">Create Coupon</button>
     </form>
     
-
-
-    <!-- List of all coupons -->
     <h3
     style="text-align: center;
     margin-left: 50px;
@@ -78,8 +75,6 @@
 </div>
 
 
-
-<!-- Include SweetAlert2 Library -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -98,7 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let isValid = true;
         let errorMessage = "";
 
-        // Validate Coupon Code
         const codeValue = codeInput.value.trim();
         if (!codeValue) {
             errorMessage += "Coupon code cannot be empty or only spaces.<br>";
@@ -121,7 +115,6 @@ document.addEventListener("DOMContentLoaded", function () {
             isValid = false;
         }
 
-        // Validate Discount Percentage
         const discountValueRaw = discountInput.value.trim();
         const discountValue = parseInt(discountValueRaw);
         if (!discountValueRaw || /^\s+$/.test(discountValueRaw)) {
@@ -135,7 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
             isValid = false;
         }
 
-        // Validate Minimum Purchase Amount
         const minPurchaseValueRaw = minPurchaseInput.value.trim();
         const minPurchaseValue = parseFloat(minPurchaseValueRaw);
         if (!minPurchaseValueRaw || /^\s+$/.test(minPurchaseValueRaw)) {
@@ -149,7 +141,6 @@ document.addEventListener("DOMContentLoaded", function () {
             isValid = false;
         }
 
-        // Validate End Date
         const selectedDate = new Date(endDateInput.value);
         const currentDate = new Date(today);
         if (selectedDate <= currentDate) {

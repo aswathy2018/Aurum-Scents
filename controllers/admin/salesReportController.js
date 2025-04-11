@@ -4,143 +4,6 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const moment = require('moment');
 
-// const getSalesReport = async (req, res) => {
-//     try {
-//         const page = req.query.page || 1;
-//         const limit = 6;
-//         const skip = (page - 1) * limit;
-//         let filter = req.query.filter || 'today';
-//         let startDate = req.query.startDate;
-//         let endDate = req.query.endDate;
-
-//         let dateFilter = {};
-//         const today = moment().startOf('day');
-
-//         switch (filter) {
-//             case 'today':
-//                 dateFilter = {
-//                     createdAt: {
-//                         $gte: today.toDate(),
-//                         $lte: moment(today).endOf('day').toDate()
-//                     }
-//                 };
-//                 break;
-//             case 'weekly':
-//                 dateFilter = {
-//                     createdAt: {
-//                         $gte: moment().startOf('week').toDate(),
-//                         $lte: moment().endOf('week').toDate()
-//                     }
-//                 };
-//                 break;
-//             case 'monthly':
-//                 dateFilter = {
-//                     createdAt: {
-//                         $gte: moment().startOf('month').toDate(),
-//                         $lte: moment().endOf('month').toDate()
-//                     }
-//                 };
-//                 break;
-//             case 'yearly':
-//                 dateFilter = {
-//                     createdAt: {
-//                         $gte: moment().startOf('year').toDate(),
-//                         $lte: moment().endOf('year').toDate()
-//                     }
-//                 };
-//                 break;
-//             case 'specific':
-//                 if (!startDate || !endDate) {
-//                     return res.status(400).send("Start and end dates are required for specific filter.");
-//                 }
-//                 // Validate dates are not in future
-//                 const currentDate = moment().startOf('day');
-//                 if (moment(startDate).isAfter(currentDate) || moment(endDate).isAfter(currentDate)) {
-//                     return res.status(400).send("Future dates are not allowed.");
-//                 }
-//                 // Validate end date is not before start date
-//                 if (moment(endDate).isBefore(moment(startDate))) {
-//                     return res.status(400).send("End date cannot be before start date.");
-//                 }
-//                 // Handle single-day range
-//                 if (moment(startDate).isSame(moment(endDate), 'day')) {
-//                     dateFilter = {
-//                         createdAt: {
-//                             $gte: moment(startDate).startOf('day').toDate(),
-//                             $lte: moment(startDate).endOf('day').toDate()
-//                         }
-//                     };
-//                 } else {
-//                     dateFilter = {
-//                         createdAt: {
-//                             $gte: moment(startDate).startOf('day').toDate(),
-//                             $lte: moment(endDate).endOf('day').toDate()
-//                         }
-//                     };
-//                 }
-//                 break;
-//             default:
-//                 filter = 'today';
-//                 dateFilter = {
-//                     createdAt: {
-//                         $gte: today.toDate(),
-//                         $lte: moment(today).endOf('day').toDate()
-//                     }
-//                 };
-//         }
-
-//         const orders = await Order.find(dateFilter)
-//             .populate('userId', 'name')
-//             .populate('orderedItems.product')
-//             .skip(skip)
-//             .limit(limit)
-//             .sort({ createdAt: -1 });
-
-//         const allOrders = await Order.find(dateFilter)
-//             .populate('userId', 'name')
-//             .populate('orderedItems.product');
-
-//         const totalOrders = await Order.countDocuments(dateFilter);
-//         const totalPages = Math.ceil(totalOrders / limit);
-
-//         let totalRevenue = 0;
-//         let totalOffer = 0;
-//         allOrders.forEach(order => {
-//             order.orderedItems.forEach(item => {
-//                 totalRevenue += item.price * item.quantity;
-//             });
-//             totalOffer += order.discount || 0;
-//         });
-
-//         const formattedOrders = orders.map(order => ({
-//             _id: order._id,
-//             createdAt: order.createdAt,
-//             userName: order.userId ? order.userId.name : 'Unknown',
-//             items: order.orderedItems.map(item => ({
-//                 productName: item.product ? item.product.productName : 'Unknown',
-//                 quantity: item.quantity,
-//                 price: item.price
-//             })),
-//             discount: order.discount || 0
-//         }));
-        
-//         res.render('salesreport', {
-//             orders: formattedOrders,
-//             totalRevenue,
-//             totalOffer,
-//             totalOrders,
-//             currentPage: Number(page),
-//             totalPages,
-//             fil: filter,
-//             startDate,
-//             endDate
-//         });
-//     } catch (error) {
-//         console.error("Error fetching sales report:", error);
-//         res.redirect('/404error');
-//     }
-// };
-
 const getSalesReport = async (req, res) => {
     try {
         const page = req.query.page || 1;
@@ -190,16 +53,13 @@ const getSalesReport = async (req, res) => {
                 if (!startDate || !endDate) {
                     return res.status(400).send("Start and end dates are required for specific filter.");
                 }
-                // Validate dates are not in future
                 const currentDate = moment().startOf('day');
                 if (moment(startDate).isAfter(currentDate) || moment(endDate).isAfter(currentDate)) {
                     return res.status(400).send("Future dates are not allowed.");
                 }
-                // Validate end date is not before start date
                 if (moment(endDate).isBefore(moment(startDate))) {
                     return res.status(400).send("End date cannot be before start date.");
                 }
-                // Handle single-day range
                 if (moment(startDate).isSame(moment(endDate), 'day')) {
                     dateFilter = {
                         createdAt: {
@@ -226,7 +86,6 @@ const getSalesReport = async (req, res) => {
                 };
         }
 
-        // Add payment status filter to match the graph function
         const queryFilter = {
             ...dateFilter,
             paymentStatus: 'Paid'
@@ -307,8 +166,6 @@ const downloadSalesReportPDF = async (req, res) => {
                 dateFilter = { createdAt: { $gte: moment(startDate).startOf('day').toDate(), $lte: moment(endDate).endOf('day').toDate() } };
                 break;
         }
-
-        // Add payment status filter to match the graph function
         const queryFilter = {
             ...dateFilter,
             paymentStatus: 'Paid'
@@ -422,7 +279,6 @@ const downloadSalesReportExcel = async (req, res) => {
                 break;
         }
 
-        // Add payment status filter to match the graph function
         const queryFilter = {
             ...dateFilter,
             paymentStatus: 'Paid'

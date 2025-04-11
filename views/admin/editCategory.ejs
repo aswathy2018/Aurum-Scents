@@ -118,7 +118,6 @@ document.getElementById('editCategoryForm').addEventListener('submit', async (e)
         const data = await response.json();
         
         if (!response.ok) {
-            // Show error message using SweetAlert2
             await Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -126,7 +125,6 @@ document.getElementById('editCategoryForm').addEventListener('submit', async (e)
                 confirmButtonColor: '#3085d6'
             });
         } else {
-            // Show success message and redirect
             await Swal.fire({
                 icon: 'success',
                 title: 'Success!',

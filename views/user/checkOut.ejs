@@ -546,40 +546,33 @@ function copyCode(couponId) {
 function validateAddressForm() {
     let isValid = true;
     const allFields = ["addType", "addName", "addCity", "addState", "addPincode", "addLandmark", "addPhone", "addAltPhone"];
-    
-    // Patterns
-    const letterPattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
-    const pincodePattern = /^(?!(\d)\1{5})\d{6}$/;  // 6 digits, no repeating numbers
-    const phonePattern = /^(?!(\d)\1{9})[6-9]\d{9}$/;  // 10 digits, starting 6-9, no repeating numbers
 
-    // Function to check space rules
+    const letterPattern = /^[A-Za-z\s]+$/;
+    const pincodePattern = /^(?!(\d)\1{5})\d{6}$/;
+    const phonePattern = /^(?!(\d)\1{9})[6-9]\d{9}$/;
+
     function isValidSpaceFormat(value) {
         return !(/^\s|\s$/.test(value) || /^\s+$/.test(value) || /\s\s+/.test(value));
     }
 
-    // Clear all previous errors first
     allFields.forEach(field => clearError(field));
 
-    // Validate all fields
     allFields.forEach(function(field) {
         const input = document.getElementById(field);
         const value = input.value.trim();
 
-        // Check if field is empty
         if (value === "") {
             showError(field, "This field is required");
             isValid = false;
             return;
         }
 
-        // Check space rules
         if (!isValidSpaceFormat(input.value)) {
             showError(field, "Cannot start/end with spaces or have consecutive spaces");
             isValid = false;
             return;
         }
 
-        // Specific field validations
         switch(field) {
             case "addType":
             case "addName":
@@ -609,7 +602,6 @@ function validateAddressForm() {
         }
     });
 
-    // Check for phone number duplication
     const phone = document.getElementById('addPhone').value.trim();
     const altPhone = document.getElementById('addAltPhone').value.trim();
     if (phone === altPhone) {
@@ -621,7 +613,7 @@ function validateAddressForm() {
 }
 
 function showError(field, message) {
-    clearError(field); // Clear existing error first
+    clearError(field);
     const input = document.getElementById(field);
     const errorElement = document.createElement('div');
     errorElement.className = "text-danger error-message";
@@ -822,7 +814,6 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
             },
             modal: {
                 ondismiss: async function () {
-                    // Handle payment cancellation or failure
                     window.location.href = "/getPaymentFail"
                 }
             },
@@ -844,7 +835,7 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderData })
     })
-    .then(response => response.json()) // Always parse JSON, regardless of status
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
             localStorage.removeItem('appliedCoupon');
@@ -858,7 +849,6 @@ document.getElementById("placeOrderButton").addEventListener("click", async func
                 window.location.href = "/paymentsuccess";
             });
         } else {
-            // Handle specific error messages
             Swal.fire({
                 icon: "error",
                 title: "Order Failed",

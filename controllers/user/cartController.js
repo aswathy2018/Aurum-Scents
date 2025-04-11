@@ -353,7 +353,6 @@ const addToCartFromWishlist = async (req, res) => {
         let wishlist = await Wishlist.findOne({ userId: user });
         
         if (!cart) {
-            // If no cart exists, create a new one
             cart = new Cart({
                 userId: user,
                 items: [{
@@ -365,7 +364,6 @@ const addToCartFromWishlist = async (req, res) => {
             });
             await cart.save();
             
-            // Remove from wishlist since it was added to cart
             if (wishlist) {
                 wishlist.products = wishlist.products.filter(item => 
                     item.productId.toString() !== productId
@@ -383,15 +381,12 @@ const addToCartFromWishlist = async (req, res) => {
             );
             
             if (existingItemIndex !== -1) {
-                // Product already exists in cart
-                // Don't remove from wishlist if it's already in the cart
                 return res.status(200).json({
                     success: false,
                     exists: true,
                     message: "Product already exists in your cart"
                 });
             } else {
-                // Add to cart
                 cart.items.push({
                     productId,
                     quantity: itemQuantity,
@@ -400,7 +395,6 @@ const addToCartFromWishlist = async (req, res) => {
                 });
                 await cart.save();
                 
-                // Remove from wishlist since it was added to cart
                 if (wishlist) {
                     wishlist.products = wishlist.products.filter(item => 
                         item.productId.toString() !== productId
@@ -428,7 +422,6 @@ const checkAddAddress = async (req, res) => {
         const { addressType, name, city, landMark, state, pincode, phone, alternativePhone } = req.body
 
         const userAddress = await Address.findOne({ userId: userData._id })
-        // Validate required fields
         if (!userAddress) {
             const newAddress = new Address({
                 userId: userData._id,

@@ -332,8 +332,6 @@ function submitReturn(formId) {
     const reasonTextarea = document.getElementById(reasonId);
     const reasonValue = reasonTextarea.value;
     
-    // Validation checks
-    // 1. Check if field is empty or contains only spaces
     if (!reasonValue || reasonValue.trim() === '') {
         Swal.fire({
             title: 'Validation Error',
@@ -344,7 +342,6 @@ function submitReturn(formId) {
         return false;
     }
     
-    // 2. Check for leading or trailing spaces
     if (reasonValue !== reasonValue.trim()) {
         Swal.fire({
             title: 'Validation Error',
@@ -355,17 +352,10 @@ function submitReturn(formId) {
         return false;
     }
     
-    // 3. Check if input contains only numbers (this is allowed)
     if (/^\d+$/.test(reasonValue)) {
-        // Valid number-only input, allow it to continue
     } else if (/\d/.test(reasonValue) && /[^\d\s]/.test(reasonValue)) {
-        // Contains both numbers and non-number characters (excluding spaces)
-        // This is valid mixed content
     } else if (!/\d/.test(reasonValue)) {
-        // Contains no numbers at all (just text/spaces)
-        // This is valid text-only content
     } else {
-        // Invalid format - contains some numbers but not in a valid pattern
         Swal.fire({
             title: 'Validation Error',
             text: 'If providing only numbers, please ensure there are no letters mixed in.',
@@ -375,7 +365,6 @@ function submitReturn(formId) {
         return false;
     }
 
-    // If validation passes, continue with form submission
     const formData = new FormData(form);
     const url = form.getAttribute('action');
 
@@ -425,69 +414,10 @@ function submitReturn(formId) {
         });
     });
 }
-
-// document.getElementById('retryPaymentBtn')?.addEventListener('click', async function () {
-//     const orderId = this.getAttribute('data-order-id');
-//     const response = await fetch(`/retry-payment/${orderId}`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//     });
-
-//     const result = await response.json();
-//     if (!result.success) {
-//         Swal.fire({ icon: 'error', title: 'Error', text: result.message });
-//         return;
-//     }
-
-//     const options = {
-//         key: result.key,
-//         amount: result.amount.toString(),
-//         currency: result.currency,
-//         name: "Aurum Scents",
-//         description: "Retry Payment",
-//         order_id: result.orderId,
-//         handler: async function (response) {
-//             const verifyResponse = await fetch('/verify-payment', {
-//                 method: 'POST',
-//                 headers: { 'Content-Type': 'application/json' },
-//                 body: JSON.stringify({
-//                     razorpay_payment_id: response.razorpay_payment_id,
-//                     razorpay_order_id: response.razorpay_order_id,
-//                     razorpay_signature: response.razorpay_signature,
-//                     dbOrderId: result.dbOrderId
-//                 })
-//             });
-
-//             const verifyResult = await verifyResponse.json();
-//             if (verifyResult.success) {
-//                 Swal.fire({
-//                     icon: 'success',
-//                     title: 'Payment Successful',
-//                     text: 'Your payment was successful!',
-//                     timer: 2000,
-//                     showConfirmButton: false
-//                 }).then(() => {
-//                     window.location.reload();
-//                 });
-//             }
-//         },
-//         modal: {
-//             ondismiss: function () {
-//                 Swal.fire({icon: 'info', title: 'Payment Cancelled', text: 'Payment was not completed.' });
-//             }
-//         }
-//     };
-
-//     const rzp1 = new Razorpay(options);
-//     rzp1.on('payment.failed', function () {
-//         Swal.fire({ icon: 'error', title: 'Payment Failed', text: 'Please try again.' });
-//     });
-//     rzp1.open();
-// })
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.retry-payment-btn').forEach(button => {
         button.addEventListener('click', async function (event) {
-            event.preventDefault(); // Prevent default link behavior
+            event.preventDefault();
             const orderId = this.getAttribute('data-order-id');
             
             if (!orderId) {

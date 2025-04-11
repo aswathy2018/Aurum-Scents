@@ -164,7 +164,7 @@
                         <div class="card mb-2 w-75">
                             <div class="card-header">
                                 <h4>Product Images</h4>
-                                <!-- Display existing images with delete option -->
+                                <!-- Displaying existing images-->
                                 <div class="row">
                                     <% for (let i=0; i < product.productImage.length; i++) { %>
                                         <div class="col-md-3 mb-3" id="image-<%= product.productImage[i] %>">
@@ -277,7 +277,7 @@ function viewImage(event, index) {
     const cropperContainer = document.querySelector(`#croppedImg${index}`).parentNode;
     const croppedPreview = document.getElementById('croppedImg' + index);
 
-    // it Destroyes the existing cropper instance
+    // it will Destroyes the existing cropper instance
     if (window.cropperInstances[index]) {
         window.cropperInstances[index].destroy();
         window.cropperInstances[index] = null;
