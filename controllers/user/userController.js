@@ -265,30 +265,92 @@ const logout = async (req, res) => {
     }
 }
 
+// const productDetails = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+
+//         const productData = await Product.findById(id).populate('category').populate('brand')
+
+//         const category = await Category.find({ islisted: true })
+//         const brand = await Brand.find({isBlocked: false})
+//         const product = await Product.find({
+//             isBlocked: false,
+//             quantity: { $gt: 0 },
+//             category: { $in: category.map(cat => cat._id) },
+//         })
+//         const userId = req.session.user
+//         const user = await User.findById(userId)
+
+//         const findCategory = productData.category;
+//         const relatedproducts = await Product.find({ category: findCategory._id, _id: { $ne: id } }).limit(4)
+
+//         res.render('productDetails', {
+//             product: productData,
+//             category: findCategory,
+//             relatedproducts: relatedproducts,
+//             user: user
+//         })
+
+//     } catch (error) {
+//         console.log("Product detail page error", error);
+//         res.redirect('/pageNotFound')
+//     }
+// }
+
 const productDetails = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const productData = await Product.findById(id).populate('category').populate('brand')
+        // Fetch product with category and brand population
+        const productData = await Product.findById(id).populate('category').populate('brand');
+        if (!productData) {
+            return res.redirect('/pageNotFound'); // Handle invalid product ID
+        }
 
-        const userId = req.session.user
-        const user = await User.findById(userId)
+        // Check blocking/unlisting conditions
+        const isProductBlocked = productData.isBlocked;
+        const isCategoryUnlisted = !productData.category.islisted;
+        const isBrandBlocked = productData.brand?.isBlocked || false; // Handle case where brand might be null
+
+        // If any condition is true, redirect without rendering the page
+        if (isProductBlocked || isCategoryUnlisted || isBrandBlocked) {
+            // Store the referrer or last page in session or redirect to a default page
+            const referrer = req.headers.referer || '/shop'; // Default to shop page if no referrer
+            return res.redirect(referrer); // Redirect to the last visited page or shop
+        }
+
+        // Fetch additional data for rendering
+        const category = await Category.find({ islisted: true });
+        const brand = await Brand.find({ isBlocked: false });
+        const product = await Product.find({
+            isBlocked: false,
+            quantity: { $gt: 0 },
+            category: { $in: category.map(cat => cat._id) },
+        });
+        const userId = req.session.user;
+        const user = await User.findById(userId);
 
         const findCategory = productData.category;
-        const relatedproducts = await Product.find({ category: findCategory._id, _id: { $ne: id } }).limit(4)
+        const relatedproducts = await Product.find({
+            category: findCategory._id,
+            _id: { $ne: id },
+            isBlocked: false, // Ensure related products are not blocked
+            quantity: { $gt: 0 }
+        }).limit(4);
 
+        // Render the page if all conditions pass
         res.render('productDetails', {
             product: productData,
             category: findCategory,
             relatedproducts: relatedproducts,
             user: user
-        })
+        });
 
     } catch (error) {
         console.log("Product detail page error", error);
-        res.redirect('/pageNotFound')
+        res.redirect('/pageNotFound');
     }
-}
+};
 
 
 const shop = async (req, res, next) => {

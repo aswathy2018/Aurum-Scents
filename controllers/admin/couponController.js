@@ -28,6 +28,10 @@ const createCoupons = async (req, res) => {
         return res.status(500).send("Start date must be before the end date.");
       }
   
+      let coupon = Coupon.findOne({couponCode});
+      if(coupon) {
+        return res.json({ success: false, message : "Coupon code already exists."});
+      }
       const today = new Date();
   
       const newCoupon = new Coupon({

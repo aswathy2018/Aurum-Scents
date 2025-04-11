@@ -437,7 +437,7 @@ const createOrder = async (req, res) => {
             couponCode: couponCode,
             couponApplied: couponApplied,
             discount: discount,
-            originalAmount: originalTotal // Store original amount
+            originalAmount: originalTotal
         });
 
         await order.save();
@@ -484,8 +484,6 @@ const verifyPayment = async (req, res) => {
             }
 
             order.paymentStatus = 'Paid';
-            
-            
 
             for (const item of order.orderedItems) {
                 const product = await Product.findById(item.product);
