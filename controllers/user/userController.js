@@ -79,11 +79,15 @@ const loadHomepage = async (req, res, next) => {
         const user = req.session.user
 
         const category = await Category.find({ islisted: true })
+        const brands = await Brand.find({ isBlocked: false });
+
+        const allowedBrandNames = brands.map(brand => brand.brandName);
 
         const product = await Product.find({
             isBlocked: false,
             quantity: { $gt: 0 },
             category: { $in: category.map(cat => cat._id) },
+            brand: { $in: allowedBrandNames },
         })
 
         product.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -265,52 +269,162 @@ const logout = async (req, res) => {
     }
 }
 
+
 // const productDetails = async (req, res) => {
 //     try {
 //         const { id } = req.params;
 
-//         const productData = await Product.findById(id).populate('category').populate('brand')
+//         // Fetch product with category and brand population
+//         const productData = await Product.findById(id).populate('category').populate('brand');
+//         if (!productData) {
+//             return res.redirect('/pageNotFound'); // Handle invalid product ID
+//         }
 
-//         const category = await Category.find({ islisted: true })
-//         const brand = await Brand.find({isBlocked: false})
+//         // Check blocking/unlisting conditions
+//         const isProductBlocked = productData.isBlocked;
+//         const isCategoryUnlisted = !productData.category.islisted;
+//         const isBrandBlocked = productData.brand?.isBlocked || false; // Handle case where brand might be null
+
+//         // If any condition is true, redirect without rendering the page
+//         if (isProductBlocked || isCategoryUnlisted || isBrandBlocked) {
+//             // Store the referrer or last page in session or redirect to a default page
+//             const referrer = req.headers.referer || '/shop'; // Default to shop page if no referrer
+//             return res.redirect(referrer); // Redirect to the last visited page or shop
+//         }
+
+//         // Fetch additional data for rendering
+//         const category = await Category.find({ islisted: true });
+//         const brand = await Brand.find({ isBlocked: false });
 //         const product = await Product.find({
 //             isBlocked: false,
 //             quantity: { $gt: 0 },
 //             category: { $in: category.map(cat => cat._id) },
-//         })
-//         const userId = req.session.user
-//         const user = await User.findById(userId)
+//         });
+//         const userId = req.session.user;
+//         const user = await User.findById(userId);
 
 //         const findCategory = productData.category;
-//         const relatedproducts = await Product.find({ category: findCategory._id, _id: { $ne: id } }).limit(4)
+//         const relatedproducts = await Product.find({
+//             category: findCategory._id,
+//             _id: { $ne: id },
+//             isBlocked: false, // Ensure related products are not blocked
+//             quantity: { $gt: 0 }
+//         }).limit(4);
 
+//         // Render the page if all conditions pass
 //         res.render('productDetails', {
 //             product: productData,
 //             category: findCategory,
 //             relatedproducts: relatedproducts,
 //             user: user
-//         })
+//         });
 
 //     } catch (error) {
 //         console.log("Product detail page error", error);
-//         res.redirect('/pageNotFound')
+//         res.redirect('/pageNotFound');
 //     }
-// }
+// };
+
+
+// const shop = async (req, res, next) => {
+//     try {
+//         const user = req.session.user;
+//         const categories = await Category.find({ islisted:true });
+//         const products = await Product.find({
+//             isBlocked: false,
+//             quantity: { $gt: 0 },
+//             category: { $in: categories.map(cat => cat._id) },
+//         }).populate('category')
+
+//         products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+//         const userData = await User.findById(user);
+//         req.session.categoryId = null;
+
+//         const page = parseInt(req.query.page) || 1;
+//         const limit = 9;
+//         const skip = (page - 1) * limit;
+
+//         const { query, category, priceRange, sort } = req.query;
+
+//         const filters = {
+//             isBlocked: false,
+//             quantity: { $gt: 0 },
+//         };
+        
+
+//         if (category && category !== "all") {
+//             filters.category = category;
+//         } else {
+//             filters.category = { $in: categories.map(cat => cat._id) };
+//         }
+        
+
+//         if (priceRange) {
+//             const [min, max] = priceRange.split('-').map(Number);
+//             filters.salesPrice = {};
+//             if (!isNaN(min)) filters.salesPrice.$gte = min;
+//             if (!isNaN(max)) filters.salesPrice.$lte = max;
+//         }
+
+
+//         if (query) {
+//             const searchRegex = new RegExp(query, "i");
+//             filters.$or = [{ productName: searchRegex }, { description: searchRegex }];
+//         }
+
+//         let filteredProducts = Product.find(filters).populate("category").skip(skip).limit(limit);
+
+//         if (sort === "lowToHigh") {
+//             filteredProducts = filteredProducts.sort({ salesPrice: 1 });
+//         } else if (sort === "highToLow") {
+//             filteredProducts = filteredProducts.sort({ salesPrice: -1 });
+//         } else if (sort === "aToZ") {
+//             filteredProducts = filteredProducts.sort({ productName: 1 });
+//         } else if (sort === "zToA") {
+//             filteredProducts = filteredProducts.sort({ productName: -1 });
+//         }
+
+//         const totalProducts = await Product.countDocuments(filters);
+//         const totalPages = Math.ceil(totalProducts / limit);
+//         const brands = await Brand.find({ isBlocked: false });
+
+//         res.render("shop", {
+//             user: userData,
+//             products: await filteredProducts,
+//             category: categories,
+//             brand: brands,
+//             totalProducts,
+//             currentPage: page,
+//             totalPages,
+//             searchQuery: query || "",
+//             selectedCategory: category || "",
+//             selectedPriceRange: priceRange || "",
+//             selectedSort: sort || "",
+//         });
+//     } catch (error) {
+//         console.error('Error in shop function:', error);
+//         next(error);
+//     }
+// };
 
 const productDetails = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Fetch product with category and brand population
-        const productData = await Product.findById(id).populate('category').populate('brand');
+        // Fetch product with category population
+        const productData = await Product.findById(id).populate('category');
         if (!productData) {
             return res.redirect('/pageNotFound'); // Handle invalid product ID
         }
 
+        // Get brand status
+        const brandData = await Brand.findOne({ brandName: productData.brand });
+        const isBrandBlocked = brandData?.isBlocked || false;
+
         // Check blocking/unlisting conditions
         const isProductBlocked = productData.isBlocked;
         const isCategoryUnlisted = !productData.category.islisted;
-        const isBrandBlocked = productData.brand?.isBlocked || false; // Handle case where brand might be null
 
         // If any condition is true, redirect without rendering the page
         if (isProductBlocked || isCategoryUnlisted || isBrandBlocked) {
@@ -320,13 +434,19 @@ const productDetails = async (req, res) => {
         }
 
         // Fetch additional data for rendering
-        const category = await Category.find({ islisted: true });
-        const brand = await Brand.find({ isBlocked: false });
+        const categories = await Category.find({ islisted: true });
+        const brands = await Brand.find({ isBlocked: false });
+        
+        // Get array of non-blocked brand names
+        const allowedBrandNames = brands.map(brand => brand.brandName);
+        
         const product = await Product.find({
             isBlocked: false,
             quantity: { $gt: 0 },
-            category: { $in: category.map(cat => cat._id) },
+            category: { $in: categories.map(cat => cat._id) },
+            brand: { $in: allowedBrandNames }, // Filter by non-blocked brands
         });
+        
         const userId = req.session.user;
         const user = await User.findById(userId);
 
@@ -334,8 +454,9 @@ const productDetails = async (req, res) => {
         const relatedproducts = await Product.find({
             category: findCategory._id,
             _id: { $ne: id },
-            isBlocked: false, // Ensure related products are not blocked
-            quantity: { $gt: 0 }
+            isBlocked: false,
+            quantity: { $gt: 0 },
+            brand: { $in: allowedBrandNames }, // Filter by non-blocked brands
         }).limit(4);
 
         // Render the page if all conditions pass
@@ -352,16 +473,21 @@ const productDetails = async (req, res) => {
     }
 };
 
-
 const shop = async (req, res, next) => {
     try {
         const user = req.session.user;
-        const categories = await Category.find({ islisted:true });
+        const categories = await Category.find({ islisted: true });
+        const brands = await Brand.find({ isBlocked: false });
+        
+        // Get array of non-blocked brand names
+        const allowedBrandNames = brands.map(brand => brand.brandName);
+        
         const products = await Product.find({
             isBlocked: false,
             quantity: { $gt: 0 },
             category: { $in: categories.map(cat => cat._id) },
-        }).populate('category')
+            brand: { $in: allowedBrandNames }, // Only include products with non-blocked brands
+        }).populate('category');
 
         products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -377,23 +503,21 @@ const shop = async (req, res, next) => {
         const filters = {
             isBlocked: false,
             quantity: { $gt: 0 },
+            brand: { $in: allowedBrandNames }, // Add this to filters as well
         };
         
-
         if (category && category !== "all") {
             filters.category = category;
         } else {
             filters.category = { $in: categories.map(cat => cat._id) };
         }
         
-
         if (priceRange) {
             const [min, max] = priceRange.split('-').map(Number);
             filters.salesPrice = {};
             if (!isNaN(min)) filters.salesPrice.$gte = min;
             if (!isNaN(max)) filters.salesPrice.$lte = max;
         }
-
 
         if (query) {
             const searchRegex = new RegExp(query, "i");
@@ -414,7 +538,6 @@ const shop = async (req, res, next) => {
 
         const totalProducts = await Product.countDocuments(filters);
         const totalPages = Math.ceil(totalProducts / limit);
-        const brands = await Brand.find({ isBlocked: false });
 
         res.render("shop", {
             user: userData,
@@ -434,8 +557,6 @@ const shop = async (req, res, next) => {
         next(error);
     }
 };
-
-
 
 const searchProducts = async (req, res) => {
     try {
