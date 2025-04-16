@@ -113,6 +113,72 @@ const addToCart = async (req, res) => {
 }
 
 
+// const updateCart = async (req, res) => {
+//     try {
+//         const user = req.session.user;
+//         const { productId, quantity } = req.body;
+
+//         const newQuantity = parseInt(quantity);
+//         if (isNaN(newQuantity) || newQuantity < 1) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Invalid quantity"
+//             });
+//         }
+
+//         const cart = await Cart.findOne({ userId: user });
+//         if (!cart) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Cart not found"
+//             });
+//         }
+
+//         const itemIndex = cart.items.findIndex(item =>
+//             item.productId.toString() === productId
+//         );
+
+//         if (itemIndex === -1) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Product not found in cart"
+//             });
+//         }
+
+//         const product = await Product.findById(productId);
+//         if (!product) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Product not found"
+//             });
+//         }
+
+//         if (newQuantity > 5) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "You can choose up to 5 items."
+//             });
+//         }
+
+//         cart.items[itemIndex].quantity = newQuantity;
+//         cart.items[itemIndex].totalPrice = cart.items[itemIndex].price * newQuantity;
+
+//         await cart.save();
+//         return res.status(200).json({
+//             success: true,
+//             message: "Cart updated successfully"
+//         });
+
+//     } catch (error) {
+//         console.log("Error in updateCart", error);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Internal Server Error"
+//         });
+//     }
+// };
+
+
 const updateCart = async (req, res) => {
     try {
         const user = req.session.user;
@@ -160,6 +226,14 @@ const updateCart = async (req, res) => {
             });
         }
 
+        // Check if requested quantity exceeds available stock
+        if (newQuantity > product.quantity) {
+            return res.status(400).json({
+                success: false,
+                message: `Only ${product.quantity} units of ${product.productName} are available.`
+            });
+        }
+
         cart.items[itemIndex].quantity = newQuantity;
         cart.items[itemIndex].totalPrice = cart.items[itemIndex].price * newQuantity;
 
@@ -177,6 +251,7 @@ const updateCart = async (req, res) => {
         });
     }
 };
+
 
 const removeFromCart = async (req, res) => {
     try {

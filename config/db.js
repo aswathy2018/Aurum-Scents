@@ -10,6 +10,7 @@ const connectDB = async () => {
         await mongoose.connect(mongoDBUrl)
         .then(()=>{
             console.log('MongoDB connected successfully')
+            console.log('http://localhost:3002');
         }).catch((error)=>{
             console.log('MongoDB connect error',error)
         })

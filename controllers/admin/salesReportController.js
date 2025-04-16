@@ -6,7 +6,7 @@ const moment = require('moment');
 
 const getSalesReport = async (req, res) => {
     try {
-        const page = req.query.page || 1;
+        const page = parseInt(req.query.page) || 1;
         const limit = 6;
         const skip = (page - 1) * limit;
         let filter = req.query.filter || 'today';
@@ -143,6 +143,7 @@ const getSalesReport = async (req, res) => {
     }
 };
 
+
 const downloadSalesReportPDF = async (req, res) => {
     try {
         const { filter, startDate, endDate } = req.query;
@@ -180,10 +181,19 @@ const downloadSalesReportPDF = async (req, res) => {
         res.setHeader('Content-type', 'application/pdf');
         doc.pipe(res);
 
-        doc.fontSize(20).font('Helvetica-Bold').text('Sales Report', { align: 'center' });
-        doc.moveDown(0.5);
-        doc.fontSize(12).font('Helvetica').text(`Generated on: ${moment().format('DD-MM-YYYY')}`, { align: 'right' });
-        doc.moveDown(1);
+        const pageHeight = doc.page.height;
+        const pageWidth = doc.page.width;
+        const margins = {top: 40, bottom: 40, left: 40, right: 40};
+        const maxY = pageHeight - margins.bottom;
+
+        const addHeader = () => {
+            doc.fontSize(20).font('Helvetica-Bold').text('Sales Report', { align: 'center' });
+            doc.moveDown(0.5);
+            doc.fontSize(12).font('Helvetica').text(`Generated on: ${moment().format('DD-MM-YYYY')}`, { align: 'right' });
+            doc.moveDown(1);
+        };
+
+        addHeader();
 
         let totalRevenue = 0;
         let totalDiscount = 0;
@@ -201,37 +211,40 @@ const downloadSalesReportPDF = async (req, res) => {
         doc.text(`Total Orders: ${totalOrders}`).moveDown(1.5);
 
         const startX = 40;
-        const startY = doc.y;
-        const colWidths = [60, 80, 90, 80, 40, 50, 60, 60];
+        let startY = doc.y;
+        const colWidths = [30, 60, 70, 80, 70, 40, 50, 60, 50];
         const rowHeight = 20;
         const lineHeight = 15;
         let yPos = startY;
 
-        const drawTableRow = (y, rowData, isHeader = false) => {
+        const tableHeaders = ['No.', 'Date', 'order_id', 'User', 'Product', 'Qty', 'Price', 'Discount', 'Total'];
+
+        const drawTableHeader = (y) => {
             let x = startX;
-            doc.fontSize(isHeader ? 10 : 8).font(isHeader ? 'Helvetica-Bold' : 'Helvetica');
-            rowData.forEach((text, i) => {
+            doc.fontSize(10).font('Helvetica-Bold');
+            tableHeaders.forEach((text, i) => {
                 doc.text(text, x, y, { width: colWidths[i], align: 'center' });
                 x += colWidths[i];
             });
 
-            if (!isHeader) {
-                doc.moveTo(startX, y + lineHeight)
-                    .lineTo(startX + colWidths.reduce((a, b) => a + b, 0), y + lineHeight)
-                    .strokeColor('#aaaaaa')
-                    .stroke();
-            }
+            doc.strokeColor('black').lineWidth(0.5);
+            doc.moveTo(startX, y + lineHeight)
+                .lineTo(startX + colWidths.reduce((a, b) => a + b, 0), y + lineHeight)
+                .stroke();
+            
+            return y + rowHeight;
         };
 
-        doc.strokeColor('black').lineWidth(0.5);
-        drawTableRow(yPos, ['Date', 'order_id', 'User', 'Product', 'Qty', 'Price', 'Discount', 'Total'], true);
-        doc.moveTo(startX, yPos + lineHeight).lineTo(startX + colWidths.reduce((a, b) => a + b, 0), yPos + lineHeight).stroke();
-        yPos += rowHeight;
+        yPos = drawTableHeader(yPos);
+
+        let serialNo = 1;
 
         orders.forEach(order => {
             order.orderedItems.forEach(item => {
                 const totalAmount = (item.price * item.quantity) - (order.discount || 0);
-                drawTableRow(yPos, [
+                
+                const rowData = [
+                    serialNo.toString(),
                     moment(order.createdAt).format('DD-MM-YYYY'),
                     order._id.toString().slice(-6),
                     order.userId ? order.userId.name : 'Unknown',
@@ -240,8 +253,29 @@ const downloadSalesReportPDF = async (req, res) => {
                     `${item.price.toFixed(2)}`,
                     `${order.discount ? order.discount.toFixed(2) : '0.00'}`,
                     `${totalAmount.toFixed(2)}`
-                ]);
+                ];
+
+                if (yPos + rowHeight > maxY) {
+                    doc.addPage();
+                    addHeader();
+                    yPos = drawTableHeader(doc.y);
+                }
+
+                let x = startX;
+                doc.fontSize(8).font('Helvetica');
+                rowData.forEach((text, i) => {
+                    doc.text(text, x, yPos, { width: colWidths[i], align: 'center' });
+                    x += colWidths[i];
+                });
+
+                doc.moveTo(startX, yPos + lineHeight)
+                    .lineTo(startX + colWidths.reduce((a, b) => a + b, 0), yPos + lineHeight)
+                    .strokeColor('#aaaaaa')
+                    .stroke();
+
                 yPos += rowHeight;
+                
+                serialNo++;
             });
         });
 

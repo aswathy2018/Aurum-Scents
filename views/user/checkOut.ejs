@@ -308,7 +308,8 @@
                                         <div>
                                             <h6 class="mb-1"><%= coupon.name %></h6>
                                             <p class="mb-1 text-success">Save %<%= coupon.offerPercentage %></p>
-                                            <small class="text-muted">Minimum Purchase: ₹<%= coupon.minimumprice %></small>
+                                            <small class="text-muted">Minimum Purchase: ₹<%= coupon.minimumprice %></small><br>
+                                            <small class="text-muted">Maximum Purchase: ₹<%= coupon.maximumprice%></small>
                                             <br>
                                             <small class="text-muted">Expires: <%= new Date(coupon.expiryDate).toLocaleDateString() %></small>
                                         </div>

@@ -319,8 +319,7 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <a href="/checkout" class="btn btn-fill-out btn-block mt-30">Proceed To
-                                            Checkout</a>
+                                        <a href="javascript:void(0)" onclick="proceedToCheckout()" class="btn btn-fill-out btn-block mt-30">Proceed To Checkout</a>
                                     </div>
                                 </div>
                             </div>
@@ -498,5 +497,40 @@
                     }
                 });
             }
+
+            function proceedToCheckout() {
+        fetch('/checkout?validateStock=true', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/checkout';
+                } else {
+                    let errorMessage = 'In Stock:\n';
+                    data.items.forEach(item => {
+                        errorMessage += `- ${item.productName}: Requested ${item.requestedQty}, Available ${item.availableQty}\n`;
+                    });
+                    Swal.fire({
+                        title: 'Insufficient Stock',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Something went wrong while validating stock',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+    }
 
         </script>

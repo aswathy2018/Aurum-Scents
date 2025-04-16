@@ -14,6 +14,9 @@
     
         <label for="minimumprice">Minimum Purchase Amount:</label>
         <input type="number" name="minimumprice"/>
+
+        <label for="maximumprice">Maximum Purchase Amount:</label>
+        <input type="number" name="maximumprice"/>
     
         <label for="expiryDate">End Date:</label>
         <input type="date" name="expiryDate"/>
@@ -23,10 +26,11 @@
     
     <h3
     style="text-align: center;
-    margin-left: 50px;
+    margin-left: -50px;
     font-size: 20px;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    margin-top: 30px;"
+    margin-top: 30px;
+    margin-bottom: 12px;"
     >
     All Coupons
     </h3>
@@ -37,6 +41,8 @@
                 <th>Discount (%)</th>
                 <th>Start Date</th>
                 <th>End Date</th>
+                <th>Minimum Amount</th>
+                <th>Maximum Amount</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -47,6 +53,8 @@
                 <td><%= coupon.offerPercentage %>%</td>
                 <td><%= coupon.startingDate.toDateString() %></td>
                 <td><%= coupon.expiryDate.toDateString() %></td>
+                <td><%= coupon.minimumprice %></td>
+                <td><%= coupon.maximumprice %></td>
                 <td>
                     <button onclick="confirmDelete('<%= coupon._id %>')" class="delete-btn">Delete</button>
                 </td>
@@ -84,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const discountInput = document.querySelector("input[name='offerPercentage']");
     const endDateInput = document.querySelector("input[name='expiryDate']");
     const minPurchaseInput = document.querySelector("input[name='minimumprice']");
+    const maxPurchaseInput = document.querySelector("input[name='maximumprice']");
 
     const today = new Date().toISOString().split("T")[0];
     endDateInput.setAttribute("min", today);
@@ -141,6 +150,38 @@ document.addEventListener("DOMContentLoaded", function () {
             isValid = false;
         }
 
+        const maxPurchaseValueRaw = maxPurchaseInput.value.trim();
+        const maxPurchaseValue = parseFloat(maxPurchaseValueRaw);
+
+        if (!maxPurchaseValueRaw || /^\s+$/.test(maxPurchaseValueRaw)) {
+            errorMessage += "Maximum purchase amount cannot be empty.<br>";
+            isValid = false;
+        } else if (/^0+$/.test(maxPurchaseValueRaw)) {
+            errorMessage += "Please enter a valid number for Maximum purchase amount.<br>";
+            isValid = false;
+        } else if (maxPurchaseValue <= 0) {
+            errorMessage += "Maximum purchase amount must be greater than 0.<br>";
+            isValid = false;
+        } else if (maxPurchaseValue < minPurchaseValue) {
+            errorMessage += "Maximum purchase amount must be greater than or equal to the minimum purchase amount.<br>";
+            isValid = false;
+        }
+
+        if (isNaN(discountValue)) {
+    errorMessage += "Discount percentage must be a valid number.<br>";
+    isValid = false;
+}
+
+if (isNaN(minPurchaseValue)) {
+    errorMessage += "Minimum purchase amount must be a valid number.<br>";
+    isValid = false;
+}
+
+if (isNaN(maxPurchaseValue)) {
+    errorMessage += "Maximum purchase amount must be a valid number.<br>";
+    isValid = false;
+}
+
         const selectedDate = new Date(endDateInput.value);
         const currentDate = new Date(today);
         if (selectedDate <= currentDate) {
@@ -160,40 +201,46 @@ document.addEventListener("DOMContentLoaded", function () {
         const formData = new URLSearchParams(new FormData(form));
 
         try {
-            const response = await fetch("/admin/coupons/create", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: formData,
-            });
+    const response = await fetch("/admin/coupons/create", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData,
+    });
 
-            const data = await response.json();
+    let data;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+    } else {
+        throw new Error("Server returned non-JSON response");
+    }
 
-            if (response.ok && data.success) {
-                Swal.fire({
-                    icon: "success",
-                    title: "Coupon Created!",
-                    text: data.message,
-                    confirmButtonText: "OK",
-                }).then(() => {
-                    window.location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Failed to Create Coupon",
-                    text: data.message || "An error occurred while creating the coupon.",
-                });
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Server Error",
-                text: "Something went wrong. Please try again later.",
-            });
-        }
+    if (response.ok && data.success) {
+        Swal.fire({
+            icon: "success",
+            title: "Coupon Created!",
+            text: data.message,
+            confirmButtonText: "OK",
+        }).then(() => {
+            window.location.reload();
+        });
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Failed to Create Coupon",
+            text: data.message || "An error occurred while creating the coupon.",
+        });
+    }
+} catch (error) {
+    console.error("Error:", error);
+    Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: "Something went wrong. Please try again later.",
+    });
+}
     });
 });
 

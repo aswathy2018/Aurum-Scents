@@ -2,6 +2,7 @@ const Product = require('../../model/productSchema')
 const Category = require('../../model/categorySchema')
 const Brand = require('../../model/brandSchema')
 const User = require('../../model/userSchema')
+const statusCodes = require('../statusCode')
 const fs = require('fs')
 const path = require('path')
 const sharp = require('sharp')
@@ -76,7 +77,7 @@ const productAdd = async (req, res) => {
             });
 
             await newProduct.save();
-            return res.redirect('/admin/productAdd');
+            return res.redirect('/admin/products');
         } else {
             return res.status(400).json("Product already exists. Please try with another name.");
         }
@@ -99,10 +100,12 @@ const getAllProducts = async (req, res) => {
                 { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
             ]
         })
+            .sort({ createdAt: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit)
             .populate('category')
             .exec();
+            
             
         const count = await Product.find({
             $or: [
@@ -161,7 +164,7 @@ const productunBlocked = async (req, res, next) => {
         );
 
         if (result.matchedCount === 0) {
-            return res.status(404).json({ success: false, message: 'Product not found' });
+            return res.status(statusCodes.Not_Found).json({ success: false, message: 'Product not found' });
         }
 
         res.status(200).json({ success: true, message: 'Product unblocked successfully' });

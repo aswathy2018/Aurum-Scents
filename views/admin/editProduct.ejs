@@ -467,10 +467,21 @@ const productName = document.getElementsByName('productName')[0].value;
     }
 
     const existingImages = document.querySelectorAll('[id^="image-"]');
-    if (existingImages.length === 0 && !hasNewImage) {
+    let visibleExistingImages = 0;
+    
+    // Count only visible existing images (not marked for deletion)
+    existingImages.forEach(img => {
+        if (img.style.display !== 'none') {
+            visibleExistingImages++;
+        }
+    });
+    
+    // Check if at least one image will be available after submission
+    if (visibleExistingImages === 0 && !hasNewImage) {
         displayErrorMessage('images-error', 'At least one product image is required.');
         isValid = false;
     }
+    
     return isValid;
 }
 

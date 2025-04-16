@@ -9,6 +9,7 @@
         
         <label for="productId">Select Product:</label>
         <select id="productId" name="productId" required>
+            <option value="" selected disabled>Select a Brand</option>
             <% products.forEach(product => { %>
                 <option value="<%= product._id %>"><%= product.productName %></option>
             <% }) %>

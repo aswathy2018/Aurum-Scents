@@ -73,7 +73,7 @@
                             <div class="d-flex gap-3">
                                 <div class="border rounded bg-light position-relative overflow-hidden"
                                     style="width: 300px; height: 300px;">
-                                    <img src="/placeholder.svg" alt="Preview Image" id="imgView1"
+                                    <img id="imgView1"
                                         class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
                                 </div>
                                 <div id="croppie-container-1" class="border" style="width: 300px; height: 300px;"></div>
@@ -98,7 +98,7 @@
                             </div>
                             <div class="d-flex gap-3">
                                 <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
-                                    <img src="/placeholder.svg" alt="Preview Image" id="imgView2" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
+                                    <img id="imgView2" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
                                 </div>
                                 <div id="croppie-container-2" class="border" style="width: 300px; height: 300px;"></div>
                                 <div id="result-2" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
@@ -118,7 +118,7 @@
                             </div>
                             <div class="d-flex gap-3">
                                 <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
-                                    <img src="/placeholder.svg" alt="Preview Image" id="imgView3" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
+                                    <img id="imgView3" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
                                 </div>
                                 <div id="croppie-container-3" class="border" style="width: 300px; height: 300px;"></div>
                                 <div id="result-3" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
@@ -142,7 +142,7 @@
                                 </div>
                                 <div id="croppie-container-4" class="border" style="width: 300px; height: 300px;"></div>
                                 <div id="result-4" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
-                                    <img src="/placeholder.svg" id="croppedImg4" alt="Cropped Image" class="img-fluid" style="object-fit: contain;">
+                                    <img id="croppedImg4" class="img-fluid" style="object-fit: contain;">
                                 </div>
                             </div>
                             <div class="mt-3">
@@ -262,7 +262,7 @@ components.forEach(id => {
 });
 
 
-        document.addEventListener("DOMContentLoaded", function () {
+        documnt.addEventListener("DOMContentLoaded", function () {
             const form = document.querySelector("form");
             const errorClass = "text-red-500 text-sm mt-1";
 
@@ -359,37 +359,50 @@ components.forEach(id => {
             }
 
             function validateNumber(field, fieldName) {
-                const value = field.value.trim();
+        const value = field.value.trim();
+        const isStock = fieldName.toLowerCase().includes('stock');
 
-                if (!value) {
-                    return showError(field, `${fieldName} is required`);
-                }
+        if (!value) {
+            return showError(field, `${fieldName} is required`);
+        }
 
-                if (!/^\d+$/.test(value)) {
-                    return showError(field, `${fieldName} must contain only digits`);
-                }
+        // For stock: only integers; for prices: allow decimals
+        const regex = isStock ? /^\d+$/ : /^\d+(\.\d{1,2})?$/;
+        if (!regex.test(value)) {
+            return showError(field, isStock 
+                ? `${fieldName} must be a number`
+                : `${fieldName} must be a Non-negative number`);
+        }
 
-                if (value.length > 1 && value[0] === '0') {
-                    return showError(field, `${fieldName} cannot start with 0`);
-                }
+        // No special characters
+        if (/[$@!%*?&#^-]/.test(value)) {
+            return showError(field, `${fieldName} cannot contain special characters like $, -, etc.`);
+        }
 
-                if (parseInt(value) <= 0) {
-                    return showError(field, `${fieldName} must be a positive number`);
-                }
+        // Parse value
+        const numValue = parseFloat(value);
 
-                if (fieldName.toLowerCase().includes('price')) {
-                    if (parseInt(value) > 1000000) {
-                        return showError(field, `${fieldName} cannot exceed 1,000,000`);
-                    }
-                } else if (fieldName.toLowerCase().includes('stock')) {
-                    if (parseInt(value) > 10000) {
-                        return showError(field, `${fieldName} cannot exceed 10,000`);
-                    }
-                }
+        // Check for leading zeros
+        if (value.length > 1 && value[0] === '0' && !value.includes('.')) {
+            return showError(field, `${fieldName} cannot start with unnecessary zeros`);
+        }
 
-                clearError(field);
-                return true;
-            }
+        // Must be greater than zero
+        if (numValue <= 0) {
+            return showError(field, `${fieldName} must be greater than 0`);
+        }
+
+        // Maximum value constraints
+        if (isStock && numValue > 10000) {
+            return showError(field, `${fieldName} cannot exceed 10,000`);
+        }
+        if (!isStock && numValue > 1000000) {
+            return showError(field, `${fieldName} cannot exceed 1,000,000`);
+        }
+
+        clearError(field);
+        return true;
+    }
 
             function validateImage(field) {
                 if (field.files.length > 0) {
@@ -441,25 +454,24 @@ components.forEach(id => {
             });
 
             function validateVariants() {
-                let isValid = true;
-                document.querySelectorAll(".variant-item").forEach((variant, index) => {
-                    const stock = variant.querySelector(`input[name='variants[${index}][stock]']`);
-                    const regularPrice = variant.querySelector(`input[name='variants[${index}][regularPrice]']`);
-                    const salePrice = variant.querySelector(`input[name='variants[${index}][salePrice]']`);
+        let isValid = true;
+        document.querySelectorAll(".variant-item").forEach((variant, index) => {
+            const stock = variant.querySelector(`input[name='variants[${index}][stock]']`);
+            const regularPrice = variant.querySelector(`input[name='variants[${index}][regularPrice]']`);
+            const salePrice = variant.querySelector(`input[name='variants[${index}][salesPrice]']`);
 
-                    isValid = validateNumber(stock, "Stock quantity") && isValid;
-                    isValid = validateNumber(regularPrice, "Regular price") && isValid;
+            isValid = validateNumber(stock, "Stock quantity") && isValid;
+            isValid = validateNumber(regularPrice, "Regular price") && isValid;
 
-                    if (salePrice && salePrice.value.trim()) {
-                        if (parseFloat(salePrice.value) >= parseFloat(regularPrice.value)) {
-                            isValid = showError(salePrice, "Sale price must be less than regular price") && isValid;
-                        } else {
-                            isValid = validateNumber(salesPrice, "Sale price") && isValid;
-                        }
-                    }
-                });
-                return isValid;
+            if (salePrice && salePrice.value.trim()) {
+                isValid = validateNumber(salePrice, "Sale price") && isValid;
+                if (isValid && parseFloat(salePrice.value) >= parseFloat(regularPrice.value)) {
+                    isValid = showError(salePrice, "Sale price must be less than regular price") && isValid;
+                }
             }
+        });
+        return isValid;
+    }
 
             form.addEventListener("submit", function (event) {
                 event.preventDefault();

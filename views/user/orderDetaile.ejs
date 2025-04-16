@@ -246,19 +246,26 @@
 
 <div class="pagination-buttons" style="display: flex; justify-content: center; align-items: center; margin-top: 15px; gap: 10px;">
   <% if (currentPage > 1) { %>
-      <a href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">Previous</a>
+    <a href="?page=<%= currentPage - 1 %>" class="page-link">Previous</a>
   <% } else { %>
-      <span class="page-link disabled">Previous</span>
+    <span class="page-link disabled">Previous</span>
   <% } %>
-  <span class="page-link current-page"><%= currentPage %></span>
+
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <% if (i === currentPage) { %>
+      <span class="page-link current-page"><%= i %></span>
+    <% } else { %>
+      <a href="?page=<%= i %>" class="page-link"><%= i %></a>
+    <% } %>
+  <% } %>
+
   <% if (currentPage < totalPages) { %>
-      <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link"><%= currentPage + 1 %></a>
-      <a href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + locals.search : '' %>" class="page-link">Next</a>
+    <a href="?page=<%= currentPage + 1 %>" class="page-link">Next</a>
   <% } else { %>
-      <span class="page-link"><%= currentPage %></span>
-      <span class="page-link disabled">Next</span>
+    <span class="page-link disabled">Next</span>
   <% } %>
 </div>
+
 
 <%- include("../partials/user/footer.ejs") %>
 

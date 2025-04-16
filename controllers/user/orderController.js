@@ -3,6 +3,7 @@ const User = require('../../model/userSchema')
 const Address = require('../../model/addressSchema')
 const Product = require('../../model/productSchema')
 const Cart = require('../../model/cartSchema')
+const statusCode = require('../statusCode')
 const mongoose = require('mongoose')
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
@@ -63,7 +64,7 @@ const topUpWallet = async (req, res) => {
         res.redirect("/userProfile");
     } catch (error) {
         console.error("Error topping up wallet:", error);
-        res.status(500).send("Failed to top up wallet.");
+        res.status(statusCode.internal_server_error).send("Failed to top up wallet.");
     }
 };
 
@@ -80,6 +81,7 @@ const refundToWallet = async (orderId, userId, amount) => {
         }
 
         user.wallet.balance += amount;
+        
         user.wallet.transactions.push({
             type: "credit",
             amount: amount,
@@ -96,37 +98,70 @@ const refundToWallet = async (orderId, userId, amount) => {
     }
 };
 
+
 const getCheckOut = async (req, res) => {
     try {
-        const user = req.session.user
-        const userData = await User.findById(user)
-        const address = await Address.findOne({userId: user})
+        const user = req.session.user;
+        const userData = await User.findById(user);
+        const address = await Address.findOne({ userId: user });
         const cart = await Cart.findOne({ userId: user }).populate('items.productId');
-        const coupons = await Coupon.find({isActive: true})
+        const coupons = await Coupon.find({ isActive: true });
 
+        // Validate cart items and their quantities
+        let insufficientStockItems = [];
         cart.items = cart.items.filter(item => {
-
+            // Check if product exists and is not blocked
             if (!item.productId || item.productId.isBlocked === true) {
                 return false;
             }
 
+            // Check if category exists and is listed
             if (!item.productId.category || item.productId.category.islisted === false) {
                 return false;
             }
 
+            // Check if brand exists and is not blocked
             if (item.productId.brand && item.productId.brand.isBlocked === true) {
                 return false;
             }
 
+            // Check if requested quantity exceeds available stock
+            if (item.quantity > item.productId.quantity) {
+                insufficientStockItems.push({
+                    productName: item.productId.productName,
+                    requestedQty: item.quantity,
+                    availableQty: item.productId.quantity
+                });
+                return false; // Remove item from cart if stock is insufficient
+            }
+
             return true;
         });
-        
-        res.render('checkOut', {user: userData, address, cart, cartItems:cart, coupons})
+
+        // If there are items with insufficient stock, return error response for AJAX call
+        if (req.query.validateStock) {
+            if (insufficientStockItems.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Some items have insufficient stock",
+                    items: insufficientStockItems
+                });
+            }
+            return res.status(200).json({ success: true });
+        }
+
+        // Save cart if items were removed
+        if (insufficientStockItems.length > 0) {
+            await cart.save();
+        }
+
+        res.render('checkOut', { user: userData, address, cart, cartItems: cart, coupons });
     } catch (error) {
         console.log(error);
-        res.redirect('/pageNotFound')
+        res.redirect('/pageNotFound');
     }
-}
+};
+
 
 const applyCoupon = async (req, res) => {
     try {
@@ -144,34 +179,44 @@ const applyCoupon = async (req, res) => {
           message: "Invalid or expired coupon code"
         });
       }
+  
       if (totalAmount < coupon.minimumprice) {
         return res.json({
           success: false,
           message: `Minimum purchase amount of ₹${coupon.minimumprice} required to use this coupon`
         });
       }
-
-      const discountAmount = (totalAmount*coupon.offerPercentage)/100;
+      
+      if (totalAmount > coupon.maximumprice) {
+        return res.json({
+          success: false,
+          message: `Maximum purchase amount of ₹${coupon.maximumprice} limit exceeded for this coupon`
+        });
+      }
+  
+      const discountAmount = (totalAmount * coupon.offerPercentage) / 100;
   
       res.json({
         success: true,
         coupon: {
-          _id: coupon._id,
-          name: coupon.name,
-          discountAmount
+          id: coupon._id,
+          code: coupon.couponCode,
+          discountAmount,
+          discountPercentage: coupon.offerPercentage
         },
         message: "Coupon applied successfully"
       });
       
     } catch (error) {
       console.error("Error applying coupon:", error);
-      res.status(500).json({
+      res.status(statusCode.internal_server_error).json({
         success: false,
         message: "Failed to apply coupon"
       });
     }
   };
-  
+
+
 const razorpayInstance = new Razorpay({
     key_id: "rzp_test_fpueLavUtsLoKt",
     key_secret: "Bk8bywg3LIZxueU2ZgCPN6zV"
@@ -194,7 +239,7 @@ const createOrder = async (req, res) => {
         });
 
         if (!cart || cart.items.length === 0) {
-            return res.status(400).json({ success: false, message: "Cart is empty or invalid." });
+            return res.status(statusCode.bad_request).json({ success: false, message: "Cart is empty or invalid." });
         }
 
         const blockedConditions = {
@@ -233,10 +278,10 @@ const createOrder = async (req, res) => {
             else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
             else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
             errorMessage += " by the admin.";
-            return res.status(403).json({ success: false, message: errorMessage });
+            return res.status(statusCode.forbidden).json({ success: false, message: errorMessage });
         }
         if (blockedConditions.insufficientStock) {
-            return res.status(400).json({
+            return res.status(statusCode.bad_request).json({
                 success: false,
                 message: `Quantity is not available for the product: ${insufficientStockProduct}.`
             });
@@ -247,12 +292,12 @@ const createOrder = async (req, res) => {
             "address._id": new mongoose.Types.ObjectId(addressId),
         });
         if (!address) {
-            return res.status(400).json({ success: false, message: "Invalid address." });
+            return res.status(statusCode.bad_request).json({ success: false, message: "Invalid address." });
         }
 
         const foundAddress = address.address.find(addr => addr._id.toString() === addressId);
         if (!foundAddress) {
-            return res.status(400).json({ success: false, message: "Address not found." });
+            return res.status(statusCode.bad_request).json({ success: false, message: "Address not found." });
         }
 
         const orderItems = cart.items.map(item => ({
@@ -320,7 +365,7 @@ const createOrder = async (req, res) => {
         }
     } catch (error) {
         console.error("Error creating order:", error);
-        res.status(500).json({ success: false, message: 'Failed to create order' });
+        res.status(statusCode.internal_server_error).json({ success: false, message: 'Failed to create order' });
     }
 };
 
@@ -363,7 +408,7 @@ const verifyPayment = async (req, res) => {
             res.json({ success: true, message: "Payment verified and order processed successfully." });
         } catch (error) {
             console.error("Error verifying payment:", error);
-            res.status(500).json({ success: false, message: "Failed to verify payment." });
+            res.status(statusCode.internal_server_error).json({ success: false, message: "Failed to verify payment." });
         }
     } else {
         const order = await Order.findById(dbOrderId);
@@ -371,7 +416,7 @@ const verifyPayment = async (req, res) => {
             order.paymentStatus = 'Failed';
             await order.save();
         }
-        res.status(400).json({ success: false, message: 'Payment verification failed' });
+        res.status(statusCode.bad_request).json({ success: false, message: 'Payment verification failed' });
     }
 };
 
@@ -383,7 +428,7 @@ const retryPayment =  async (req, res) => {
         const order = await Order.findById(orderId);
 
         if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
+            return res.status(statusCode.Not_Found).json({ success: false, message: 'Order not found' });
         }
 
         const razorpay = new Razorpay({
@@ -410,7 +455,7 @@ const retryPayment =  async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.status(statusCode.internal_server_error).json({ success: false, message: 'Server error' });
     }
 };
 
@@ -430,7 +475,7 @@ const placeorder = async (req, res) => {
         });
 
         if (!cart || cart.items.length === 0) {
-            return res.status(400).json({ success: false, message: "Cart is empty or invalid." });
+            return res.status(statusCode.bad_request).json({ success: false, message: "Cart is empty or invalid." });
         }
 
         const blockedConditions = {
@@ -469,10 +514,10 @@ const placeorder = async (req, res) => {
             else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
             else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
             errorMessage += " by the admin.";
-            return res.status(403).json({ success: false, message: errorMessage });
+            return res.status(statusCode.forbidden).json({ success: false, message: errorMessage });
         }
         if (blockedConditions.insufficientStock) {
-            return res.status(400).json({
+            return res.status(statusCode.bad_request).json({
                 success: false,
                 message: `Quantity is not available for the product: ${insufficientStockProduct}.`
             });
@@ -483,12 +528,12 @@ const placeorder = async (req, res) => {
             "address._id": new mongoose.Types.ObjectId(addressId),
         });
         if (!address) {
-            return res.status(400).json({ success: false, message: "Invalid address." });
+            return res.status(statusCode.bad_request).json({ success: false, message: "Invalid address." });
         }
 
         const foundAddress = address.address.find(addr => addr._id.toString() === addressId);
         if (!foundAddress) {
-            return res.status(400).json({ success: false, message: "Address not found." });
+            return res.status(statusCode.bad_request).json({ success: false, message: "Address not found." });
         }
 
         const orderItems = cart.items.map(item => ({
@@ -538,10 +583,10 @@ const placeorder = async (req, res) => {
             try {
                 const user = await User.findById(userId);
                 if (!user) {
-                    return res.status(400).json({ success: false, message: "User not found." });
+                    return res.status(statusCode.bad_request).json({ success: false, message: "User not found." });
                 }
                 if (user.wallet.balance < parseFloat(totalAmount)) {
-                    return res.status(400).json({ success: false, message: "Insufficient wallet balance." });
+                    return res.status(statusCode.bad_request).json({ success: false, message: "Insufficient wallet balance." });
                 }
         
                 const blockedConditions = {
@@ -580,10 +625,10 @@ const placeorder = async (req, res) => {
                     else if (blockedConditions.blockedCategory) errorMessage += "Product category is blocked";
                     else if (blockedConditions.blockedBrand) errorMessage += "Product brand is blocked";
                     errorMessage += " by the admin.";
-                    return res.status(403).json({ success: false, message: errorMessage });
+                    return res.status(statusCode.forbidden).json({ success: false, message: errorMessage });
                 }
                 if (blockedConditions.insufficientStock) {
-                    return res.status(400).json({
+                    return res.status(statusCode.bad_request).json({
                         success: false,
                         message: `Quantity is not available for the product: ${insufficientStockProduct}.`
                     });
@@ -642,17 +687,17 @@ const placeorder = async (req, res) => {
                 cart.items = [];
                 await cart.save();
         
-                return res.status(200).json({ success: true, message: "Order placed successfully with Wallet." });
+                return res.status(statusCode.succss).json({ success: true, message: "Order placed successfully with Wallet." });
             } catch (error) {
                 console.error("Error in Wallet payment:", error);
-                return res.status(500).json({ success: false, message: "Failed to process Wallet payment. Please try again." });
+                return res.status(statusCode.internal_server_error).json({ success: false, message: "Failed to process Wallet payment. Please try again." });
             }
         } else {
-            return res.status(400).json({ success: false, message: 'Invalid payment method' });
+            return res.status(statusCode.bad_request).json({ success: false, message: 'Invalid payment method' });
         }
     } catch (error) {
         console.error("Unexpected Error:", error);
-        res.status(500).json({ success: false, message: 'Unable to process order' });
+        res.status(statusCode.internal_server_error).json({ success: false, message: 'Unable to process order' });
     }
 };
 
@@ -709,7 +754,7 @@ const generateInvoicePdf = async (req, res) => {
             .populate("orderedItems.product");
 
         if (!order) {
-            return res.status(404).send("Order not found");
+            return res.status(statusCode.Not_Found).send("Order not found");
         }
 
         const pdfDoc = new PDFDocument({ margin: 30 });
@@ -814,14 +859,14 @@ const cancelOrder = async (req, res) => {
         }
 
         if (orderedProduct.status === "Delivered" || orderedProduct.status === "Return") {
-            return res.status(400).json({
+            return res.status(statusCode.bad_request).json({
                 success: false,
                 message: "Product has already been delivered or returned and cannot be canceled."
             });
         }
 
         if (orderedProduct.status === "Cancelled") {
-            return res.status(400).json({ success: false, message: "Product is already canceled." });
+            return res.status(statusCode.bad_request).json({ success: false, message: "Product is already canceled." });
         }
 
         const refundAmount = order.totalAmount
@@ -852,7 +897,7 @@ const cancelOrder = async (req, res) => {
         res.status(200).json({ success: true, message: "Order cancelled successfully" });
     } catch (error) {
         console.error("Error canceling product:", error);
-        res.status(500).json({
+        res.status(statusCode.internal_server_error).json({
             success: false,
             message: "Failed to cancel the product. Please try again later."
         });
@@ -877,25 +922,25 @@ const returnOrder = async (req, res) => {
         );
 
         if (!orderedProduct) {
-            return res.status(404).json({ success: false, message: "Product not found in this order." });
+            return res.status(statusCode.Not_Found).json({ success: false, message: "Product not found in this order." });
         }
 
         if (orderedProduct.status === "Cancelled") {
-            return res.status(400).json({
+            return res.status(statusCode.bad_request).json({
                 success: false,
                 message: "Cancelled products cannot be returned."
             });
         }
 
         if (orderedProduct.status !== "Delivered") {
-            return res.status(400).json({
+            return res.status(statusCode.bad_request).json({
                 success: false,
                 message: "Only delivered products can be returned."
             });
         }
 
         if (orderedProduct.status === "Return") {
-            return res.status(400).json({
+            return res.status(statusCode.bad_request).json({
                 success: false,
                 message: "The product is already returned."
             });
@@ -918,7 +963,7 @@ const returnOrder = async (req, res) => {
 
         await order.save();
 
-        return res.status(200).json({
+        return res.status(statusCode.succss).json({
             success: true,
             message: "Product return initiated successfully"
         });
@@ -930,6 +975,7 @@ const returnOrder = async (req, res) => {
         });
     }
 };
+
 
 
 
