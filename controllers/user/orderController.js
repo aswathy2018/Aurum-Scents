@@ -107,38 +107,32 @@ const getCheckOut = async (req, res) => {
         const cart = await Cart.findOne({ userId: user }).populate('items.productId');
         const coupons = await Coupon.find({ isActive: true });
 
-        // Validate cart items and their quantities
         let insufficientStockItems = [];
         cart.items = cart.items.filter(item => {
-            // Check if product exists and is not blocked
             if (!item.productId || item.productId.isBlocked === true) {
                 return false;
             }
 
-            // Check if category exists and is listed
             if (!item.productId.category || item.productId.category.islisted === false) {
                 return false;
             }
 
-            // Check if brand exists and is not blocked
             if (item.productId.brand && item.productId.brand.isBlocked === true) {
                 return false;
             }
 
-            // Check if requested quantity exceeds available stock
             if (item.quantity > item.productId.quantity) {
                 insufficientStockItems.push({
                     productName: item.productId.productName,
                     requestedQty: item.quantity,
                     availableQty: item.productId.quantity
                 });
-                return false; // Remove item from cart if stock is insufficient
+                return false;
             }
 
             return true;
         });
 
-        // If there are items with insufficient stock, return error response for AJAX call
         if (req.query.validateStock) {
             if (insufficientStockItems.length > 0) {
                 return res.status(400).json({
@@ -150,7 +144,6 @@ const getCheckOut = async (req, res) => {
             return res.status(200).json({ success: true });
         }
 
-        // Save cart if items were removed
         if (insufficientStockItems.length > 0) {
             await cart.save();
         }

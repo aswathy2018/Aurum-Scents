@@ -246,7 +246,6 @@ const updateProduct = async (req, res) => {
 
         await Product.findByIdAndUpdate(id, updateFields, { new: true });
 
-        // Handle image deletion
         if (data.imagesToDelete) {
             const imagesToDelete = JSON.parse(data.imagesToDelete);
 

@@ -212,7 +212,7 @@
     <script>
 
 const components = [1, 2, 3, 4];
-const croppieInstances = {}; // Store separate Croppie instances for each component
+const croppieInstances = {};
 
 components.forEach(id => {
     const input = document.getElementById(`input${id}`);
@@ -234,7 +234,6 @@ components.forEach(id => {
     });
 
     function initCroppie(componentId, imageData) {
-        // Destroy previous instance if exists
         if (croppieInstances[componentId]) {
             croppieInstances[componentId].destroy();
         }
@@ -366,7 +365,6 @@ components.forEach(id => {
             return showError(field, `${fieldName} is required`);
         }
 
-        // For stock: only integers; for prices: allow decimals
         const regex = isStock ? /^\d+$/ : /^\d+(\.\d{1,2})?$/;
         if (!regex.test(value)) {
             return showError(field, isStock 
@@ -374,25 +372,20 @@ components.forEach(id => {
                 : `${fieldName} must be a Non-negative number`);
         }
 
-        // No special characters
         if (/[$@!%*?&#^-]/.test(value)) {
             return showError(field, `${fieldName} cannot contain special characters like $, -, etc.`);
         }
 
-        // Parse value
         const numValue = parseFloat(value);
 
-        // Check for leading zeros
         if (value.length > 1 && value[0] === '0' && !value.includes('.')) {
             return showError(field, `${fieldName} cannot start with unnecessary zeros`);
         }
 
-        // Must be greater than zero
         if (numValue <= 0) {
             return showError(field, `${fieldName} must be greater than 0`);
         }
 
-        // Maximum value constraints
         if (isStock && numValue > 10000) {
             return showError(field, `${fieldName} cannot exceed 10,000`);
         }
