@@ -234,7 +234,7 @@
                                                 <td class="price" data-title="Price">
                                                     <span>₹<%= item.price.toFixed(2) %></span>
                                                 </td>
-                                                <td class="text-center" data-title="Quantity">
+                                                <!-- <td class="text-center" data-title="Quantity">
                                                     <div class="detail-qty border radius m-auto">
                                                         <a href="javascript:void(0)" class="qty-down"
                                                             onclick="updateQuantity('<%= item.productId._id %>', -1)"><i
@@ -245,6 +245,14 @@
                                                         <a href="javascript:void(0)" class="qty-up"
                                                             onclick="updateQuantity('<%= item.productId._id %>', 1, '<%= item.productId.quantity %>')"><i
                                                                 class="fi-rs-angle-small-up"></i></a>
+                                                    </div>
+                                                </td> -->
+                                                
+                                                <td class="text-center" data-title="Quantity">
+                                                    <div class="detail-qty border radius m-auto">
+                                                        <a href="javascript:void(0)" class="qty-down" onclick="updateQuantity('<%= item.productId._id %>', -1)"><i class="fi-rs-angle-small-down"></i></a>
+                                                        <span class="qty-val"><%= item.quantity %></span>
+                                                        <a href="javascript:void(0)" class="qty-up" onclick="updateQuantity('<%= item.productId._id %>', 1, 5)"><i class="fi-rs-angle-small-up"></i></a>
                                                     </div>
                                                 </td>
                                                 <td class="text-right" data-title="Subtotal">
@@ -361,14 +369,83 @@
                 });
             });
 
-            function updateQuantity(productId, change, maxQuantity) {
+//             function updateQuantity(productId, change, maxQuantity) {
+//     const row = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
+//     const qtyElement = row.querySelector('.qty-val');
+//     let currentQty = parseInt(qtyElement.textContent);
+//     let newQty = currentQty + change;
+
+//     if (newQty < 1) {
+//         newQty = 1;
+//         return;
+//     }
+
+//     if (newQty > 5) {
+//         Swal.fire({
+//             title: 'Quantity Limit Reached',
+//             text: 'You can choose up to 5 quantity only.',
+//             icon: 'warning',
+//             confirmButtonText: 'OK',
+//             timer: 2000,
+//             timerProgressBar: true,
+//             willClose: () => {
+//             }
+//         });
+//         return;
+//     }
+
+//     fetch('/updateCart', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify({
+//             productId: productId,
+//             quantity: newQty
+//         })
+//     })
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.success) {
+//                 qtyElement.textContent = newQty;
+//                 const priceElement = row.querySelector('.price span');
+//                 const price = parseFloat(priceElement.textContent.replace('₹', ''));
+//                 const subtotalElement = row.querySelector('.subtotal-value');
+//                 subtotalElement.textContent = `₹${(price * newQty).toFixed(2)}`;
+
+//                 updateCartTotals();
+//             } else {
+//                 Swal.fire({
+//                     title: 'Error',
+//                     text: data.message || 'Failed to update quantity',
+//                     icon: 'error',
+//                     confirmButtonText: 'OK'
+//                 });
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//             Swal.fire({
+//                 title: 'Error',
+//                 text: 'Something went wrong',
+//                 icon: 'error',
+//                 confirmButtonText: 'OK'
+//             });
+//         });
+// }
+
+function updateQuantity(productId, change, maxQuantity) {
     const row = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
     const qtyElement = row.querySelector('.qty-val');
+    const qtyUpButton = row.querySelector('.qty-up');
+    const qtyDownButton = row.querySelector('.qty-down');
     let currentQty = parseInt(qtyElement.textContent);
     let newQty = currentQty + change;
 
     if (newQty < 1) {
         newQty = 1;
+        qtyElement.textContent = newQty;
+        qtyDownButton.classList.add('disabled'); // Disable down button
         return;
     }
 
@@ -381,10 +458,20 @@
             timer: 2000,
             timerProgressBar: true,
             willClose: () => {
+                qtyElement.textContent = 5;
+                qtyUpButton.classList.add('disabled'); // Disable up button
             }
         });
         return;
     }
+
+    // Enable buttons based on new quantity
+    qtyUpButton.classList.remove('disabled');
+    qtyDownButton.classList.remove('disabled');
+    if (newQty === 5) qtyUpButton.classList.add('disabled');
+    if (newQty === 1) qtyDownButton.classList.add('disabled');
+
+    qtyElement.textContent = newQty;
 
     fetch('/updateCart', {
         method: 'POST',
@@ -407,6 +494,7 @@
 
                 updateCartTotals();
             } else {
+                qtyElement.textContent = currentQty;
                 Swal.fire({
                     title: 'Error',
                     text: data.message || 'Failed to update quantity',
@@ -416,6 +504,7 @@
             }
         })
         .catch(error => {
+            qtyElement.textContent = currentQty;
             console.error('Error:', error);
             Swal.fire({
                 title: 'Error',
@@ -534,3 +623,9 @@
     }
 
         </script>
+        <!-- <style>
+            .qty-up.disabled, .qty-down.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+        </style> -->

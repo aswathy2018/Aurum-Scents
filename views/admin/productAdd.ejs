@@ -1,6 +1,14 @@
 <%- include('../partials/admin/adminHeader.ejs') %>
+<style>
+    .image-preview {
+    display: none;
+}
+
+</style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" />
     <link rel="stylesheet" href="/assets/css/adProductAdd.css">
+    <!-- Add SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Main Content -->
     <main class="content-main">
@@ -9,8 +17,7 @@
         </div>
         <div class="card">
             <div class="card-body">
-                <form method="post" action="/admin/productAdd" enctype="multipart/form-data"
-                    onsubmit="return validateForm()">
+                <form method="post" action="/admin/productAdd" enctype="multipart/form-data" id="productForm">
                     <div class="form-group">
                         <label for="product_name" class="form-label">Product Name</label>
                         <input type="text" placeholder="Type here" name="productName" class="form-control"
@@ -20,7 +27,7 @@
                     <div class="form-group">
                         <label class="form-label">Brand</label>
                         <div class="dropdown-container">
-                            <select class="form-control" name="brand">
+                            <select class="form-control" name="brand" id="brand">
                                 <option value="" selected disabled>Select a Brand</option>
                                 <% for (let i=0; i < brand.length; i++) { %>
                                     <option value="<%= brand[i].brandName %>">
@@ -36,7 +43,7 @@
                     <div class="form-group">
                         <label class="form-label">Category</label>
                         <div class="dropdown-container">
-                            <select class="form-control" name="category">
+                            <select class="form-control" name="category" id="category">
                                 <option value="" selected disabled>Select a Category</option>
                                 <% for (let i=0; i < cat.length; i++) { %>
                                     <option value="<%= cat[i].name %>">
@@ -50,7 +57,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Full Description</label>
-                        <textarea placeholder="Type here" name="description" class="form-control" rows="4"></textarea>
+                        <textarea placeholder="Type here" name="description" class="form-control" rows="4" id="description"></textarea>
                         <div id="description-error" class="error-message"></div>
                     </div>
 
@@ -69,19 +76,25 @@
                             <div class="mb-3">
                                 <input class="form-control" type="file" name="images" id="input1"
                                     accept="image/png, image/jpeg, image/jpg">
+                                <div id="images-error" class="error-message"></div>
                             </div>
                             <div class="d-flex gap-3">
-                                <div class="border rounded bg-light position-relative overflow-hidden"
-                                    style="width: 300px; height: 300px;">
-                                    <img id="imgView1"
-                                        class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
-                                </div>
-                                <div id="croppie-container-1" class="border" style="width: 300px; height: 300px;"></div>
-                                <div id="result-1"
-                                    class="d-none border rounded bg-light d-flex justify-content-center align-items-center"
-                                    style="width: 300px; height: 300px;">
-                                    <img src="/placeholder.svg" id="croppedImg1" alt="Cropped Image" class="img-fluid"
-                                        style="object-fit: contain;">
+                                <div class="image-preview" id="preview-container-1">
+                                    <div class="d-flex gap-3">
+                                        <!-- Preview and croppie container code here -->
+                                        <div class="border rounded bg-light position-relative overflow-hidden"
+                                        style="width: 300px; height: 300px;">
+                                        <img id="imgView1"
+                                            class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
+                                    </div>
+                                    <div id="croppie-container-1" class="border" style="width: 300px; height: 300px;"></div>
+                                    <div id="result-1"
+                                        class="d-none border rounded bg-light d-flex justify-content-center align-items-center"
+                                        style="width: 300px; height: 300px;">
+                                        <img src="/placeholder.svg" id="croppedImg1" alt="Cropped Image" class="img-fluid"
+                                            style="object-fit: contain;">
+                                    </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="mt-3">
@@ -97,6 +110,9 @@
                                 <input class="form-control" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg">
                             </div>
                             <div class="d-flex gap-3">
+                                <div class="image-preview" id="preview-container-2">
+                                    <div class="d-flex gap-3">
+                                        <!-- Preview and croppie container code here -->
                                 <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
                                     <img id="imgView2" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
                                 </div>
@@ -104,6 +120,8 @@
                                 <div id="result-2" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
                                     <img src="/placeholder.svg" id="croppedImg2" alt="Cropped Image" class="img-fluid" style="object-fit: contain;">
                                 </div>
+                                </div>
+                            </div>
                             </div>
                             <div class="mt-3">
                                 <button type="button" id="crop-button-2" class="btn btn-primary me-2">Crop Image</button>
@@ -117,6 +135,9 @@
                                 <input class="form-control" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg">
                             </div>
                             <div class="d-flex gap-3">
+                                <div class="image-preview" id="preview-container-3">
+                                    <div class="d-flex gap-3">
+                                        <!-- Preview and croppie container code here -->
                                 <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
                                     <img id="imgView3" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
                                 </div>
@@ -124,6 +145,8 @@
                                 <div id="result-3" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
                                     <img src="/placeholder.svg" id="croppedImg3" alt="Cropped Image" class="img-fluid" style="object-fit: contain;">
                                 </div>
+                                </div>
+                            </div>
                             </div>
                             <div class="mt-3">
                                 <button type="button" id="crop-button-3" class="btn btn-primary me-2">Crop Image</button>
@@ -137,13 +160,18 @@
                                 <input class="form-control" type="file" name="images" id="input4" accept="image/png, image/jpeg, image/jpg">
                             </div>
                             <div class="d-flex gap-3">
+                                <div class="image-preview" id="preview-container-4">
+                                    <div class="d-flex gap-3">
+                                        <!-- Preview and croppie container code here -->
                                 <div class="border rounded bg-light position-relative overflow-hidden" style="width: 300px; height: 300px;">
-                                    <img src="/placeholder.svg" alt="Preview Image" id="imgView4" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
+                                    <img id="imgView4" class="img-fluid w-100 h-100 position-absolute" style="object-fit: cover;">
                                 </div>
                                 <div id="croppie-container-4" class="border" style="width: 300px; height: 300px;"></div>
                                 <div id="result-4" class="d-none border rounded bg-light d-flex justify-content-center align-items-center" style="width: 300px; height: 300px;">
                                     <img id="croppedImg4" class="img-fluid" style="object-fit: contain;">
                                 </div>
+                                </div>
+                            </div>
                             </div>
                             <div class="mt-3">
                                 <button type="button" id="crop-button-4" class="btn btn-primary me-2">Crop Image</button>
@@ -172,6 +200,7 @@
                                         <label class="form-label">Stock quantity</label>
                                         <input type="number" name="variants[0][stock]" class="form-control"
                                             placeholder="Enter quantity">
+                                        <div id="variants[0][stock]-error" class="error-message"></div>
                                     </div>
 
                                     <div class="variant-prices">
@@ -181,6 +210,7 @@
                                                 <span class="currency">₹</span>
                                                 <input type="number" name="variants[0][regularPrice]"
                                                     class="form-control" placeholder="₹1000">
+                                                <div id="variants[0][regularPrice]-error" class="error-message"></div>
                                             </div>
                                         </div>
 
@@ -190,6 +220,7 @@
                                                 <span class="currency">₹</span>
                                                 <input type="number" name="variants[0][salesPrice]" class="form-control"
                                                     placeholder="₹2500">
+                                                <div id="variants[0][salesPrice]-error" class="error-message"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -198,166 +229,286 @@
                         </div>
                     </div>
                     <div>
-                        <button class="btn btn-primary" type="submit">Publish</button>
+                        <button class="btn btn-primary" type="submit" id="submitBtn">Publish</button>
                     </div>
-            </div>
-            
+                </div>
             </form>
-        </div>
         </div>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+    for (let i = 1; i <= 4; i++) {
+        const fileInput = document.getElementById(`input${i}`);
+        const previewContainer = document.getElementById(`preview-container-${i}`);
+        const imgView = document.getElementById(`imgView${i}`);
 
-const components = [1, 2, 3, 4];
-const croppieInstances = {};
-
-components.forEach(id => {
-    const input = document.getElementById(`input${id}`);
-    const previewImage = document.getElementById(`imgView${id}`);
-    const croppieContainer = document.getElementById(`croppie-container-${id}`);
-    const resultContainer = document.getElementById(`result-${id}`);
-    const cropButton = document.getElementById(`crop-button-${id}`);
-    const croppedImg = document.getElementById(`croppedImg${id}`);
-
-    input.addEventListener('change', function () {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                previewImage.src = e.target.result;
-                initCroppie(id, e.target.result);
-            };
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-
-    function initCroppie(componentId, imageData) {
-        if (croppieInstances[componentId]) {
-            croppieInstances[componentId].destroy();
-        }
-
-        croppieInstances[componentId] = new Croppie(document.getElementById(`croppie-container-${componentId}`), {
-            viewport: { width: 200, height: 200, type: 'square' },
-            boundary: { width: 300, height: 300 },
-            showZoomer: true,
-        });
-
-        croppieInstances[componentId].bind({ url: imageData });
-    }
-
-    cropButton.addEventListener('click', function () {
-        if (croppieInstances[id]) {
-            croppieInstances[id].result({
-                type: 'canvas',
-                size: 'viewport',
-            }).then(function (croppedImage) {
-                croppedImg.src = croppedImage;
-                resultContainer.classList.remove('d-none');
+        if (fileInput) {
+            fileInput.addEventListener("change", function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imgView.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                } else {
+                    previewContainer.style.display = 'none';
+                }
             });
         }
-    });
+    }
 });
 
 
-        documnt.addEventListener("DOMContentLoaded", function () {
-            const form = document.querySelector("form");
-            const errorClass = "text-red-500 text-sm mt-1";
+        //////////////////////////////////////////////
+    document.addEventListener("DOMContentLoaded", function () {
+    // === CROPPIE INITIALIZATION ===
+    const components = [1, 2, 3, 4];
+    const croppieInstances = {};
+    const croppedImageData = {};
 
-            function showError(field, message) {
-                let errorDiv = field.nextElementSibling;
-                if (!errorDiv || !errorDiv.classList.contains("error-message")) {
-                    errorDiv = document.createElement("div");
-                    errorDiv.className = `error-message ${errorClass}`;
-                    field.parentNode.insertBefore(errorDiv, field.nextSibling);
+    components.forEach(id => {
+        const input = document.getElementById(`input${id}`);
+        const previewImage = document.getElementById(`imgView${id}`);
+        const croppieContainer = document.getElementById(`croppie-container-${id}`);
+        const resultContainer = document.getElementById(`result-${id}`);
+        const cropButton = document.getElementById(`crop-button-${id}`);
+        const croppedImg = document.getElementById(`croppedImg${id}`);
+
+        input.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                
+                // Validate file type and size
+                const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                
+                if (!allowedTypes.includes(file.type)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid File Type',
+                        text: 'Only JPG, JPEG, and PNG files are allowed'
+                    });
+                    this.value = ''; // Clear the input
+                    return;
                 }
-                errorDiv.textContent = message;
-                return false;
+                
+                if (file.size > maxSize) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'File Too Large',
+                        text: 'Image size should not exceed 5MB'
+                    });
+                    this.value = ''; // Clear the input
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                    initCroppie(id, e.target.result);
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        function initCroppie(componentId, imageData) {
+            if (croppieInstances[componentId]) {
+                croppieInstances[componentId].destroy();
             }
 
-            function clearError(field) {
-                const errorDiv = field.nextElementSibling;
-                if (errorDiv && errorDiv.classList.contains("error-message")) {
-                    errorDiv.textContent = "";
-                }
+            croppieInstances[componentId] = new Croppie(document.getElementById(`croppie-container-${componentId}`), {
+                viewport: { width: 200, height: 200, type: 'square' },
+                boundary: { width: 300, height: 300 },
+                showZoomer: true,
+            });
+
+            croppieInstances[componentId].bind({ url: imageData });
+        }
+
+        cropButton.addEventListener('click', function () {
+            if (croppieInstances[id]) {
+                croppieInstances[id].result({
+                    type: 'canvas',
+                    size: 'viewport',
+                    format: 'jpeg',
+                    quality: 0.9
+                }).then(function (croppedImage) {
+                    croppedImg.src = croppedImage;
+                    resultContainer.classList.remove('d-none');
+                    
+                    // Store cropped image data for form submission
+                    croppedImageData[`image${id}`] = croppedImage;
+                    
+                    // Add a hidden input to the form to store this data
+                    let hiddenInput = document.getElementById(`croppedData${id}`);
+                    if (!hiddenInput) {
+                        hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.id = `croppedData${id}`;
+                        hiddenInput.name = `croppedImages[${id-1}]`;
+                        document.getElementById('productForm').appendChild(hiddenInput);
+                    }
+                    hiddenInput.value = croppedImage;
+                    
+                    // Clear any image-related error message after successful cropping
+                    clearError(document.getElementById(`input${id}`));
+                });
             }
+        });
+    });
 
-            function validateProductName(field) {
-                const value = field.value;
-                const trimmedValue = value.trim();
+    // === FORM VALIDATION AND SUBMISSION ===
+    const form = document.getElementById("productForm");
+    
+    // Function to show SweetAlert errors
+    function showSwalError(title, message) {
+        Swal.fire({
+            icon: 'error',
+            title: title,
+            text: message,
+            confirmButtonColor: '#3085d6'
+        });
+    }
+    
+    // Function to show SweetAlert success
+    function showSwalSuccess(title, message) {
+        Swal.fire({
+            icon: 'success',
+            title: title,
+            text: message,
+            confirmButtonColor: '#3085d6'
+        });
+    }
 
-                if (!trimmedValue) {
-                    return showError(field, "Product name is required");
-                }
+    // Function to display field-specific validation errors
+    function showError(field, message) {
+        const fieldId = field.name || field.id;
+        let errorDiv;
+        
+        // For fields within variant blocks
+        if (fieldId.includes('[')) {
+            // Replace brackets to make valid selector
+            const selector = fieldId.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+            errorDiv = document.querySelector(`#${selector}-error`);
+        } else {
+            errorDiv = document.getElementById(`${fieldId}-error`);
+        }
+        
+        if (!errorDiv) {
+            errorDiv = document.createElement("div");
+            errorDiv.className = "error-message text-danger text-sm mt-1";
+            errorDiv.id = `${fieldId}-error`;
+            field.parentNode.appendChild(errorDiv);
+        }
+        
+        errorDiv.textContent = message;
+        field.classList.add('is-invalid');
+        return false;
+    }
 
-                if (value.startsWith(' ')) {
-                    return showError(field, "Product name cannot start with space");
-                }
+    // Function to clear field-specific errors
+    function clearError(field) {
+        const fieldId = field.name || field.id;
+        let errorDiv;
+        
+        // For fields within variant blocks
+        if (fieldId.includes('[')) {
+            // Replace brackets to make valid selector
+            const selector = fieldId.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+            errorDiv = document.querySelector(`#${selector}-error`);
+        } else {
+            errorDiv = document.getElementById(`${fieldId}-error`);
+        }
+        
+        if (errorDiv) {
+            errorDiv.textContent = "";
+        }
+        
+        field.classList.remove('is-invalid');
+    }
 
-                if (/^\s*$/.test(value)) {
-                    return showError(field, "Product name cannot contain only spaces");
-                }
+    // Form field validation functions
+    function validateProductName(field) {
+        const value = field.value;
+        const trimmedValue = value.trim();
 
-                if (value.endsWith(' ')) {
-                    return showError(field, "Product name cannot end with space");
-                }
+        if (!trimmedValue) {
+            return showError(field, "Product name is required");
+        }
 
-                if (trimmedValue.length < 3) {
-                    return showError(field, "Product name must be at least 3 characters long");
-                }
+        if (value.startsWith(' ')) {
+            return showError(field, "Product name cannot start with space");
+        }
 
-                if (trimmedValue.length > 100) {
-                    return showError(field, "Product name cannot exceed 100 characters");
-                }
+        if (/^\s*$/.test(value)) {
+            return showError(field, "Product name cannot contain only spaces");
+        }
 
-                if (!/^[a-zA-Z0-9\s-&()']+$/.test(value)) {
-                    return showError(field, "Product name can only contain letters, numbers, and single quotes");
-                }
+        if (value.endsWith(' ')) {
+            return showError(field, "Product name cannot end with space");
+        }
 
+        if (trimmedValue.length < 3) {
+            return showError(field, "Product name must be at least 3 characters long");
+        }
 
-                clearError(field);
-                return true;
-            }
+        if (trimmedValue.length > 100) {
+            return showError(field, "Product name cannot exceed 100 characters");
+        }
 
-            function validateDescription(field) {
-                const value = field.value;
-                const trimmedValue = value.trim();
-                if (!trimmedValue) {
-                    return showError(field, "Description is required");
-                }
+        if (!/^[a-zA-Z0-9\s\-&()']+$/.test(value)) {
+            return showError(field, "Product name can only contain letters, numbers, spaces, hyphens, &, parentheses and single quotes");
+        }
 
-                if (value.startsWith(' ')) {
-                    return showError(field, "Description cannot start with space");
-                }
+        clearError(field);
+        return true;
+    }
 
-                if (/^\s*$/.test(value)) {
-                    return showError(field, "Description cannot contain only spaces");
-                }
+    function validateDescription(field) {
+        const value = field.value;
+        const trimmedValue = value.trim();
+        
+        if (!trimmedValue) {
+            return showError(field, "Description is required");
+        }
 
-                if (trimmedValue.length < 8) {
-                    return showError(field, "Description must be at least 8 characters long");
-                }
+        if (value.startsWith(' ')) {
+            return showError(field, "Description cannot start with space");
+        }
 
-                if (trimmedValue.length > 1000) {
-                    return showError(field, "Description cannot exceed 1000 characters");
-                }
+        if (/^\s*$/.test(value)) {
+            return showError(field, "Description cannot contain only spaces");
+        }
 
-                if (value.endsWith(' ')) {
-                    return showError(field, "Description cannot end with space");
-                }
+        if (trimmedValue.length < 8) {
+            return showError(field, "Description must be at least 8 characters long");
+        }
 
-                clearError(field);
-                return true;
-            }
+        if (trimmedValue.length > 1000) {
+            return showError(field, "Description cannot exceed 1000 characters");
+        }
 
-            function validateDropdown(field, fieldName) {
-                if (!field.value) return showError(field, `${fieldName} is required`);
-                clearError(field);
-                return true;
-            }
+        if (value.endsWith(' ')) {
+            return showError(field, "Description cannot end with space");
+        }
 
-            function validateNumber(field, fieldName) {
+        clearError(field);
+        return true;
+    }
+
+    function validateDropdown(field, fieldName) {
+        if (!field.value) {
+            return showError(field, `${fieldName} is required`);
+        }
+        clearError(field);
+        return true;
+    }
+
+    function validateNumber(field, fieldName) {
         const value = field.value.trim();
         const isStock = fieldName.toLowerCase().includes('stock');
 
@@ -368,8 +519,8 @@ components.forEach(id => {
         const regex = isStock ? /^\d+$/ : /^\d+(\.\d{1,2})?$/;
         if (!regex.test(value)) {
             return showError(field, isStock 
-                ? `${fieldName} must be a number`
-                : `${fieldName} must be a Non-negative number`);
+                ? `${fieldName} must be a whole number`
+                : `${fieldName} must be a non-negative number`);
         }
 
         if (/[$@!%*?&#^-]/.test(value)) {
@@ -389,6 +540,7 @@ components.forEach(id => {
         if (isStock && numValue > 10000) {
             return showError(field, `${fieldName} cannot exceed 10,000`);
         }
+        
         if (!isStock && numValue > 1000000) {
             return showError(field, `${fieldName} cannot exceed 1,000,000`);
         }
@@ -397,104 +549,253 @@ components.forEach(id => {
         return true;
     }
 
-            function validateImage(field) {
-                if (field.files.length > 0) {
-                    const file = field.files[0];
-                    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    function validateImage(field) {
+        // First check if file is selected
+        if (field.files.length === 0) {
+            // Only show error for first image (mandatory)
+            if (field.id === 'input1') {
+                return showError(field, "At least one product image is required");
+            }
+            return true; // Other images are optional
+        }
+        
+        // If file is selected, validate it
+        const file = field.files[0];
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
 
-                    if (!allowedTypes.includes(file.type)) {
-                        return showError(field, "Only JPG, JPEG, and PNG files are allowed");
-                    }
+        if (!allowedTypes.includes(file.type)) {
+            return showError(field, "Only JPG, JPEG, and PNG files are allowed");
+        }
 
-                    const maxSize = 5 * 1024 * 1024;
-                    if (file.size > maxSize) {
-                        return showError(field, "Image size should not exceed 5MB");
-                    }
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            return showError(field, "Image size should not exceed 5MB");
+        }
 
-                    clearError(field);
-                    return true;
+        // Check if image is cropped
+        const componentId = field.id.replace('input', '');
+        const croppedData = document.getElementById(`croppedData${componentId}`);
+        
+        if (!croppedData || !croppedData.value) {
+            return showError(field, "Please crop the image before submitting");
+        }
+
+        clearError(field);
+        return true;
+    }
+
+    // New function to validate ML size selections
+    function validateSizeSelections() {
+        let isValid = true;
+        const sizeSelects = document.querySelectorAll('.size-select');
+        const selectedSizes = new Set();
+        
+        // First check if all size dropdowns have values
+        sizeSelects.forEach((select, index) => {
+            if (!select.value) {
+                isValid = showError(select, "ML size is required") && isValid;
+            } else {
+                // Check for duplicate sizes
+                if (selectedSizes.has(select.value)) {
+                    isValid = showError(select, "Duplicate ML size is not allowed") && isValid;
+                } else {
+                    selectedSizes.add(select.value);
+                    clearError(select);
                 }
-                return true;
             }
+        });
+        
+        return isValid;
+    }
 
-
-            const productName = document.getElementById("product_name");
-            const description = document.querySelector("textarea[name='description']");
-            const brand = document.querySelector("select[name='brand']");
-            const category = document.querySelector("select[name='category']");
-            const fileInputs = document.querySelectorAll("input[type='file']");
-
-            function debounce(func, wait) {
-                let timeout;
-                return function (...args) {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, args), wait);
-                };
-            }
-
-            productName.addEventListener("input", debounce(() => validateProductName(productName), 300));
-            description.addEventListener("input", debounce(() => validateDescription(description), 300));
-            brand.addEventListener("change", () => validateDropdown(brand, "Brand"));
-            category.addEventListener("change", () => validateDropdown(category, "Category"));
-            fileInputs.forEach(input => {
-                input.addEventListener("change", () => validateImage(input));
-            });
-
-            description.addEventListener("paste", function (e) {
-                e.preventDefault();
-                const text = (e.originalEvent || e).clipboardData.getData('text/plain');
-                document.execCommand("insertText", false, text);
-            });
-
-            function validateVariants() {
+    function validateVariants() {
         let isValid = true;
         document.querySelectorAll(".variant-item").forEach((variant, index) => {
             const stock = variant.querySelector(`input[name='variants[${index}][stock]']`);
             const regularPrice = variant.querySelector(`input[name='variants[${index}][regularPrice]']`);
             const salePrice = variant.querySelector(`input[name='variants[${index}][salesPrice]']`);
+            const sizeSelect = variant.querySelector(`.size-select`);
 
+            // Validate ML size
+            if (sizeSelect && !sizeSelect.value) {
+                isValid = showError(sizeSelect, "ML size is required") && isValid;
+            } else if (sizeSelect) {
+                clearError(sizeSelect);
+            }
+
+            // Validate stock
             isValid = validateNumber(stock, "Stock quantity") && isValid;
+            
+            // Validate regular price
             isValid = validateNumber(regularPrice, "Regular price") && isValid;
 
-            if (salePrice && salePrice.value.trim()) {
+            // Validate sale price - now required
+            if (!salePrice.value.trim()) {
+                isValid = showError(salePrice, "Sale price is required") && isValid;
+            } else {
                 isValid = validateNumber(salePrice, "Sale price") && isValid;
                 if (isValid && parseFloat(salePrice.value) >= parseFloat(regularPrice.value)) {
                     isValid = showError(salePrice, "Sale price must be less than regular price") && isValid;
                 }
             }
         });
+        
+        // Check for duplicate ML sizes
+        isValid = validateSizeSelections() && isValid;
+        
         return isValid;
     }
 
-            form.addEventListener("submit", function (event) {
-                event.preventDefault();
-                let isValid = true;
+    // Reference form fields
+    const productName = document.getElementById("product_name");
+    const description = document.querySelector("textarea[name='description']");
+    const brand = document.querySelector("select[name='brand']");
+    const category = document.querySelector("select[name='category']");
+    const fileInputs = document.querySelectorAll("input[type='file']");
 
-                isValid = validateProductName(productName) && isValid;
-                isValid = validateDescription(description) && isValid;
-                isValid = validateDropdown(brand, "Brand") && isValid;
-                isValid = validateDropdown(category, "Category") && isValid;
+    // Add debounce function for input validation
+    function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
 
+    // Add event listeners for real-time validation
+    productName.addEventListener("input", debounce(() => validateProductName(productName), 300));
+    description.addEventListener("input", debounce(() => validateDescription(description), 300));
+    brand.addEventListener("change", () => validateDropdown(brand, "Brand"));
+    category.addEventListener("change", () => validateDropdown(category, "Category"));
+    
+    // Add validation for file inputs with cropping
+    fileInputs.forEach(input => {
+        input.addEventListener("change", () => validateImage(input));
+    });
 
-                let hasImage = false;
-                fileInputs.forEach(input => {
-                    if (input.files.length > 0) {
-                        hasImage = true;
-                        isValid = validateImage(input) && isValid;
-                    }
-                });
+    // Handle paste events for description to maintain formatting
+    description.addEventListener("paste", function (e) {
+        e.preventDefault();
+        const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+        document.execCommand("insertText", false, text);
+    });
 
-                if (!hasImage) {
-                    isValid = showError(fileInputs[0], "At least one image is required") && isValid;
-                }
-
-                isValid = validateVariants() && isValid;
-
-                if (isValid) {
-                    form.submit();
+    // Listen for variant field changes including ML sizes
+    document.querySelectorAll('.variant-item').forEach((variant, index) => {
+        const stock = variant.querySelector(`input[name='variants[${index}][stock]']`);
+        const regularPrice = variant.querySelector(`input[name='variants[${index}][regularPrice]']`);
+        const salePrice = variant.querySelector(`input[name='variants[${index}][salesPrice]']`);
+        const sizeSelect = variant.querySelector(`.size-select`);
+        
+        if (sizeSelect) {
+            sizeSelect.addEventListener('change', () => {
+                if (!sizeSelect.value) {
+                    showError(sizeSelect, "ML size is required");
+                } else {
+                    clearError(sizeSelect);
+                    validateSizeSelections(); // Check for duplicates when changing
                 }
             });
-        });
+        }
+        
+        if (stock) stock.addEventListener('input', debounce(() => validateNumber(stock, "Stock quantity"), 300));
+        if (regularPrice) regularPrice.addEventListener('input', debounce(() => validateNumber(regularPrice, "Regular price"), 300));
+        if (salePrice) {
+            salePrice.addEventListener('input', debounce(() => {
+                if (!salePrice.value.trim()) {
+                    showError(salePrice, "Sale price is required");
+                } else {
+                    validateNumber(salePrice, "Sale price");
+                    if (regularPrice.value.trim() && parseFloat(salePrice.value) >= parseFloat(regularPrice.value)) {
+                        showError(salePrice, "Sale price must be less than regular price");
+                    }
+                }
+            }, 300));
+        }
+    });
+
+    // Function to check if at least first image is uploaded and cropped
+    function validateRequiredImage() {
+        const input1 = document.getElementById('input1');
+        if (!input1.files || input1.files.length === 0) {
+            showError(input1, "At least one product image is required");
+            return false;
+        }
+        
+        const croppedData1 = document.getElementById('croppedData1');
+        if (!croppedData1 || !croppedData1.value) {
+            showError(input1, "Please crop the first image before submitting");
+            return false;
+        }
+        
+        clearError(input1);
+        return true;
+    }
+
+    // Modify form submission to use fetch
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        let isValid = true;
+
+        // Validate all required fields
+        isValid = validateProductName(productName) && isValid;
+        isValid = validateDescription(description) && isValid;
+        isValid = validateDropdown(brand, "Brand") && isValid;
+        isValid = validateDropdown(category, "Category") && isValid;
+
+        isValid = validateRequiredImage() && isValid;
+        
+        for (let i = 2; i <= 4; i++) {
+            const input = document.getElementById(`input${i}`);
+            if (input.files.length > 0) {
+                isValid = validateImage(input) && isValid;
+            }
+        }
+
+        isValid = validateVariants() && isValid;
+
+        if (isValid) {
+            Swal.fire({
+                title: 'Submitting...',
+                text: 'Please wait while we process your request',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const formData = new FormData(form);
+            
+            fetch('/admin/productAdd', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || "Server error occurred");
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showSwalSuccess("Success", "Product added successfully!");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                showSwalError("Error", error.message || "Failed to add product. Please try again.");
+            });
+        } else {
+            // Show validation error summary
+            showSwalError("Validation Error", "Please add the input fields properly!");
+        }
+    });
+});
+
+
     </script>
 
     <%- include('../partials/admin/adminFooter.ejs') %>

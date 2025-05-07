@@ -2,7 +2,7 @@ const Product = require('../../model/productSchema')
 const Category = require('../../model/categorySchema')
 const Brand = require('../../model/brandSchema')
 const User = require('../../model/userSchema')
-const statusCodes = require('../statusCode')
+const {statusCodes} = require('../../utils/statusCode')
 const fs = require('fs')
 const path = require('path')
 const sharp = require('sharp')
@@ -77,13 +77,13 @@ const productAdd = async (req, res) => {
             });
 
             await newProduct.save();
-            return res.redirect('/admin/products');
+            return res.status(200).json({ message: "Product added successfully" });
         } else {
-            return res.status(400).json("Product already exists. Please try with another name.");
+            return res.status(400).json({ message: "Product already exists. Please try with another name." });
         }
     } catch (error) {
         console.error("Error in saving product", error);
-        return res.redirect('/admin/404error');
+        return res.status(500).json({ message: "An unexpected error occurred. Please try again." });
     }
 };
 
@@ -267,13 +267,33 @@ const updateProduct = async (req, res) => {
             }
         }
 
-        res.redirect("/admin/products");
+        // Check if it's an AJAX request or a traditional form submission
+        const isAjaxRequest = req.xhr || req.headers.accept.indexOf('json') > -1;
+        
+        if (isAjaxRequest) {
+            return res.status(200).json({ 
+                success: true, 
+                message: "Product updated successfully" 
+            });
+        } else {
+            // Traditional form submission redirect
+            return res.redirect("/admin/products");
+        }
     } catch (error) {
         console.error("Error updating product:", error);
-        res.redirect("/404error");
+        
+        // Check if it's an AJAX request
+        const isAjaxRequest = req.xhr || req.headers.accept.indexOf('json') > -1;
+        
+        if (isAjaxRequest) {
+            return res.status(500).json({ 
+                error: error.message || "An error occurred while updating the product" 
+            });
+        } else {
+            return res.redirect("/404error");
+        }
     }
 };
-
 
 const deleteoneimage = async (req, res) => {
     try {

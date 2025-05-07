@@ -4,6 +4,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+    <!-- Add SweetAlert2 CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js"></script>
     <style>
         .image-container {
             position: relative;
@@ -79,7 +82,7 @@
         <div class="col-lg-6">
             <div class="card mb-4">
                 <div class="card-body">
-                    <form method="post" action="/admin/editProduct/id=<%=product._id%>"
+                    <form id="editProductForm" method="post" action="/admin/editProduct/id=<%=product._id%>"
                         enctype="multipart/form-data">
                         <div class="mb-4">
                             <label for="product_name" class="form-label">Product Name</label>
@@ -267,7 +270,6 @@
 </section>
 
 <script>
-
 window.cropperInstances = {};
 
 function viewImage(event, index) {
@@ -357,6 +359,7 @@ function deleteSingleImage(imageName, productId) {
 
 function validateAndSubmit() {
     if (validateForm()) {
+        // Clean up cropper instances
         for (let i = 1; i <= 4; i++) {
             if (window.cropperInstances && window.cropperInstances[i]) {
                 window.cropperInstances[i].destroy();
@@ -364,14 +367,67 @@ function validateAndSubmit() {
             }
         }
 
-        const form = document.forms[0];
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "imagesToDelete";
-        input.value = JSON.stringify(imagesToDelete);
-        form.appendChild(input);
+        const form = document.getElementById('editProductForm');
+        const formData = new FormData(form);
+        
+        // Add the images to delete
+        if (imagesToDelete.length > 0) {
+            formData.append('imagesToDelete', JSON.stringify(imagesToDelete));
+        }
 
-        document.forms[0].submit();
+        // Show loading state
+        Swal.fire({
+            title: 'Processing...',
+            text: 'Updating product details',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Send form data using fetch API
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Failed to update product');
+                });
+            }
+            return response;
+        })
+        .then(() => {
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Product details updated successfully',
+                confirmButtonColor: '#4CAF50'
+            }).then(() => {
+                // Redirect to products listing page
+                window.location.href = '/admin/products';
+            });
+        })
+        .catch(error => {
+            // Show error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.message || 'Something went wrong!',
+                confirmButtonColor: '#d33'
+            });
+        });
+    } else {
+        // Show validation error message
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please reset the error fields before submitting',
+            confirmButtonColor: '#d33'
+        });
     }
 }
 
@@ -380,7 +436,7 @@ function validateForm() {
     clearErrorMessages();
     let isValid = true;
 
-const productName = document.getElementsByName('productName')[0].value;
+    const productName = document.getElementsByName('productName')[0].value;
     const description = document.getElementsByName('description')[0].value;
     const brand = document.getElementsByName('brand')[0].value;
     const category = document.getElementsByName('category')[0].value;
@@ -422,6 +478,9 @@ const productName = document.getElementsByName('productName')[0].value;
         isValid = false;
     } else if (isNaN(salePrice) || parseFloat(salePrice) < 0) {
         displayErrorMessage('salePrice-error', 'Sale price must be a non-negative number.');
+        isValid = false;
+    } else if (parseFloat(salePrice) >= parseFloat(regularPrice)) {
+        displayErrorMessage('salePrice-error', 'Sale price must be less than regular price.');
         isValid = false;
     }
     
@@ -483,7 +542,6 @@ const productName = document.getElementsByName('productName')[0].value;
     return isValid;
 }
 
-
 function displayErrorMessage(elementId, message) {
     const errorElement = document.getElementById(elementId);
     if (errorElement) {
@@ -502,5 +560,4 @@ function clearErrorMessages() {
         element.style.display = "none";
     });
 }
-
 </script>
