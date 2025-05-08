@@ -110,7 +110,9 @@ const loadHomepage = async (req, res, next) => {
 const loadSignup = async (req, res) => {
     try {
         const message = req.query.message
-
+        if(req.session.user){
+            return res.redirect('/')
+        }
         return res.render('signup', { message })
     }
     catch (error) {

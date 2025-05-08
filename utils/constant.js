@@ -28,9 +28,28 @@ const MESSAGES = {
     PRODUCT_ALREADY_RETURNED : 'The product is already returned.',
     PRODUCT_RETURN_INITIATED_SUCCESS : 'Product return initiated successfully',
     PRODUCT_RETURN_FAILED : 'Failed to return the product. Please try again later.',
+    INVALID_CATEGORY_NAME : 'Invalid category name',
+    INVALID_VARIANTS_DATA : 'Invalid variants data',
+    PRODUCT_ADDED_SUCCESSFULLY : 'Product added successfully',
+    PRODUCT_ALREADY_EXISTS : 'Product already exists. Please try with another name.',
+    UNEXPECTED_ERROR : 'An unexpected error occurred. Please try again.',
+    PRODUCT_NOT_FOUND : 'Product not found',
+    PRODUCT_BLOCKED_SUCCESSFULLY : 'Product blocked successfully',
+    PRODUCT_UNBLOCKED_SUCCESSFULLY : 'Product unblocked successfully',
+    PRODUCT_UPDATED_SUCCESSFULLY : 'Product updated successfully',
+    FILE_DELETION_FAILED : 'File deletion failed',
+    IMAGE_DELETED_SUCCESSFULLY : 'Image deleted successfully',
+    INVALID_OFFER_PRICE_RANGE : 'The offer price must be between 0-100',
+    OFFER_APPLIED_SUCCESSFULLY : 'Offer applied successfully!',
+    INVALID_PRODUCT_ID : 'Invalid product ID.',
+    OFFER_REMOVED_SUCCESSFULLY : 'Offer removed successfully!',
+    OFFER_REMOVAL_FAILED : 'Offer removing failed.',
 }
 const ERROR = {
     SERVER_ERROR : 'Server error',
+    GENERIC_ERROR : 'An error occurred',
+    INVALID_DATA_PROVIDED : 'Invalid data provided',
+    INVALID_PRODUCT_ID_FORMAT : 'Invalid Product ID format',
 }
 
 

@@ -346,17 +346,128 @@ const removeFromWishlist = async (req, res) => {
 };
 
 
+// const addToCartFromWishlist = async (req, res) => {
+//     try {
+//         const user = req.session.user;
+//         const { productId, quantity } = req.body;
+//         const itemQuantity = parseInt(quantity || 1);
+        
+//         const product = await Product.findById(productId);
+//         if (!product) {
+//             return res.status(404).json({ success: false, message: "Product not found" });
+//         }
+        
+//         let cart = await Cart.findOne({ userId: user });
+//         let wishlist = await Wishlist.findOne({ userId: user });
+        
+//         if (!cart) {
+//             cart = new Cart({
+//                 userId: user,
+//                 items: [{
+//                     productId,
+//                     quantity: itemQuantity,
+//                     price: product.salesPrice,
+//                     totalPrice: product.salesPrice * itemQuantity
+//                 }]
+//             });
+//             await cart.save();
+            
+//             if (wishlist) {
+//                 wishlist.products = wishlist.products.filter(item => 
+//                     item.productId.toString() !== productId
+//                 );
+//                 await wishlist.save();
+//             }
+            
+//             return res.status(200).json({
+//                 success: true,
+//                 message: "Product added to cart and removed from wishlist"
+//             });
+//         } else {
+//             const existingItemIndex = cart.items.findIndex(item =>
+//                 item.productId.toString() === productId
+//             );
+            
+//             if (existingItemIndex !== -1) {
+//                 return res.status(200).json({
+//                     success: false,
+//                     exists: true,
+//                     message: "Product already exists in your cart"
+//                 });
+//             } else {
+//                 cart.items.push({
+//                     productId,
+//                     quantity: itemQuantity,
+//                     price: product.salesPrice,
+//                     totalPrice: product.salesPrice * itemQuantity
+//                 });
+//                 await cart.save();
+                
+//                 if (wishlist) {
+//                     wishlist.products = wishlist.products.filter(item => 
+//                         item.productId.toString() !== productId
+//                     );
+//                     await wishlist.save();
+//                 }
+                
+//                 return res.status(200).json({
+//                     success: true,
+//                     message: "Product added to cart and removed from wishlist"
+//                 });
+//             }
+//         }
+//     } catch (error) {
+//         console.log("Error in addToCartFromWishlist", error);
+//         return res.status(500).json({ success: false, message: "Internal Server Error" });
+//     }
+// };
+
 const addToCartFromWishlist = async (req, res) => {
     try {
         const user = req.session.user;
         const { productId, quantity } = req.body;
         const itemQuantity = parseInt(quantity || 1);
         
-        const product = await Product.findById(productId);
+        // Find the product and populate category for validation
+        const product = await Product.findById(productId).populate('category');
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
         
+        // Check if product quantity is zero
+        if (product.quantity <= 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "This product is out of stock and cannot be added to cart" 
+            });
+        }
+        
+        // Check if product is blocked or status isn't Available
+        if (product.isBlocked || product.status !== "Available") {
+            return res.status(400).json({ 
+                success: false, 
+                message: "This product is currently unavailable and cannot be added to cart" 
+            });
+        }
+        
+        // Check if category is not listed (using islisted property from your schema)
+        if (product.category && !product.category.islisted) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Products from this category are currently unavailable" 
+            });
+        }
+        
+        // For brand validation - since brand is stored as a string, we need to find the brand document
+        const brand = await Brand.findOne({ brandName: product.brand });
+        if (brand && brand.isBlocked) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Products from this brand are currently unavailable" 
+            });
+        }
+        
+        // If all checks pass, proceed with adding to cart
         let cart = await Cart.findOne({ userId: user });
         let wishlist = await Wishlist.findOne({ userId: user });
         
@@ -421,7 +532,6 @@ const addToCartFromWishlist = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
-
 
 const checkAddAddress = async (req, res) => {
     try {

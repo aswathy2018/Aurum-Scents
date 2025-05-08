@@ -3,6 +3,7 @@ const Category = require('../../model/categorySchema')
 const Brand = require('../../model/brandSchema')
 const User = require('../../model/userSchema')
 const {statusCodes} = require('../../utils/statusCode')
+const {MESSAGES,ERROR} = require('../../utils/constant')
 const fs = require('fs')
 const path = require('path')
 const sharp = require('sharp')
@@ -54,12 +55,12 @@ const productAdd = async (req, res) => {
             const categoryId = await Category.findOne({ name: products.category });
 
             if (!categoryId) {
-                return res.status(400).json({ message: "Invalid category name" });
+                return res.status(400).json({ message: MESSAGES.INVALID_CATEGORY_NAME });
             }
 
             const variant = products.variants && products.variants[0];
             if (!variant) {
-                return res.status(400).json({ message: "Invalid variants data" });
+                return res.status(400).json({ message: MESSAGES.INVALID_VARIANTS_DATA });
             }
 
             const newProduct = new Product({
@@ -77,13 +78,13 @@ const productAdd = async (req, res) => {
             });
 
             await newProduct.save();
-            return res.status(200).json({ message: "Product added successfully" });
+            return res.status(200).json({ message: MESSAGES.PRODUCT_ADDED_SUCCESSFULLY });
         } else {
-            return res.status(400).json({ message: "Product already exists. Please try with another name." });
+            return res.status(400).json({ message: MESSAGES.PRODUCT_ALREADY_EXISTS });
         }
     } catch (error) {
         console.error("Error in saving product", error);
-        return res.status(500).json({ message: "An unexpected error occurred. Please try again." });
+        return res.status(500).json({ message: MESSAGES.UNEXPECTED_ERROR });
     }
 };
 
@@ -146,12 +147,12 @@ const productBlocked = async (req, res, next) => {
         );
 
         if (result.matchedCount === 0) {
-            return res.status(404).json({ success: false, message: 'Product not found' });
+            return res.status(404).json({ success: false, message: MESSAGES.PRODUCT_NOT_FOUND });
         }
 
-        res.status(200).json({ success: true, message: 'Product blocked successfully' });
+        res.status(200).json({ success: true, message: MESSAGES.PRODUCT_BLOCKED_SUCCESSFULLY });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'An error occurred' });
+        res.status(500).json({ success: false, message: ERROR.GENERIC_ERROR });
     }
 }
 
@@ -164,12 +165,12 @@ const productunBlocked = async (req, res, next) => {
         );
 
         if (result.matchedCount === 0) {
-            return res.status(statusCodes.Not_Found).json({ success: false, message: 'Product not found' });
+            return res.status(statusCodes.Not_Found).json({ success: false, message: MESSAGES.PRODUCT_NOT_FOUND });
         }
 
-        res.status(200).json({ success: true, message: 'Product unblocked successfully' });
+        res.status(200).json({ success: true, message: MESSAGES.PRODUCT_UNBLOCKED_SUCCESSFULLY });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'An error occurred' });
+        res.status(500).json({ success: false, message: ERROR.GENERIC_ERROR });
     }
 }
 
@@ -202,12 +203,12 @@ const updateProduct = async (req, res) => {
         const id = req.params.id.replace(/^id=/, "");
 
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-            return res.status(400).json({ error: "Invalid Product ID format" });
+            return res.status(400).json({ error: ERROR.INVALID_PRODUCT_ID_FORMAT });
         }
 
         const product = await Product.findOne({ _id: id });
         if (!product) {
-            return res.status(404).json({ error: "Product not found" });
+            return res.status(404).json({ error: MESSAGES.PRODUCT_NOT_FOUND });
         }
 
         const data = req.body;
@@ -218,7 +219,7 @@ const updateProduct = async (req, res) => {
         });
         if (existingProduct) {
             return res.status(400).json({
-                error: "Product already exists. Please try again with another name.",
+                error: MESSAGES.PRODUCT_ALREADY_EXISTS,
             });
         }
 
@@ -267,22 +268,19 @@ const updateProduct = async (req, res) => {
             }
         }
 
-        // Check if it's an AJAX request or a traditional form submission
         const isAjaxRequest = req.xhr || req.headers.accept.indexOf('json') > -1;
         
         if (isAjaxRequest) {
             return res.status(200).json({ 
                 success: true, 
-                message: "Product updated successfully" 
+                message: MESSAGES.PRODUCT_UPDATED_SUCCESSFULLY 
             });
         } else {
-            // Traditional form submission redirect
             return res.redirect("/admin/products");
         }
     } catch (error) {
         console.error("Error updating product:", error);
         
-        // Check if it's an AJAX request
         const isAjaxRequest = req.xhr || req.headers.accept.indexOf('json') > -1;
         
         if (isAjaxRequest) {
@@ -301,7 +299,7 @@ const deleteoneimage = async (req, res) => {
         console.log(imageNameToServer, productIdToServer)
 
         if (!imageNameToServer || !productIdToServer) {
-            return res.status(400).json({ status: false, message: "Invalid data provided" });
+            return res.status(400).json({ status: false, message: ERROR.INVALID_DATA_PROVIDED });
         }
 
         const product = await Product.findByIdAndUpdate(productIdToServer, {
@@ -309,7 +307,7 @@ const deleteoneimage = async (req, res) => {
         });
 
         if (!product) {
-            return res.status(404).json({ status: false, message: "Product not found" });
+            return res.status(404).json({ status: false, message: MESSAGES.PRODUCT_NOT_FOUND });
         }
 
         const imagePath = path.join(__dirname, "public", "uploads", "product-images", imageNameToServer);
@@ -318,7 +316,7 @@ const deleteoneimage = async (req, res) => {
             fs.unlink(imagePath, (err) => {
                 if (err) {
                     console.error("Failed to delete file:", err);
-                    return res.status(500).json({ status: false, message: "File deletion failed" });
+                    return res.status(500).json({ status: false, message: MESSAGES.FILE_DELETION_FAILED });
                 }
                 console.log(`Image ${imageNameToServer} deleted successfully.`);
             });
@@ -326,10 +324,10 @@ const deleteoneimage = async (req, res) => {
             console.log(`Image ${imageNameToServer} not found.`);
         }
 
-        res.status(200).json({ status: true, message: "Image deleted successfully" });
+        res.status(200).json({ status: true, message: MESSAGES.IMAGE_DELETED_SUCCESSFULLY });
     } catch (error) {
         console.error("Error deleting image:", error);
-        res.status(500).json({ status: false, message: "Internal Server Error" });
+        res.status(500).json({ status: false, message: ERROR.SERVER_ERROR });
     }
 };
 
@@ -356,12 +354,12 @@ const addproductoffer = async (req, res) => {
         const { productId, offerPercentage } = req.body;
 
         if (offerPercentage < 0 || offerPercentage > 100) {
-            return res.status(400).json({ success: false, message: "The offer price must be between 0-100" });
+            return res.status(400).json({ success: false, message: MESSAGES.INVALID_OFFER_PRICE_RANGE });
         }
 
         const product = await Product.findById(productId);
         if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found" });
+            return res.status(404).json({ success: false, message: MESSAGES.PRODUCT_NOT_FOUND });
         }
 
         if (!product.originalPrice) {
@@ -384,10 +382,10 @@ const addproductoffer = async (req, res) => {
 
         await product.save();
 
-        res.status(200).json({ success: true, message: "Offer applied successfully!" });
+        res.status(200).json({ success: true, message: MESSAGES.OFFER_APPLIED_SUCCESSFULLY });
     } catch (error) {
         console.log("Error adding product offer:", error);
-        res.status(500).json({ success: false, message: "Internal server error." });
+        res.status(500).json({ success: false, message: ERROR.SERVER_ERROR });
     }
 };
 
@@ -396,12 +394,12 @@ const removeOffer = async (req, res) => {
         const productId = req.query.id;
 
         if (!mongoose.Types.ObjectId.isValid(productId)) {
-            return res.status(400).json({ success: false, message: "Invalid product ID." });
+            return res.status(400).json({ success: false, message: MESSAGES.INVALID_PRODUCT_ID });
         }
 
         const product = await Product.findById(productId);
         if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found." });
+            return res.status(404).json({ success: false, message: MESSAGES.PRODUCT_NOT_FOUND });
         }
 
         const categoryId = product.category;
@@ -419,11 +417,11 @@ const removeOffer = async (req, res) => {
             }
         });
 
-        res.status(200).json({ success: true, message: "Offer removed successfully!" });
+        res.status(200).json({ success: true, message: MESSAGES.OFFER_REMOVED_SUCCESSFULLY });
 
     } catch (error) {
         console.error("Error removing product offer:", error);
-        res.status(500).json({ success: false, message: "Offer removing failed." });
+        res.status(500).json({ success: false, message: MESSAGES.OFFER_REMOVAL_FAILED });
     }
 };
 

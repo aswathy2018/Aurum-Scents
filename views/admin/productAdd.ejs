@@ -98,7 +98,7 @@
                                 </div>
                             </div>
                             <div class="mt-3">
-                                <button type="button" id="crop-button-1" class="btn btn-primary me-2">Crop
+                                <button type="button" id="crop-button-1" class="btn btn-primary me-2 d-none">Crop
                                     Image</button>
                             </div>
                         </div>
@@ -124,7 +124,7 @@
                             </div>
                             </div>
                             <div class="mt-3">
-                                <button type="button" id="crop-button-2" class="btn btn-primary me-2">Crop Image</button>
+                                <button type="button" id="crop-button-2" class="btn btn-primary me-2 d-none">Crop Image</button>
                             </div>
                         </div>
                         
@@ -149,7 +149,7 @@
                             </div>
                             </div>
                             <div class="mt-3">
-                                <button type="button" id="crop-button-3" class="btn btn-primary me-2">Crop Image</button>
+                                <button type="button" id="crop-button-3" class="btn btn-primary me-2 d-none">Crop Image</button>
                             </div>
                         </div>
                         
@@ -174,7 +174,7 @@
                             </div>
                             </div>
                             <div class="mt-3">
-                                <button type="button" id="crop-button-4" class="btn btn-primary me-2">Crop Image</button>
+                                <button type="button" id="crop-button-4" class="btn btn-primary me-2 d-none">Crop Image</button>
                             </div>
                         </div>
                     </div>
@@ -239,11 +239,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+
+document.addEventListener("DOMContentLoaded", () => {
     for (let i = 1; i <= 4; i++) {
         const fileInput = document.getElementById(`input${i}`);
         const previewContainer = document.getElementById(`preview-container-${i}`);
         const imgView = document.getElementById(`imgView${i}`);
+        const cropButton = document.getElementById(`crop-button-${i}`);
 
         if (fileInput) {
             fileInput.addEventListener("change", function () {
@@ -252,10 +254,18 @@
                     reader.onload = function (e) {
                         imgView.src = e.target.result;
                         previewContainer.style.display = 'block';
+
+                        if (cropButton) {
+                            cropButton.classList.remove('d-none');
+                        }
                     };
                     reader.readAsDataURL(this.files[0]);
                 } else {
                     previewContainer.style.display = 'none';
+
+                    if (cropButton) {
+                        cropButton.classList.add('d-none');
+                    }
                 }
             });
         }
@@ -263,9 +273,7 @@
 });
 
 
-        //////////////////////////////////////////////
     document.addEventListener("DOMContentLoaded", function () {
-    // === CROPPIE INITIALIZATION ===
     const components = [1, 2, 3, 4];
     const croppieInstances = {};
     const croppedImageData = {};
@@ -282,9 +290,8 @@
             if (this.files && this.files[0]) {
                 const file = this.files[0];
                 
-                // Validate file type and size
                 const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-                const maxSize = 5 * 1024 * 1024; // 5MB
+                const maxSize = 5 * 1024 * 1024;
                 
                 if (!allowedTypes.includes(file.type)) {
                     Swal.fire({
@@ -292,7 +299,7 @@
                         title: 'Invalid File Type',
                         text: 'Only JPG, JPEG, and PNG files are allowed'
                     });
-                    this.value = ''; // Clear the input
+                    this.value = '';
                     return;
                 }
                 
@@ -302,7 +309,7 @@
                         title: 'File Too Large',
                         text: 'Image size should not exceed 5MB'
                     });
-                    this.value = ''; // Clear the input
+                    this.value = '';
                     return;
                 }
                 
@@ -340,10 +347,8 @@
                     croppedImg.src = croppedImage;
                     resultContainer.classList.remove('d-none');
                     
-                    // Store cropped image data for form submission
                     croppedImageData[`image${id}`] = croppedImage;
                     
-                    // Add a hidden input to the form to store this data
                     let hiddenInput = document.getElementById(`croppedData${id}`);
                     if (!hiddenInput) {
                         hiddenInput = document.createElement('input');
@@ -354,17 +359,14 @@
                     }
                     hiddenInput.value = croppedImage;
                     
-                    // Clear any image-related error message after successful cropping
                     clearError(document.getElementById(`input${id}`));
                 });
             }
         });
     });
 
-    // === FORM VALIDATION AND SUBMISSION ===
     const form = document.getElementById("productForm");
     
-    // Function to show SweetAlert errors
     function showSwalError(title, message) {
         Swal.fire({
             icon: 'error',
@@ -374,7 +376,6 @@
         });
     }
     
-    // Function to show SweetAlert success
     function showSwalSuccess(title, message) {
         Swal.fire({
             icon: 'success',
@@ -384,14 +385,11 @@
         });
     }
 
-    // Function to display field-specific validation errors
     function showError(field, message) {
         const fieldId = field.name || field.id;
         let errorDiv;
         
-        // For fields within variant blocks
         if (fieldId.includes('[')) {
-            // Replace brackets to make valid selector
             const selector = fieldId.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
             errorDiv = document.querySelector(`#${selector}-error`);
         } else {
@@ -410,14 +408,11 @@
         return false;
     }
 
-    // Function to clear field-specific errors
     function clearError(field) {
         const fieldId = field.name || field.id;
         let errorDiv;
         
-        // For fields within variant blocks
         if (fieldId.includes('[')) {
-            // Replace brackets to make valid selector
             const selector = fieldId.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
             errorDiv = document.querySelector(`#${selector}-error`);
         } else {
@@ -431,7 +426,6 @@
         field.classList.remove('is-invalid');
     }
 
-    // Form field validation functions
     function validateProductName(field) {
         const value = field.value;
         const trimmedValue = value.trim();
@@ -550,16 +544,13 @@
     }
 
     function validateImage(field) {
-        // First check if file is selected
         if (field.files.length === 0) {
-            // Only show error for first image (mandatory)
             if (field.id === 'input1') {
                 return showError(field, "At least one product image is required");
             }
-            return true; // Other images are optional
+            return true;
         }
         
-        // If file is selected, validate it
         const file = field.files[0];
         const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
 
@@ -567,12 +558,11 @@
             return showError(field, "Only JPG, JPEG, and PNG files are allowed");
         }
 
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 5 * 1024 * 1024;
         if (file.size > maxSize) {
             return showError(field, "Image size should not exceed 5MB");
         }
 
-        // Check if image is cropped
         const componentId = field.id.replace('input', '');
         const croppedData = document.getElementById(`croppedData${componentId}`);
         
@@ -584,18 +574,15 @@
         return true;
     }
 
-    // New function to validate ML size selections
     function validateSizeSelections() {
         let isValid = true;
         const sizeSelects = document.querySelectorAll('.size-select');
         const selectedSizes = new Set();
         
-        // First check if all size dropdowns have values
         sizeSelects.forEach((select, index) => {
             if (!select.value) {
                 isValid = showError(select, "ML size is required") && isValid;
             } else {
-                // Check for duplicate sizes
                 if (selectedSizes.has(select.value)) {
                     isValid = showError(select, "Duplicate ML size is not allowed") && isValid;
                 } else {
@@ -616,20 +603,16 @@
             const salePrice = variant.querySelector(`input[name='variants[${index}][salesPrice]']`);
             const sizeSelect = variant.querySelector(`.size-select`);
 
-            // Validate ML size
             if (sizeSelect && !sizeSelect.value) {
                 isValid = showError(sizeSelect, "ML size is required") && isValid;
             } else if (sizeSelect) {
                 clearError(sizeSelect);
             }
 
-            // Validate stock
             isValid = validateNumber(stock, "Stock quantity") && isValid;
             
-            // Validate regular price
             isValid = validateNumber(regularPrice, "Regular price") && isValid;
 
-            // Validate sale price - now required
             if (!salePrice.value.trim()) {
                 isValid = showError(salePrice, "Sale price is required") && isValid;
             } else {
@@ -640,20 +623,17 @@
             }
         });
         
-        // Check for duplicate ML sizes
         isValid = validateSizeSelections() && isValid;
         
         return isValid;
     }
 
-    // Reference form fields
     const productName = document.getElementById("product_name");
     const description = document.querySelector("textarea[name='description']");
     const brand = document.querySelector("select[name='brand']");
     const category = document.querySelector("select[name='category']");
     const fileInputs = document.querySelectorAll("input[type='file']");
 
-    // Add debounce function for input validation
     function debounce(func, wait) {
         let timeout;
         return function (...args) {
@@ -662,25 +642,21 @@
         };
     }
 
-    // Add event listeners for real-time validation
     productName.addEventListener("input", debounce(() => validateProductName(productName), 300));
     description.addEventListener("input", debounce(() => validateDescription(description), 300));
     brand.addEventListener("change", () => validateDropdown(brand, "Brand"));
     category.addEventListener("change", () => validateDropdown(category, "Category"));
     
-    // Add validation for file inputs with cropping
     fileInputs.forEach(input => {
         input.addEventListener("change", () => validateImage(input));
     });
 
-    // Handle paste events for description to maintain formatting
     description.addEventListener("paste", function (e) {
         e.preventDefault();
         const text = (e.originalEvent || e).clipboardData.getData('text/plain');
         document.execCommand("insertText", false, text);
     });
 
-    // Listen for variant field changes including ML sizes
     document.querySelectorAll('.variant-item').forEach((variant, index) => {
         const stock = variant.querySelector(`input[name='variants[${index}][stock]']`);
         const regularPrice = variant.querySelector(`input[name='variants[${index}][regularPrice]']`);
@@ -693,7 +669,7 @@
                     showError(sizeSelect, "ML size is required");
                 } else {
                     clearError(sizeSelect);
-                    validateSizeSelections(); // Check for duplicates when changing
+                    validateSizeSelections();
                 }
             });
         }
@@ -714,7 +690,6 @@
         }
     });
 
-    // Function to check if at least first image is uploaded and cropped
     function validateRequiredImage() {
         const input1 = document.getElementById('input1');
         if (!input1.files || input1.files.length === 0) {
@@ -732,12 +707,10 @@
         return true;
     }
 
-    // Modify form submission to use fetch
     form.addEventListener("submit", function (event) {
         event.preventDefault();
         let isValid = true;
 
-        // Validate all required fields
         isValid = validateProductName(productName) && isValid;
         isValid = validateDescription(description) && isValid;
         isValid = validateDropdown(brand, "Brand") && isValid;
@@ -789,7 +762,6 @@
                 showSwalError("Error", error.message || "Failed to add product. Please try again.");
             });
         } else {
-            // Show validation error summary
             showSwalError("Validation Error", "Please add the input fields properly!");
         }
     });

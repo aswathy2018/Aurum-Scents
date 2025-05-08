@@ -577,7 +577,7 @@ const placeorder = async (req, res) => {
                     return res.status(statusCode.bad_request).json({ success: false, message: MESSAGES.USER_NOT_FOUND });
                 }
                 if (user.wallet.balance < parseFloat(totalAmount)) {
-                    return res.status(statusCode.bad_request).json({ success: false, message: MESSAGES.INSUFFICIENT_WALLET_BALANCE });
+                    return res.json({ success: false, message: MESSAGES.INSUFFICIENT_WALLET_BALANCE });
                 }
         
                 const blockedConditions = {
@@ -678,10 +678,10 @@ const placeorder = async (req, res) => {
                 cart.items = [];
                 await cart.save();
         
-                return res.status(statusCode.succss).json({ success: true, message: MESSAGES.ORDER_PLACED_WITH_WALLET });
+                return res.json({ success: true, message: MESSAGES.ORDER_PLACED_WITH_WALLET });
             } catch (error) {
                 console.error("Error in Wallet payment:", error);
-                return res.status(statusCode.internal_server_error).json({ success: false, message: MESSAGES.WALLET_PAYMENT_FAILED });
+                return res.json({ success: false, message: MESSAGES.WALLET_PAYMENT_FAILED });
             }
         } else {
             return res.status(statusCode.bad_request).json({ success: false, message: MESSAGES.INVALID_PAYMENT_METHOD });
@@ -954,7 +954,7 @@ const returnOrder = async (req, res) => {
 
         await order.save();
 
-        return res.status(statusCode.succss).json({
+        return res.json({
             success: true,
             message: MESSAGES.PRODUCT_RETURN_INITIATED_SUCCESS
         });
