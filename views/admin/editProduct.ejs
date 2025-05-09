@@ -167,7 +167,7 @@
                         <div class="card mb-2 w-75">
                             <div class="card-header">
                                 <h4>Product Images</h4>
-                                <!-- Displaying existing images-->
+ 
                                 <div class="row">
                                     <% for (let i=0; i < product.productImage.length; i++) { %>
                                         <div class="col-md-3 mb-3" id="image-<%= product.productImage[i] %>">
@@ -359,7 +359,6 @@ function deleteSingleImage(imageName, productId) {
 
 function validateAndSubmit() {
     if (validateForm()) {
-        // Clean up cropper instances
         for (let i = 1; i <= 4; i++) {
             if (window.cropperInstances && window.cropperInstances[i]) {
                 window.cropperInstances[i].destroy();
@@ -370,12 +369,10 @@ function validateAndSubmit() {
         const form = document.getElementById('editProductForm');
         const formData = new FormData(form);
         
-        // Add the images to delete
         if (imagesToDelete.length > 0) {
             formData.append('imagesToDelete', JSON.stringify(imagesToDelete));
         }
 
-        // Show loading state
         Swal.fire({
             title: 'Processing...',
             text: 'Updating product details',
@@ -386,7 +383,6 @@ function validateAndSubmit() {
             }
         });
 
-        // Send form data using fetch API
         fetch(form.action, {
             method: 'POST',
             body: formData
@@ -400,19 +396,16 @@ function validateAndSubmit() {
             return response;
         })
         .then(() => {
-            // Show success message
             Swal.fire({
                 icon: 'success',
                 title: 'Success!',
                 text: 'Product details updated successfully',
                 confirmButtonColor: '#4CAF50'
             }).then(() => {
-                // Redirect to products listing page
                 window.location.href = '/admin/products';
             });
         })
         .catch(error => {
-            // Show error message
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -421,7 +414,6 @@ function validateAndSubmit() {
             });
         });
     } else {
-        // Show validation error message
         Swal.fire({
             icon: 'error',
             title: 'Validation Error',
